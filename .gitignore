@@ -1,0 +1,12 @@
+# Données réelles : comptes, sessions, habitudes. Ne jamais publier.
+api/data/
+api/users.php
+api/sessions.php
+
+# Contenu déposé par les utilisateurs
+uploads/
+
+# Outillage de la maquette (généré, non utilisé par l'application)
+_ds/
+ios-frame.jsx
+.thumbnail

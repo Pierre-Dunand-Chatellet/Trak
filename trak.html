@@ -1,0 +1,1290 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trak — suivi d'habitudes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caprasimo&family=Figtree:wght@400;500;600;700&display=swap">
+<style>
+  :root {
+    --color-bg: #faf7f0;
+    --color-text: #2b2620;
+    --color-neutral-100: #ffffff;
+    --color-neutral-200: #f1ece2;
+    --color-neutral-300: #e4dcce;
+    --color-neutral-400: #cfc4ae;
+    --color-neutral-600: #8a7f6c;
+    --color-neutral-700: #675e4e;
+    --color-accent-200: #ffe3b0;
+    --color-accent-500: #e79a3a;
+    --color-accent-700: #a6641a;
+    --color-accent2-200: #d9ecd3;
+    --color-accent2-300: #bfe0b4;
+    --color-accent2-400: #9ed08d;
+    --color-accent2-500: #6fb559;
+    --color-accent2-600: #58994a;
+    --color-accent2-800: #315e2c;
+    --color-accent2-900: #21401e;
+    --color-empty-grey: #d6d6d6;
+    --color-future-beige: #f1ece2;
+    --radius-lg: 18px;
+    --shadow-sm: 0 1px 2px rgba(43,38,32,.06), 0 1px 8px rgba(43,38,32,.05);
+    --font-heading: "Caprasimo", serif;
+    --font-body: "Figtree", system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--color-bg);
+    color: var(--color-text);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--color-accent-700); }
+  a:hover { color: var(--color-accent-500); }
+  input[type="number"] { -moz-appearance: textfield; }
+
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 0 20px 80px; }
+
+  header.app-header {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 16px 20px;
+    padding: 28px 0 20px;
+  }
+  .brand { display: flex; align-items: center; gap: 10px; margin-right: auto; }
+  .brand .dot { width: 30px; height: 30px; border-radius: 999px; background: var(--color-accent2-500); flex: none; }
+  .brand span { font-family: var(--font-heading); font-size: 20px; letter-spacing: -0.02em; }
+
+  nav.tabs { display: flex; flex-wrap: wrap; gap: 8px; }
+  .btn {
+    font-family: var(--font-body); font-size: 13px; font-weight: 600;
+    border: 1px solid var(--color-neutral-400); background: var(--color-neutral-100);
+    color: var(--color-text); border-radius: 999px; padding: 9px 16px;
+    cursor: pointer; transition: background .15s, border-color .15s, color .15s;
+  }
+  .btn:hover { background: var(--color-accent-200); border-color: var(--color-accent-200); }
+  .btn.active { background: var(--color-text); border-color: var(--color-text); color: var(--color-neutral-100); }
+  .btn-primary {
+    background: var(--color-accent2-500); border-color: var(--color-accent2-600); color: #fff;
+  }
+  .btn-primary:hover { background: var(--color-accent2-600); }
+  .btn-ghost { border: none; background: none; padding: 8px 10px; }
+  .btn-ghost:hover { background: var(--color-accent-200); }
+
+  .divider { height: 1px; background: var(--color-neutral-300); margin-bottom: 30px; }
+
+  .input {
+    font-family: var(--font-body); font-size: 14px; border: 1px solid var(--color-neutral-400);
+    border-radius: 999px; padding: 10px 16px; background: var(--color-neutral-100); color: var(--color-text);
+  }
+  .input:focus { outline: 2px solid var(--color-accent2-400); outline-offset: 1px; }
+
+  .card {
+    background: var(--color-neutral-100); border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm); padding: 20px 22px;
+  }
+
+  /* ---- Today ---- */
+  .today-grid { display: grid; grid-template-columns: minmax(0,1.55fr) minmax(0,1fr); gap: 40px; align-items: start; }
+  .eyebrow { margin: 0; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--color-neutral-600); }
+  h1.big { font-family: var(--font-body); font-size: 36px; margin: 6px 0 4px; font-weight: 700; }
+  .summary { font-size: 15px; color: var(--color-neutral-700); margin: 0 0 24px; }
+
+  .habit-row { background: var(--color-neutral-100); border-radius: var(--radius-lg); padding: 14px 18px; box-shadow: var(--shadow-sm); margin-bottom: 12px; }
+  .habit-row .top { display: flex; align-items: center; gap: 14px; }
+  .check {
+    width: 34px; height: 34px; border-radius: 999px; flex: none;
+    display: flex; align-items: center; justify-content: center; cursor: pointer;
+    font-size: 15px; border: 1px solid var(--color-neutral-400); background: transparent; color: transparent;
+    transition: background .15s, border-color .15s;
+  }
+  .check.done { background: var(--color-accent2-500); border-color: var(--color-accent2-600); color: #fff; }
+  .habit-name { font-size: 16px; font-weight: 600; line-height: 1.3; }
+  .habit-meta { font-size: 13px; color: var(--color-neutral-600); margin-top: 2px; }
+  .note-toggle { margin-left: auto; white-space: nowrap; }
+  .note-input { margin-top: 12px; width: 100%; }
+
+  aside.side { display: flex; flex-direction: column; gap: 16px; position: sticky; top: 20px; }
+  .stat-card { background: var(--color-accent2-200); border-radius: var(--radius-lg); padding: 22px 24px; }
+  .stat-card .eyebrow { color: var(--color-accent2-800); }
+  .stat-card .big-num { font-family: var(--font-heading); font-size: 46px; line-height: 1; margin-top: 8px; color: var(--color-accent2-900); }
+
+  .goal-item { margin-bottom: 14px; }
+  .goal-item:last-child { margin-bottom: 0; }
+  .goal-head { display: flex; justify-content: space-between; gap: 10px; font-size: 14px; margin-bottom: 6px; }
+  .goal-head .count { color: var(--color-neutral-600); font-variant-numeric: tabular-nums; }
+  .goal-bar-bg { height: 8px; border-radius: 999px; background: var(--color-neutral-300); overflow: hidden; }
+  .goal-bar { height: 100%; border-radius: 999px; background: var(--color-accent-500); }
+  .goal-bar.full { background: var(--color-accent2-500); }
+
+  /* ---- Week ---- */
+  .week-head-row { display: flex; flex-wrap: wrap; align-items: baseline; gap: 14px; margin-bottom: 22px; }
+  .week-head-row h1 { margin: 0; margin-right: auto; }
+  .week-table-wrap { overflow-x: auto; }
+  .week-table {
+    display: grid; grid-template-columns: minmax(130px,1fr) repeat(7, 42px) 64px;
+    gap: 8px; align-items: center; min-width: 600px;
+  }
+  .week-table .colhead { text-align: center; }
+  .week-table .colhead .dow { font-size: 10px; letter-spacing: .06em; text-transform: uppercase; color: var(--color-neutral-600); }
+  .week-table .colhead .daynum { font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .week-table .rowname { font-size: 14px; font-weight: 600; padding-right: 6px; }
+  .week-table .total { text-align: right; font-size: 13px; font-variant-numeric: tabular-nums; color: var(--color-neutral-700); }
+  .week-cell {
+    width: 38px; height: 38px; border-radius: 999px; border: 1px solid var(--color-neutral-400);
+    background: transparent; color: transparent; cursor: pointer; font-size: 14px;
+  }
+  .week-cell.done { background: var(--color-accent2-500); border-color: var(--color-accent2-600); color: #fff; }
+  .week-cell.future { border-style: dashed; border-color: var(--color-neutral-300); cursor: default; }
+  .week-hint { font-size: 13px; color: var(--color-neutral-600); margin-top: 12px; }
+
+  .note-card { background: var(--color-neutral-100); border-radius: var(--radius-lg); padding: 14px 18px; box-shadow: var(--shadow-sm); display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: baseline; margin-bottom: 10px; }
+  .note-when { font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--color-neutral-600); min-width: 100px; }
+  .note-name { font-size: 14px; font-weight: 600; }
+  .note-text { font-size: 14px; color: var(--color-neutral-700); flex: 1; min-width: 180px; }
+
+  /* ---- Year ---- */
+  .year-card { padding: 24px; overflow-x: auto; }
+  .year-inner { min-width: 760px; }
+  .month-row { display: flex; gap: 3px; margin-bottom: 6px; }
+  .month-label { width: 12px; font-size: 10px; color: var(--color-neutral-600); white-space: nowrap; overflow: visible; }
+  .year-grid { display: flex; gap: 3px; }
+  .year-col { display: flex; flex-direction: column; gap: 3px; }
+  .year-cell { width: 12px; height: 12px; border-radius: 4px; background: var(--color-neutral-200); }
+  .legend-row { display: flex; align-items: center; gap: 7px; margin-top: 18px; font-size: 12px; color: var(--color-neutral-600); flex-wrap: wrap; }
+  .legend-cell { width: 12px; height: 12px; border-radius: 4px; }
+  .legend-note { margin-left: 8px; }
+
+  .streak-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px,1fr)); gap: 14px; margin-top: 20px; }
+  .streak-card { background: var(--color-neutral-100); border-radius: var(--radius-lg); padding: 18px 20px; box-shadow: var(--shadow-sm); }
+  .streak-card .name { font-size: 14px; font-weight: 600; }
+  .streak-card .num { font-family: var(--font-heading); font-size: 30px; line-height: 1.1; margin-top: 6px; color: var(--color-accent-700); }
+  .streak-card .detail { font-size: 12px; color: var(--color-neutral-600); }
+
+  /* ---- Manage ---- */
+  .manage-wrap { max-width: 620px; }
+  .manage-row { background: var(--color-neutral-100); border-radius: var(--radius-lg); padding: 12px 16px; box-shadow: var(--shadow-sm); display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .manage-row .input:first-child { flex: 1; min-width: 160px; }
+  .manage-row .goal-input { width: 68px; text-align: center; }
+  .manage-unit { font-size: 12px; color: var(--color-neutral-600); }
+  .manage-add { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
+  .manage-add .input { flex: 1; min-width: 180px; }
+  .reset-link { margin-top: 24px; }
+
+  /* ---- Compte & synchronisation ---- */
+  .account-btn { display: flex; align-items: center; gap: 8px; }
+  .account-btn .who { max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .sync-dot { width: 8px; height: 8px; border-radius: 999px; background: var(--color-neutral-400); flex: none; }
+  .sync-dot.ok { background: var(--color-accent2-500); }
+  .sync-dot.busy { background: var(--color-accent-500); animation: sync-pulse 1s ease-in-out infinite; }
+  .sync-dot.err { background: #c0532c; }
+  @keyframes sync-pulse { 0%,100% { opacity: 1; } 50% { opacity: .3; } }
+
+  .modal-backdrop {
+    position: fixed; inset: 0; background: rgba(43,38,32,.42);
+    display: flex; align-items: center; justify-content: center; padding: 20px; z-index: 50;
+  }
+  .modal-backdrop[hidden] { display: none; }
+  .modal {
+    background: var(--color-neutral-100); border-radius: var(--radius-lg);
+    box-shadow: 0 10px 40px rgba(43,38,32,.22); width: 100%; max-width: 420px;
+    max-height: 90vh; overflow-y: auto; padding: 24px;
+  }
+  .modal h2 { font-size: 20px; margin: 0 0 4px; }
+  .modal .p-muted { margin-bottom: 18px; }
+  .modal-close { position: absolute; }
+  .field { display: block; margin-bottom: 12px; }
+  .field span { display: block; font-size: 12px; font-weight: 600; color: var(--color-neutral-700); margin-bottom: 5px; }
+  .field .input { width: 100%; }
+  .modal-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 18px; }
+  .modal-actions .spacer { margin-left: auto; }
+  .form-msg { font-size: 13px; line-height: 1.45; margin: 14px 0 0; }
+  .form-msg.err { color: #a33f1c; }
+  .form-msg.ok { color: var(--color-accent2-800); }
+  .switch-mode { font-size: 13px; color: var(--color-neutral-700); margin: 16px 0 0; }
+  .switch-mode button {
+    background: none; border: 0; padding: 0; font: inherit; font-weight: 600;
+    color: var(--color-accent-700); cursor: pointer; text-decoration: underline;
+  }
+  .sync-line { font-size: 13px; color: var(--color-neutral-700); margin: 0 0 6px; display: flex; align-items: center; gap: 8px; }
+  .device-list { list-style: none; padding: 0; margin: 10px 0 0; font-size: 13px; }
+  .device-list li { display: flex; gap: 8px; padding: 7px 0; border-top: 1px solid var(--color-neutral-200); color: var(--color-neutral-700); }
+  .device-list li .tag { margin-left: auto; font-size: 11px; color: var(--color-accent2-800); font-weight: 600; }
+
+  h1, h2 { font-weight: 700; }
+  h1 { font-size: 30px; margin: 0 0 4px; }
+  h2 { font-size: 20px; margin: 34px 0 14px; }
+  p { line-height: 1.5; }
+  .p-muted { font-size: 14px; color: var(--color-neutral-700); margin: 0 0 22px; }
+
+  /* ---- Responsive ---- */
+  @media (max-width: 860px) {
+    .today-grid { grid-template-columns: 1fr; }
+    aside.side { position: static; }
+  }
+  @media (max-width: 560px) {
+    .wrap { padding: 0 14px 60px; }
+    header.app-header { padding: 20px 0 16px; }
+    .btn { font-size: 12px; padding: 7px 12px; }
+    h1.big, h1 { font-size: 26px; }
+    .habit-row, .card { padding: 14px 16px; }
+    .week-table { grid-template-columns: minmax(80px,1fr) repeat(7, 30px); min-width: 0; }
+    .week-table .total { display: none; }
+    .week-cell { width: 28px; height: 28px; font-size: 12px; }
+    .year-inner { min-width: 560px; }
+    .year-cell { width: 9px; height: 9px; }
+    .month-label { width: 9px; font-size: 8px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <header class="app-header">
+    <div class="brand"><div class="dot"></div><span>Trak</span></div>
+    <nav class="tabs">
+      <button type="button" class="btn" data-tab="today">Aujourd'hui</button>
+      <button type="button" class="btn" data-tab="week">Semaine</button>
+      <button type="button" class="btn" data-tab="year">Année</button>
+      <button type="button" class="btn" data-tab="manage">Habitudes</button>
+    </nav>
+    <button type="button" class="btn account-btn" id="account-btn">
+      <span class="sync-dot" id="sync-dot"></span><span class="who" id="account-label">Se connecter</span>
+    </button>
+  </header>
+  <div class="divider"></div>
+
+  <section id="view-today"></section>
+  <section id="view-week" style="display:none"></section>
+  <section id="view-year" style="display:none"></section>
+  <section id="view-manage" style="display:none"></section>
+
+</div>
+
+<div class="modal-backdrop" id="account-modal" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="account-title">
+    <div id="account-body"></div>
+  </div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  const DEFAULT_HABITS = [
+    { id: "douche", name: "Douche", goal: 7 },
+    { id: "boire", name: "Boire", goal: 7 },
+    { id: "dents", name: "Brosser les dents", goal: 7 },
+    { id: "sport", name: "Faire du sport", goal: 4 },
+    { id: "coder", name: "Coder", goal: 5 },
+    { id: "travailler", name: "Travailler", goal: 5 }
+  ];
+  const DOW = ["lun", "mar", "mer", "jeu", "ven", "sam", "dim"];
+  const DOW_LONG = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"];
+  const MONTHS = ["janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc."];
+  const KEY = "cadence-vierge.v1";
+
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  }
+  function ymd(d) {
+    const p = (n) => String(n).padStart(2, "0");
+    return d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate());
+  }
+  function addDays(d, n) { const x = new Date(d.getTime()); x.setDate(x.getDate() + n); return x; }
+  function mondayOf(d) {
+    const x = new Date(d.getTime());
+    x.setDate(x.getDate() - ((x.getDay() + 6) % 7));
+    return x;
+  }
+
+  function nowMs() { return Date.now(); }
+
+  function defaultHabits() {
+    return DEFAULT_HABITS.map((h, i) => ({ id: h.id, name: h.name, goal: h.goal, pos: i, u: 0 }));
+  }
+
+  const State = {
+    tab: "today",
+    today: ymd(new Date()),
+    weekOffset: 0,
+    openNote: null,
+    newName: "",
+    habits: defaultHabits(),
+    log: {},
+    // Habitudes supprimees : { id: { u } }. Conservees pour que la suppression
+    // se propage aux autres appareils au lieu d'etre "reparee" par eux.
+    gone: {},
+    // Ce qui reste a envoyer au serveur.
+    dirtyH: {},
+    dirtyE: {}
+  };
+
+  function load() {
+    try {
+      const raw = localStorage.getItem(KEY);
+      if (raw) {
+        const d = JSON.parse(raw);
+        if (d && d.habits && d.log) {
+          State.habits = d.habits;
+          State.log = d.log;
+          State.gone = d.gone || {};
+          State.dirtyH = d.dirtyH || {};
+          State.dirtyE = d.dirtyE || {};
+          if (!d.v) migrateToSync();
+          return;
+        }
+      }
+    } catch (e) { /* stockage indisponible */ }
+    State.log = {};
+    persist();
+  }
+
+  // Donnees enregistrees avant l'arrivee de la synchronisation : on les horodate
+  // maintenant et on les marque a envoyer, pour qu'elles remontent au compte.
+  function migrateToSync() {
+    const t = nowMs();
+    State.habits.forEach((h, i) => {
+      if (h.pos == null) h.pos = i;
+      h.u = t;
+      State.dirtyH[h.id] = 1;
+    });
+    Object.keys(State.log).forEach((k) => { State.log[k].u = t; State.dirtyE[k] = 1; });
+    persist();
+  }
+
+  function persist() {
+    try {
+      localStorage.setItem(KEY, JSON.stringify({
+        v: 2,
+        habits: State.habits, log: State.log, gone: State.gone,
+        dirtyH: State.dirtyH, dirtyE: State.dirtyE
+      }));
+    } catch (e) { /* ignore */ }
+  }
+
+  function findHabit(id) {
+    for (let i = 0; i < State.habits.length; i++) if (State.habits[i].id === id) return State.habits[i];
+    return null;
+  }
+  function habitStamp(id) {
+    const h = findHabit(id);
+    if (h) return h.u || 0;
+    return State.gone[id] ? State.gone[id].u || 0 : 0;
+  }
+  function nextPos() {
+    return State.habits.reduce((m, h) => Math.max(m, h.pos || 0), -1) + 1;
+  }
+  // Marque une habitude comme modifiee localement et programme l'envoi.
+  function touchHabit(h) {
+    h.u = nowMs();
+    State.dirtyH[h.id] = 1;
+    persist(); Sync.schedule();
+  }
+
+  function isDone(id, day) { const e = State.log[id + "|" + day]; return !!(e && e.done); }
+  function toggle(id, day) {
+    const k = id + "|" + day;
+    const prev = State.log[k];
+    State.log[k] = { done: !(prev && prev.done), note: prev ? prev.note || "" : "", u: nowMs() };
+    State.dirtyE[k] = 1;
+    persist(); Sync.schedule(); render();
+  }
+  function setNote(id, day, note) {
+    const k = id + "|" + day;
+    const prev = State.log[k] || { done: false, note: "" };
+    State.log[k] = { done: prev.done, note: note, u: nowMs() };
+    State.dirtyE[k] = 1;
+    persist(); Sync.schedule();
+  }
+
+  function streak(id) {
+    const t = new Date(State.today + "T12:00:00");
+    let n = 0;
+    let start = isDone(id, ymd(t)) ? 0 : 1;
+    if (start === 1 && !isDone(id, ymd(addDays(t, -1)))) return 0;
+    for (let i = start; i < 400; i++) {
+      if (isDone(id, ymd(addDays(t, -i)))) n++; else break;
+    }
+    return n;
+  }
+  function best(id) {
+    const t = new Date(State.today + "T12:00:00");
+    let n = 0, m = 0;
+    for (let i = 365; i >= 0; i--) {
+      if (isDone(id, ymd(addDays(t, -i)))) { n++; if (n > m) m = n; } else n = 0;
+    }
+    return m;
+  }
+  function heatColor(ratio) {
+    if (ratio === 0) return "var(--color-empty-grey)";
+    if (ratio < 0.34) return "var(--color-accent2-200)";
+    if (ratio < 0.67) return "var(--color-accent2-300)";
+    if (ratio < 1) return "var(--color-accent2-400)";
+    return "var(--color-accent2-600)";
+  }
+
+  function renderTabs() {
+    document.querySelectorAll(".tabs .btn").forEach((b) => {
+      b.classList.toggle("active", b.dataset.tab === State.tab);
+    });
+    ["today", "week", "year", "manage"].forEach((t) => {
+      document.getElementById("view-" + t).style.display = t === State.tab ? "" : "none";
+    });
+  }
+
+  function renderToday() {
+    const el = document.getElementById("view-today");
+    const today = new Date(State.today + "T12:00:00");
+    const doneToday = State.habits.filter((h) => isDone(h.id, State.today)).length;
+    const weekday = DOW_LONG[(today.getDay() + 6) % 7];
+
+    let hit = 0, tot = 0;
+    for (let i = 0; i < 30; i++) {
+      const day = ymd(addDays(today, -i));
+      State.habits.forEach((h) => { tot++; if (isDone(h.id, day)) hit++; });
+    }
+    const pct30 = (tot ? Math.round(hit / tot * 100) : 0) + " %";
+
+    const monday = mondayOf(today);
+    const goalsHtml = State.habits.map((h) => {
+      let c = 0;
+      for (let i = 0; i < 7; i++) if (isDone(h.id, ymd(addDays(monday, i)))) c++;
+      const pct = Math.min(100, Math.round(c / Math.max(1, h.goal) * 100));
+      return `<div class="goal-item">
+        <div class="goal-head"><span>${esc(h.name)}</span><span class="count">${c} / ${h.goal}</span></div>
+        <div class="goal-bar-bg"><div class="goal-bar${pct >= 100 ? " full" : ""}" style="width:${pct}%"></div></div>
+      </div>`;
+    }).join("");
+
+    const rowsHtml = State.habits.map((h) => {
+      const entry = State.log[h.id + "|" + State.today] || { done: false, note: "" };
+      const st = streak(h.id);
+      const meta = st > 0 ? "Série de " + st + " jour" + (st > 1 ? "s" : "") : "Série interrompue";
+      const noteOpen = State.openNote === h.id || !!entry.note;
+      return `<div class="habit-row" data-id="${esc(h.id)}">
+        <div class="top">
+          <button type="button" class="check${entry.done ? " done" : ""}" data-action="toggle" data-id="${esc(h.id)}" aria-label="Marquer comme fait">${entry.done ? "✓" : ""}</button>
+          <div style="flex:1;min-width:0">
+            <div class="habit-name">${esc(h.name)}</div>
+            <div class="habit-meta">${meta}</div>
+          </div>
+          <button type="button" class="btn btn-ghost note-toggle" data-action="note-toggle" data-id="${esc(h.id)}">${entry.note ? "Note" : "+ note"}</button>
+        </div>
+        ${noteOpen ? `<input class="input note-input" type="text" placeholder="Note du jour" data-action="note-input" data-id="${esc(h.id)}" value="${esc(entry.note || "")}">` : ""}
+      </div>`;
+    }).join("");
+
+    el.innerHTML = `
+      <div class="today-grid">
+        <div>
+          <p class="eyebrow">${esc(weekday)}</p>
+          <h1 class="big">${today.getDate()} ${MONTHS[today.getMonth()]}</h1>
+          <p class="summary">${doneToday} sur ${State.habits.length} coché${doneToday > 1 ? "es" : "e"} aujourd'hui.</p>
+          <div>${rowsHtml || "<p class=\"p-muted\">Aucune habitude. Ajoutez-en depuis l'onglet Habitudes.</p>"}</div>
+        </div>
+        <aside class="side">
+          <div class="stat-card">
+            <p class="eyebrow">Réussite, 30 derniers jours</p>
+            <div class="big-num">${pct30}</div>
+          </div>
+          <div class="card">
+            <p class="eyebrow" style="margin:0 0 16px">Objectifs de la semaine</p>
+            ${goalsHtml || "<p class=\"p-muted\" style=\"margin:0\">—</p>"}
+          </div>
+        </aside>
+      </div>`;
+
+    el.querySelectorAll('[data-action="toggle"]').forEach((b) => b.addEventListener("click", () => toggle(b.dataset.id, State.today)));
+    el.querySelectorAll('[data-action="note-toggle"]').forEach((b) => b.addEventListener("click", () => {
+      State.openNote = State.openNote === b.dataset.id ? null : b.dataset.id;
+      renderToday();
+    }));
+    el.querySelectorAll('[data-action="note-input"]').forEach((inp) => {
+      inp.addEventListener("change", () => setNote(inp.dataset.id, State.today, inp.value));
+    });
+  }
+
+  function renderWeek() {
+    const el = document.getElementById("view-week");
+    const today = new Date(State.today + "T12:00:00");
+    const monday = mondayOf(today);
+    const wStart = addDays(monday, State.weekOffset * 7);
+    const weekDays = [];
+    for (let i = 0; i < 7; i++) weekDays.push(ymd(addDays(wStart, i)));
+
+    const headsHtml = DOW.map((d, i) => {
+      const dn = addDays(wStart, i).getDate();
+      return `<div class="colhead"><div class="dow">${d}</div><div class="daynum">${dn}</div></div>`;
+    }).join("");
+
+    const rowsHtml = State.habits.map((h) => {
+      let c = 0;
+      const cellsHtml = weekDays.map((day) => {
+        const done = isDone(h.id, day);
+        if (done) c++;
+        const future = day > State.today;
+        const cls = done ? "done" : future ? "future" : "";
+        return `<button type="button" class="week-cell ${cls}" title="${esc(h.name)} — ${day}" ${future ? "disabled" : `data-action="toggle" data-id="${esc(h.id)}" data-day="${day}"`}>${done ? "✓" : ""}</button>`;
+      }).join("");
+      return `<div class="rowname">${esc(h.name)}</div>${cellsHtml}<div class="total">${c}/7</div>`;
+    }).join("");
+
+    const wEnd = addDays(wStart, 6);
+    const weekLabel = State.weekOffset === 0 ? "Cette semaine"
+      : wStart.getDate() + " " + MONTHS[wStart.getMonth()] + " – " + wEnd.getDate() + " " + MONTHS[wEnd.getMonth()];
+
+    const weekNotes = [];
+    weekDays.forEach((day, i) => {
+      State.habits.forEach((h) => {
+        const e = State.log[h.id + "|" + day];
+        if (e && e.note && e.note.trim()) {
+          const d = addDays(wStart, i);
+          weekNotes.push({ name: h.name, when: DOW[i] + " " + d.getDate() + " " + MONTHS[d.getMonth()], note: e.note });
+        }
+      });
+    });
+    const notesHtml = weekNotes.length
+      ? weekNotes.map((n) => `<div class="note-card"><span class="note-when">${esc(n.when)}</span><span class="note-name">${esc(n.name)}</span><span class="note-text">${esc(n.note)}</span></div>`).join("")
+      : `<p class="p-muted" style="margin:0">Aucune note cette semaine. Ajoutez-en depuis l'écran Aujourd'hui.</p>`;
+
+    el.innerHTML = `
+      <div class="week-head-row">
+        <h1>${esc(weekLabel)}</h1>
+        <div style="display:flex;gap:8px">
+          <button type="button" class="btn" data-action="week-prev">← Précédente</button>
+          <button type="button" class="btn" data-action="week-next">Suivante →</button>
+        </div>
+      </div>
+      <div class="card week-table-wrap">
+        <div class="week-table">
+          <div></div>
+          ${headsHtml}
+          <div class="total" style="text-align:right;font-size:11px;letter-spacing:.06em;text-transform:uppercase">Total</div>
+          ${rowsHtml}
+        </div>
+      </div>
+      <p class="week-hint">Cliquez une case pour basculer le statut. Les jours à venir restent vides.</p>
+      <h2>Notes de la semaine</h2>
+      ${notesHtml}`;
+
+    el.querySelectorAll('[data-action="toggle"]').forEach((b) => b.addEventListener("click", () => toggle(b.dataset.id, b.dataset.day)));
+    el.querySelector('[data-action="week-prev"]').addEventListener("click", () => { State.weekOffset -= 1; renderWeek(); });
+    el.querySelector('[data-action="week-next"]').addEventListener("click", () => { State.weekOffset = Math.min(0, State.weekOffset + 1); renderWeek(); });
+  }
+
+  function renderYear() {
+    const el = document.getElementById("view-year");
+    const today = new Date(State.today + "T12:00:00");
+    const year = today.getFullYear();
+    const jan1 = new Date(year, 0, 1, 12);
+    const dec31 = new Date(year, 11, 31, 12);
+    const gridStart = mondayOf(jan1);
+    const weeks = Math.round((mondayOf(dec31) - gridStart) / (7 * 24 * 3600 * 1000)) + 1;
+
+    let monthsHtml = "";
+    let colsHtml = "";
+    let lastMonth = -1;
+    for (let w = 0; w < weeks; w++) {
+      const colStart = addDays(gridStart, w * 7);
+      let cellsHtml = "";
+      for (let i = 0; i < 7; i++) {
+        const d = addDays(colStart, i);
+        const inYear = d.getFullYear() === year;
+        const day = ymd(d);
+        const future = day > State.today;
+        const n = (!inYear || future) ? 0 : State.habits.filter((h) => isDone(h.id, day)).length;
+        const ratio = State.habits.length ? n / State.habits.length : 0;
+        const bg = future ? "var(--color-future-beige)" : heatColor(ratio);
+        cellsHtml += inYear
+          ? `<div class="year-cell" title="${day} — ${n}/${State.habits.length}" style="background:${bg}"></div>`
+          : `<div class="year-cell" style="background:transparent"></div>`;
+      }
+      colsHtml += `<div class="year-col">${cellsHtml}</div>`;
+      const m = colStart.getMonth();
+      const show = m !== lastMonth && colStart.getFullYear() === year;
+      lastMonth = m;
+      monthsHtml += `<div class="month-label">${show ? MONTHS[m] : ""}</div>`;
+    }
+
+    const legendHtml = [0, 0.3, 0.6, 0.9, 1].map((r) => `<div class="legend-cell" style="background:${heatColor(r)}"></div>`).join("");
+
+    let full = 0;
+    for (let d = new Date(jan1.getTime()); d.getFullYear() === year && ymd(d) <= State.today; d = addDays(d, 1)) {
+      const day = ymd(d);
+      if (State.habits.length && State.habits.every((h) => isDone(h.id, day))) full++;
+    }
+
+    const streakHtml = State.habits.map((h) => `
+      <div class="streak-card">
+        <div class="name">${esc(h.name)}</div>
+        <div class="num">${streak(h.id)} j</div>
+        <div class="detail">Record : ${best(h.id)} jours</div>
+      </div>`).join("");
+
+    el.innerHTML = `
+      <h1>${year}</h1>
+      <p class="p-muted">${full} jours parfaits en ${year}.</p>
+      <div class="card year-card">
+        <div class="year-inner">
+          <div class="month-row">${monthsHtml}</div>
+          <div class="year-grid">${colsHtml}</div>
+        </div>
+      </div>
+      <div class="legend-row">
+        <span>Aucune</span>${legendHtml}<span>Toutes</span>
+        <span class="legend-note">Une case par jour : plus le vert est foncé, plus vous avez coché d'habitudes ce jour-là.</span>
+      </div>
+      <div class="streak-grid">${streakHtml || "<p class=\"p-muted\">—</p>"}</div>`;
+  }
+
+  function renderManage() {
+    const el = document.getElementById("view-manage");
+    const rowsHtml = State.habits.map((h) => `
+      <div class="manage-row" data-id="${esc(h.id)}">
+        <input class="input" type="text" data-action="name" data-id="${esc(h.id)}" value="${esc(h.name)}">
+        <input class="input goal-input" type="number" min="1" max="7" data-action="goal" data-id="${esc(h.id)}" value="${h.goal}">
+        <span class="manage-unit">j/sem.</span>
+        <button type="button" class="btn btn-ghost" data-action="delete" data-id="${esc(h.id)}" style="color:var(--color-accent-700)">Supprimer</button>
+      </div>`).join("");
+
+    el.innerHTML = `
+      <div class="manage-wrap">
+        <h1>Habitudes</h1>
+        <p class="p-muted">Le nom et l'objectif hebdomadaire, en jours par semaine.</p>
+        <div>${rowsHtml || "<p class=\"p-muted\">Aucune habitude pour l'instant.</p>"}</div>
+        <div class="manage-add">
+          <input class="input" type="text" id="new-habit-name" placeholder="Nouvelle habitude" value="${esc(State.newName)}">
+          <button type="button" class="btn btn-primary" data-action="add">Ajouter</button>
+        </div>
+        <button type="button" class="btn btn-ghost reset-link" style="color:var(--color-neutral-700);padding-left:0" data-action="reset">Vider toutes les données</button>
+      </div>`;
+
+    el.querySelectorAll('[data-action="name"]').forEach((inp) => inp.addEventListener("change", () => {
+      const h = findHabit(inp.dataset.id);
+      if (!h) return;
+      h.name = inp.value;
+      touchHabit(h); renderToday(); renderWeek(); renderYear();
+    }));
+    el.querySelectorAll('[data-action="goal"]').forEach((inp) => inp.addEventListener("change", () => {
+      const h = findHabit(inp.dataset.id);
+      if (!h) return;
+      const v = Math.max(1, Math.min(7, Number(inp.value) || 1));
+      h.goal = v;
+      inp.value = v;
+      touchHabit(h); renderToday();
+    }));
+    el.querySelectorAll('[data-action="delete"]').forEach((b) => b.addEventListener("click", () => {
+      const id = b.dataset.id;
+      const idx = State.habits.findIndex((h) => h.id === id);
+      if (idx < 0) return;
+      State.habits.splice(idx, 1);
+      State.gone[id] = { u: nowMs() };
+      State.dirtyH[id] = 1;
+      persist(); Sync.schedule(); renderManage(); renderToday(); renderWeek(); renderYear();
+    }));
+    el.querySelector('[data-action="add"]').addEventListener("click", () => {
+      const nameInput = document.getElementById("new-habit-name");
+      const n = nameInput.value.trim();
+      if (!n) return;
+      // Identifiant aleatoire : deux appareils peuvent creer une habitude
+      // en meme temps sans se retrouver avec le meme id.
+      const id = "h" + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+      const h = { id: id, name: n, goal: 5, pos: nextPos(), u: nowMs() };
+      State.habits.push(h);
+      State.newName = "";
+      touchHabit(h); renderManage(); renderToday(); renderWeek(); renderYear();
+    });
+    el.querySelector('[data-action="reset"]').addEventListener("click", () => {
+      const warning = Account.token
+        ? "Vider toutes les donnees de votre compte Trak ? Cela effacera aussi vos autres appareils synchronises."
+        : "Vider toutes les donnees enregistrees sur cet appareil ?";
+      if (!window.confirm(warning)) return;
+      wipeAll();
+    });
+  }
+
+  function wipeAll() {
+    const t = nowMs();
+    State.habits.forEach((h) => { State.gone[h.id] = { u: t }; State.dirtyH[h.id] = 1; });
+    Object.keys(State.log).forEach((k) => {
+      State.log[k] = { done: false, note: "", del: 1, u: t };
+      State.dirtyE[k] = 1;
+    });
+    State.habits = defaultHabits();
+    State.habits.forEach((h) => { h.u = t; delete State.gone[h.id]; State.dirtyH[h.id] = 1; });
+    persist(); Sync.schedule(200); renderAll();
+  }
+
+  function renderAll() {
+    renderTabs();
+    renderToday();
+    renderWeek();
+    renderYear();
+    renderManage();
+  }
+  function render() { renderAll(); }
+
+  /* =========================================================================
+     Compte et synchronisation multi-appareils
+     ========================================================================= */
+
+  // Le compte vit dans sa propre cle : « Vider toutes les données » efface les
+  // habitudes, pas la session.
+  const AKEY = "trak.account.v1";
+
+  const Account = { base: "", token: "", email: "", lastEmail: "", lastSync: 0 };
+
+  // Adresse du serveur. Laissée vide, l'application prend le dossier api/ placé
+  // à côté de cette page — le cas normal une fois le site en ligne. À remplir
+  // seulement pour ouvrir ce fichier en local (file://) tout en synchronisant,
+  // par exemple : "https://exemple.fr/trak/api/".
+  const SERVER_URL = "";
+
+  function defaultApiBase() {
+    if (SERVER_URL) return SERVER_URL;
+    if (location.protocol === "http:" || location.protocol === "https:") {
+      return location.href.split(/[?#]/)[0].replace(/[^/]*$/, "") + "api/";
+    }
+    return "";
+  }
+
+  function loadAccount() {
+    try {
+      const d = JSON.parse(localStorage.getItem(AKEY) || "null");
+      if (d) {
+        Account.base = d.base || "";
+        Account.token = d.token || "";
+        Account.email = d.email || "";
+        Account.lastEmail = d.lastEmail || "";
+        Account.lastSync = d.lastSync || 0;
+      }
+    } catch (e) { /* ignore */ }
+    if (!Account.base) Account.base = defaultApiBase();
+  }
+  function saveAccount() {
+    try { localStorage.setItem(AKEY, JSON.stringify(Account)); } catch (e) { /* ignore */ }
+  }
+  function forgetSession() {
+    Account.token = "";
+    Account.email = "";
+    Account.lastSync = 0;
+    saveAccount();
+  }
+
+  async function api(file, payload) {
+    if (!Account.base) throw new Error("Adresse du serveur non renseignée.");
+    let res;
+    try {
+      res = await fetch(Account.base.replace(/\/?$/, "/") + file, {
+        method: "POST",
+        headers: Object.assign(
+          { "Content-Type": "application/json" },
+          Account.token ? { Authorization: "Bearer " + Account.token } : {}
+        ),
+        // Le jeton part aussi dans le corps : beaucoup d'hebergements Apache ne
+        // transmettent pas l'en-tete Authorization a PHP, et la synchro echouerait
+        // silencieusement apres une connexion pourtant reussie.
+        body: JSON.stringify(Account.token ? Object.assign({ token: Account.token }, payload) : payload)
+      });
+    } catch (e) {
+      throw new Error("Serveur injoignable. Vérifiez votre connexion ou l'adresse du serveur.");
+    }
+    let data = null;
+    try { data = await res.json(); } catch (e) { /* réponse illisible */ }
+    if (!res.ok || !data || data.ok !== true) {
+      const err = new Error((data && data.error) || ("Erreur du serveur (" + res.status + ")."));
+      err.code = (data && data.code) || String(res.status);
+      throw err;
+    }
+    return data;
+  }
+
+  // --- Conversion état local <-> format d'échange -------------------------
+  function payloadHabit(id) {
+    const h = findHabit(id);
+    if (h) return { id: h.id, name: h.name, goal: h.goal, pos: h.pos || 0, del: 0, u: h.u || 0 };
+    const g = State.gone[id];
+    if (g) return { id: id, name: "", goal: 5, pos: 0, del: 1, u: g.u || 0 };
+    return null;
+  }
+  function payloadEntry(k) {
+    const i = k.indexOf("|");
+    if (i < 0) return null;
+    const e = State.log[k];
+    const base = { h: k.slice(0, i), d: k.slice(i + 1) };
+    if (!e) return { h: base.h, d: base.d, done: 0, note: "", del: 1, u: nowMs() };
+    return { h: base.h, d: base.d, done: e.done ? 1 : 0, note: e.note || "", del: e.del ? 1 : 0, u: e.u || 0 };
+  }
+
+  // Applique ce que renvoie le serveur. Le serveur a déjà tranché les conflits ;
+  // on ne garde le local que s'il est plus récent (modifié pendant l'aller-retour).
+  function applyRemote(data) {
+    const appliedH = {}, appliedE = {};
+    let touched = false;
+
+    (data.habits || []).forEach((rh) => {
+      const local = findHabit(rh.id);
+      const known = local || State.gone[rh.id];
+      if (known && (local ? local.u || 0 : State.gone[rh.id].u || 0) > rh.u) return;
+      appliedH[rh.id] = 1; touched = true;
+      if (rh.del) {
+        if (local) State.habits.splice(State.habits.indexOf(local), 1);
+        State.gone[rh.id] = { u: rh.u };
+      } else {
+        delete State.gone[rh.id];
+        if (local) { local.name = rh.name; local.goal = rh.goal; local.pos = rh.pos; local.u = rh.u; }
+        else State.habits.push({ id: rh.id, name: rh.name, goal: rh.goal, pos: rh.pos, u: rh.u });
+      }
+    });
+
+    (data.entries || []).forEach((re) => {
+      const k = re.h + "|" + re.d;
+      const local = State.log[k];
+      if (local && (local.u || 0) > re.u) return;
+      appliedE[k] = 1; touched = true;
+      if (re.del) delete State.log[k];
+      else State.log[k] = { done: !!re.done, note: re.note || "", u: re.u };
+    });
+
+    if (touched) {
+      State.habits.sort((a, b) => ((a.pos || 0) - (b.pos || 0)) || String(a.id).localeCompare(String(b.id)));
+    }
+    return { habits: appliedH, entries: appliedE };
+  }
+
+  // --- Moteur de synchronisation ------------------------------------------
+  const Sync = {
+    state: "idle",     // idle | busy | ok | err
+    message: "",
+    at: 0,
+    timer: null,
+    running: false,
+    again: false
+  };
+
+  // Un redessin complet réinitialise les champs de saisie : on attend que
+  // l'utilisateur ait fini de taper avant d'afficher ce qui vient du serveur.
+  function renderAfterSync() {
+    const a = document.activeElement;
+    if (a && (a.tagName === "INPUT" || a.tagName === "TEXTAREA")) {
+      clearTimeout(Sync.renderTimer);
+      Sync.renderTimer = setTimeout(renderAfterSync, 2000);
+      return;
+    }
+    renderAll();
+  }
+
+  Sync.setState = function (state, message) {
+    Sync.state = state;
+    Sync.message = message || "";
+    renderAccountButton();
+    if (isModalOpen()) renderAccountModal();
+  };
+
+  Sync.schedule = function (delay) {
+    if (!Account.token) return;
+    clearTimeout(Sync.timer);
+    Sync.timer = setTimeout(() => { Sync.run(); }, delay == null ? 1200 : delay);
+  };
+
+  Sync.run = async function () {
+    if (!Account.token) return;
+    if (Sync.running) { Sync.again = true; return; }
+    Sync.running = true;
+    clearTimeout(Sync.timer);
+    Sync.setState("busy");
+
+    const sentH = Object.keys(State.dirtyH);
+    const sentE = Object.keys(State.dirtyE);
+    const stampH = {}, stampE = {};
+    sentH.forEach((id) => { stampH[id] = habitStamp(id); });
+    sentE.forEach((k) => { stampE[k] = State.log[k] ? State.log[k].u || 0 : 0; });
+
+    try {
+      const data = await api("sync.php", {
+        since: Account.lastSync,
+        habits: sentH.map(payloadHabit).filter(Boolean),
+        entries: sentE.map(payloadEntry).filter(Boolean)
+      });
+
+      const applied = applyRemote(data);
+
+      // On ne retire de la file d'envoi que ce qui n'a pas rebougé entre-temps.
+      sentH.forEach((id) => {
+        if (applied.habits[id] || habitStamp(id) === stampH[id]) delete State.dirtyH[id];
+      });
+      sentE.forEach((k) => {
+        const cur = State.log[k] ? State.log[k].u || 0 : 0;
+        if (applied.entries[k] || cur === stampE[k]) delete State.dirtyE[k];
+      });
+
+      // Compte tout neuf et vide côté serveur : on y envoie les habitudes de
+      // cet appareil, sinon elles ne quitteraient jamais le navigateur.
+      if (data.first && (data.habits || []).length === 0 && State.habits.length) {
+        const t = nowMs();
+        State.habits.forEach((h) => { if (!h.u) h.u = t; State.dirtyH[h.id] = 1; });
+      }
+
+      // Les suppressions parties au serveur n'ont plus besoin d'occuper le
+      // stockage local : le serveur porte désormais la trace.
+      Object.keys(State.log).forEach((k) => {
+        if (State.log[k].del && !State.dirtyE[k]) delete State.log[k];
+      });
+
+      Account.lastSync = data.now;
+      Account.lastEmail = Account.email;
+      saveAccount(); persist();
+      if (Object.keys(applied.habits).length || Object.keys(applied.entries).length) renderAfterSync();
+      Sync.at = Date.now();
+      Sync.setState("ok");
+
+      if (Object.keys(State.dirtyH).length || Object.keys(State.dirtyE).length) Sync.schedule(500);
+    } catch (e) {
+      if (e.code === "unauthorized") {
+        forgetSession();
+        Sync.setState("err", "Session expirée, reconnectez-vous.");
+        renderAccountButton();
+      } else {
+        Sync.setState("err", e.message);
+      }
+    } finally {
+      Sync.running = false;
+      if (Sync.again) { Sync.again = false; Sync.schedule(400); }
+    }
+  };
+
+  // --- Interface du compte -------------------------------------------------
+  const AccountUI = { mode: "login", msg: "", msgType: "", busy: false, devices: null, showServer: false };
+
+  function isModalOpen() { return !document.getElementById("account-modal").hidden; }
+
+  function openAccount(mode) {
+    AccountUI.mode = mode || (Account.token ? "account" : "login");
+    AccountUI.msg = ""; AccountUI.msgType = ""; AccountUI.busy = false;
+    AccountUI.showServer = false;
+    document.getElementById("account-modal").hidden = false;
+    renderAccountModal();
+    if (Account.token) loadDevices();
+    const first = document.querySelector("#account-body input");
+    if (first) first.focus();
+  }
+  function closeAccount() {
+    document.getElementById("account-modal").hidden = true;
+    AccountUI.devices = null;
+  }
+
+  function agoText(ms) {
+    const s = Math.max(0, Math.round((Date.now() - ms) / 1000));
+    if (s < 10) return "à l'instant";
+    if (s < 60) return "il y a " + s + " s";
+    if (s < 3600) return "il y a " + Math.round(s / 60) + " min";
+    if (s < 86400) return "il y a " + Math.round(s / 3600) + " h";
+    return "il y a " + Math.round(s / 86400) + " j";
+  }
+
+  function pendingCount() {
+    return Object.keys(State.dirtyH).length + Object.keys(State.dirtyE).length;
+  }
+
+  function syncText() {
+    if (!Account.token) return "Non connecté";
+    if (Sync.state === "busy") return "Synchronisation…";
+    if (Sync.state === "err") return Sync.message || "Échec de la synchronisation";
+    const pending = pendingCount();
+    if (pending) return pending + " modification" + (pending > 1 ? "s" : "") + " en attente";
+    if (Sync.at) return "À jour, synchronisé " + agoText(Sync.at);
+    return "Connecté";
+  }
+
+  function renderAccountButton() {
+    const dot = document.getElementById("sync-dot");
+    const label = document.getElementById("account-label");
+    if (!Account.token) {
+      dot.className = "sync-dot";
+      label.textContent = "Se connecter";
+      return;
+    }
+    dot.className = "sync-dot " + (Sync.state === "busy" ? "busy" : Sync.state === "err" ? "err" : "ok");
+    label.textContent = Account.email;
+  }
+
+  function serverFieldHtml() {
+    if (!AccountUI.showServer) {
+      return `<p class="switch-mode"><button type="button" data-act="show-server">Changer l'adresse du serveur</button></p>`;
+    }
+    return `
+      <label class="field">
+        <span>Adresse du serveur</span>
+        <input class="input" type="url" id="ac-base" placeholder="https://exemple.fr/trak/api/" value="${esc(Account.base)}">
+      </label>
+      <p class="switch-mode" style="margin-top:-4px">Le dossier <code>api/</code> déposé sur votre hébergement.</p>`;
+  }
+
+  function msgHtml() {
+    if (!AccountUI.msg) return "";
+    return `<p class="form-msg ${AccountUI.msgType}">${esc(AccountUI.msg)}</p>`;
+  }
+
+  function renderAccountModal() {
+    const el = document.getElementById("account-body");
+    el.innerHTML = Account.token ? accountViewHtml() : authViewHtml();
+    wireAccountModal(el);
+  }
+
+  function authViewHtml() {
+    const isRegister = AccountUI.mode === "register";
+    return `
+      <h2 id="account-title">${isRegister ? "Créer un compte" : "Se connecter"}</h2>
+      <p class="p-muted">Vos habitudes et vos jours cochés vous suivent sur tous vos appareils.</p>
+      <form id="ac-form">
+        <label class="field">
+          <span>Adresse e-mail</span>
+          <input class="input" type="email" id="ac-email" autocomplete="username" required value="${esc(Account.lastEmail)}">
+        </label>
+        <label class="field">
+          <span>Mot de passe</span>
+          <input class="input" type="password" id="ac-pass" autocomplete="${isRegister ? "new-password" : "current-password"}" required minlength="8">
+        </label>
+        ${isRegister ? `<p class="switch-mode" style="margin-top:-4px">8 caractères minimum.</p>` : ""}
+        <div class="modal-actions">
+          <button type="submit" class="btn btn-primary" ${AccountUI.busy ? "disabled" : ""}>
+            ${AccountUI.busy ? "Patientez…" : (isRegister ? "Créer le compte" : "Se connecter")}
+          </button>
+          <button type="button" class="btn btn-ghost" data-act="close">Annuler</button>
+        </div>
+      </form>
+      ${msgHtml()}
+      <p class="switch-mode">
+        ${isRegister ? "Vous avez déjà un compte ?" : "Pas encore de compte ?"}
+        <button type="button" data-act="switch">${isRegister ? "Se connecter" : "En créer un"}</button>
+      </p>`;
+  }
+
+  function devicesHtml() {
+    if (AccountUI.devices === null) return `<p class="switch-mode">Chargement des appareils…</p>`;
+    if (!AccountUI.devices.length) return "";
+    return `
+      <h2 style="font-size:15px;margin:22px 0 0">Appareils connectés</h2>
+      <ul class="device-list">
+        ${AccountUI.devices.map((d) => `
+          <li>
+            <span>${esc(d.label)}</span>
+            <span style="color:var(--color-neutral-600)">vu ${esc(agoText(d.seen * 1000))}</span>
+            ${d.current ? `<span class="tag">cet appareil</span>` : ""}
+          </li>`).join("")}
+      </ul>
+      ${AccountUI.devices.length > 1
+        ? `<p class="switch-mode"><button type="button" data-act="revoke">Déconnecter les autres appareils</button></p>`
+        : ""}`;
+  }
+
+  function accountViewHtml() {
+    if (AccountUI.mode === "password") {
+      return `
+        <h2 id="account-title">Changer le mot de passe</h2>
+        <p class="p-muted">Vos autres appareils devront se reconnecter.</p>
+        <form id="ac-form">
+          <label class="field">
+            <span>Mot de passe actuel</span>
+            <input class="input" type="password" id="ac-current" autocomplete="current-password" required>
+          </label>
+          <label class="field">
+            <span>Nouveau mot de passe</span>
+            <input class="input" type="password" id="ac-pass" autocomplete="new-password" required minlength="8">
+          </label>
+          <div class="modal-actions">
+            <button type="submit" class="btn btn-primary" ${AccountUI.busy ? "disabled" : ""}>
+              ${AccountUI.busy ? "Patientez…" : "Enregistrer"}
+            </button>
+            <button type="button" class="btn btn-ghost" data-act="back">Retour</button>
+          </div>
+        </form>
+        ${msgHtml()}`;
+    }
+
+    return `
+      <h2 id="account-title">Votre compte</h2>
+      <p class="p-muted">${esc(Account.email)}</p>
+      <p class="sync-line"><span class="sync-dot ${Sync.state === "busy" ? "busy" : Sync.state === "err" ? "err" : "ok"}"></span>${esc(syncText())}</p>
+      <div class="modal-actions" style="margin-top:12px">
+        <button type="button" class="btn btn-primary" data-act="sync" ${Sync.state === "busy" ? "disabled" : ""}>Synchroniser maintenant</button>
+        <button type="button" class="btn btn-ghost" data-act="close">Fermer</button>
+      </div>
+      ${msgHtml()}
+      ${devicesHtml()}
+      <div class="modal-actions" style="margin-top:22px">
+        <button type="button" class="btn btn-ghost" data-act="password" style="padding-left:0">Changer le mot de passe</button>
+        <button type="button" class="btn btn-ghost spacer" data-act="logout" style="color:var(--color-accent-700)">Se déconnecter</button>
+      </div>
+      ${serverFieldHtml()}`;
+  }
+
+  function wireAccountModal(el) {
+    const form = el.querySelector("#ac-form");
+    if (form) form.addEventListener("submit", (ev) => { ev.preventDefault(); submitAccountForm(); });
+
+    el.querySelectorAll("[data-act]").forEach((b) => b.addEventListener("click", () => {
+      const act = b.dataset.act;
+      if (act === "close") closeAccount();
+      else if (act === "switch") { AccountUI.mode = AccountUI.mode === "register" ? "login" : "register"; AccountUI.msg = ""; renderAccountModal(); }
+      else if (act === "show-server") { AccountUI.showServer = true; renderAccountModal(); }
+      else if (act === "password") { AccountUI.mode = "password"; AccountUI.msg = ""; renderAccountModal(); }
+      else if (act === "back") { AccountUI.mode = "account"; AccountUI.msg = ""; renderAccountModal(); }
+      else if (act === "sync") { commitServerField(); Sync.run(); }
+      else if (act === "logout") doLogout();
+      else if (act === "revoke") doRevokeOthers();
+    }));
+  }
+
+  function commitServerField() {
+    const input = document.getElementById("ac-base");
+    if (!input) return;
+    const v = input.value.trim();
+    if (v && v !== Account.base) { Account.base = v; saveAccount(); }
+  }
+
+  function setBusy(busy, msg, type) {
+    AccountUI.busy = busy;
+    AccountUI.msg = msg || "";
+    AccountUI.msgType = type || "";
+    renderAccountModal();
+  }
+
+  async function submitAccountForm() {
+    if (AccountUI.busy) return;
+    commitServerField();
+
+    if (AccountUI.mode === "password") return doChangePassword();
+
+    const email = (document.getElementById("ac-email").value || "").trim();
+    const pass = document.getElementById("ac-pass").value || "";
+    const isRegister = AccountUI.mode === "register";
+
+    if (isRegister && pass.length < 8) return setBusy(false, "8 caractères minimum.", "err");
+    if (!Account.base) {
+      return setBusy(false, "Cette page est ouverte en local : la synchronisation a besoin du site en ligne, ou d'une adresse renseignée dans SERVER_URL en haut du fichier.", "err");
+    }
+
+    setBusy(true, "");
+    try {
+      const data = await api("auth.php", { action: isRegister ? "register" : "login", email: email, password: pass });
+
+      // Changement de compte sur cet appareil : on repart des données du compte
+      // rejoint plutôt que de mélanger les deux historiques.
+      if (Account.lastEmail && Account.lastEmail !== data.user.email) resetLocalData();
+
+      Account.token = data.token;
+      Account.email = data.user.email;
+      Account.lastSync = 0;
+      saveAccount();
+
+      AccountUI.mode = "account";
+      setBusy(false, "");
+      renderAccountButton();
+      await Sync.run();
+      loadDevices();
+    } catch (e) {
+      setBusy(false, e.message, "err");
+    }
+  }
+
+  function resetLocalData() {
+    State.habits = defaultHabits();
+    State.log = {};
+    State.gone = {};
+    State.dirtyH = {};
+    State.dirtyE = {};
+    persist();
+  }
+
+  async function doChangePassword() {
+    const current = document.getElementById("ac-current").value || "";
+    const next = document.getElementById("ac-pass").value || "";
+    if (next.length < 8) return setBusy(false, "8 caractères minimum.", "err");
+
+    setBusy(true, "");
+    try {
+      await api("auth.php", { action: "password", current: current, password: next });
+      AccountUI.mode = "account";
+      setBusy(false, "Mot de passe modifié. Les autres appareils ont été déconnectés.", "ok");
+      loadDevices();
+    } catch (e) {
+      setBusy(false, e.message, "err");
+    }
+  }
+
+  async function doLogout() {
+    const pending = pendingCount();
+    if (pending && !window.confirm(pending + " modification(s) ne sont pas encore synchronisées. Se déconnecter quand même ?")) return;
+    setBusy(true, "");
+    try { await api("auth.php", { action: "logout" }); } catch (e) { /* on se déconnecte localement de toute façon */ }
+    forgetSession();
+    AccountUI.mode = "login";
+    AccountUI.devices = null;
+    Sync.setState("idle");
+    setBusy(false, "Vous êtes déconnecté. Vos données restent sur cet appareil.", "ok");
+    renderAccountButton();
+  }
+
+  async function doRevokeOthers() {
+    setBusy(true, "");
+    try {
+      const data = await api("auth.php", { action: "revoke_others" });
+      setBusy(false, data.revoked ? data.revoked + " appareil(s) déconnecté(s)." : "Aucun autre appareil connecté.", "ok");
+      loadDevices();
+    } catch (e) {
+      setBusy(false, e.message, "err");
+    }
+  }
+
+  async function loadDevices() {
+    if (!Account.token) return;
+    AccountUI.devices = null;
+    try {
+      const data = await api("auth.php", { action: "devices" });
+      AccountUI.devices = data.devices || [];
+    } catch (e) {
+      AccountUI.devices = [];
+    }
+    if (isModalOpen()) renderAccountModal();
+  }
+
+  // --- Déclencheurs de synchronisation -------------------------------------
+  function wireAccount() {
+    document.getElementById("account-btn").addEventListener("click", () => openAccount());
+    document.getElementById("account-modal").addEventListener("click", (ev) => {
+      if (ev.target.id === "account-modal") closeAccount();
+    });
+    document.addEventListener("keydown", (ev) => {
+      if (ev.key === "Escape" && isModalOpen()) closeAccount();
+    });
+
+    document.addEventListener("visibilitychange", () => {
+      if (!document.hidden && Account.token) {
+        // Le jour a pu changer pendant que l'onglet dormait.
+        State.today = ymd(new Date());
+        Sync.schedule(100);
+      }
+    });
+    window.addEventListener("online", () => Sync.schedule(200));
+    window.addEventListener("focus", () => Sync.schedule(400));
+    setInterval(() => { if (!document.hidden) Sync.schedule(0); }, 60000);
+  }
+
+  document.querySelectorAll(".tabs .btn").forEach((b) => {
+    b.addEventListener("click", () => { State.tab = b.dataset.tab; renderTabs(); });
+  });
+
+  load();
+  loadAccount();
+  renderAll();
+  wireAccount();
+  renderAccountButton();
+  if (Account.token) Sync.run();
+})();
+</script>
+</body>
+</html>

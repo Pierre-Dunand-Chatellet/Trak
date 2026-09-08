@@ -1,0 +1,14 @@
+# Certains hebergements Apache ne transmettent pas l'en-tete Authorization a PHP.
+# Sans cela, la connexion reussit mais aucune synchronisation ne suit.
+# Les deux blocs sont gardes par IfModule : si le module manque, ils sont ignores
+# au lieu de provoquer une erreur 500.
+
+<IfModule mod_setenvif.c>
+  SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
+</IfModule>
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteCond %{HTTP:Authorization} .
+  RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+</IfModule>
