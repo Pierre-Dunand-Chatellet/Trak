@@ -11,7 +11,7 @@ const TRAK_MIN_PASSWORD = 8;
 // Nombre maximum de comptes sur ce serveur. Une fois vos comptes crees, mettez
 // cette valeur au nombre exact de comptes existants : les inscriptions sont
 // alors fermees, et personne ne peut plus en creer.
-const TRAK_MAX_ACCOUNTS = 5;
+const TRAK_MAX_ACCOUNTS = 15;
 
 // --- CORS -------------------------------------------------------------------
 // L'authentification passe par un jeton (pas de cookie), donc autoriser
