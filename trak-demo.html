@@ -4,9 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Trak — suivi d'habitudes</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caprasimo&family=Figtree:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="fonts/fonts.css">
 <style>
   :root {
     --color-bg: #faf7f0;
@@ -79,6 +77,8 @@
     border-radius: 999px; padding: 10px 16px; background: var(--color-neutral-100); color: var(--color-text);
   }
   .input:focus { outline: 2px solid var(--color-accent2-400); outline-offset: 1px; }
+  /* Focus clavier visible sur les boutons, liens et cases (pas au clic souris). */
+  :focus-visible { outline: 2px solid var(--color-accent2-600); outline-offset: 2px; }
 
   .card {
     background: var(--color-neutral-100); border-radius: var(--radius-lg);

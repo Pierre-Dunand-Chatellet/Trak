@@ -4,9 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Trak — suivi d'habitudes</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caprasimo&family=Figtree:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="fonts/fonts.css">
 <style>
   :root {
     --color-bg: #faf7f0;
@@ -79,6 +77,8 @@
     border-radius: 999px; padding: 10px 16px; background: var(--color-neutral-100); color: var(--color-text);
   }
   .input:focus { outline: 2px solid var(--color-accent2-400); outline-offset: 1px; }
+  /* Focus clavier visible sur les boutons, liens et cases (pas au clic souris). */
+  :focus-visible { outline: 2px solid var(--color-accent2-600); outline-offset: 2px; }
 
   .card {
     background: var(--color-neutral-100); border-radius: var(--radius-lg);
@@ -180,6 +180,11 @@
   .sync-dot.busy { background: var(--color-accent-500); animation: sync-pulse 1s ease-in-out infinite; }
   .sync-dot.err { background: #c0532c; }
   @keyframes sync-pulse { 0%,100% { opacity: 1; } 50% { opacity: .3; } }
+  /* Si le système demande moins d'animations : plus de clignotement pendant la synchro.
+     Les transitions de couleur (0,15 s) restent, elles aident à voir ce qui change. */
+  @media (prefers-reduced-motion: reduce) {
+    .sync-dot.busy { animation: none; opacity: .6; }
+  }
 
   .modal-backdrop {
     position: fixed; inset: 0; background: rgba(43,38,32,.42);
@@ -1048,7 +1053,7 @@
           <span>Mot de passe</span>
           <input class="input" type="password" id="ac-pass" autocomplete="${isRegister ? "new-password" : "current-password"}" required minlength="8">
         </label>
-        ${isRegister ? `<p class="switch-mode" style="margin-top:-4px">8 caractères minimum.</p>` : ""}
+        ${isRegister ? `<p class="switch-mode" style="margin-top:-4px">8 caractères minimum. Votre e-mail et vos habitudes sont stockés sur le serveur pour la synchronisation : <a href="http://site-254.studio2.serveur-dedie.fr/mentions-legales.html#donnees" target="_blank" rel="noopener" style="text-decoration:underline">données personnelles</a>.</p>` : ""}
         <div class="modal-actions">
           <button type="submit" class="btn btn-primary" ${AccountUI.busy ? "disabled" : ""}>
             ${AccountUI.busy ? "Patientez…" : (isRegister ? "Créer le compte" : "Se connecter")}
