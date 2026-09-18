@@ -3,7 +3,7 @@
 Suivi d'habitudes quotidien : un compte, plusieurs appareils, les mêmes données
 partout. Fonctionne hors ligne et se resynchronise au retour du réseau.
 
-En ligne : http://site-254.studio2.serveur-dedie.fr/Trak/trak.html
+En ligne : https://dunandchatellet.fr/Trak/trak.html
 
 ## Ce que ça fait
 
