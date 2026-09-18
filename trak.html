@@ -1053,7 +1053,7 @@
           <span>Mot de passe</span>
           <input class="input" type="password" id="ac-pass" autocomplete="${isRegister ? "new-password" : "current-password"}" required minlength="8">
         </label>
-        ${isRegister ? `<p class="switch-mode" style="margin-top:-4px">8 caractères minimum. Votre e-mail et vos habitudes sont stockés sur le serveur pour la synchronisation : <a href="http://site-254.studio2.serveur-dedie.fr/mentions-legales.html#donnees" target="_blank" rel="noopener" style="text-decoration:underline">données personnelles</a>.</p>` : ""}
+        ${isRegister ? `<p class="switch-mode" style="margin-top:-4px">8 caractères minimum. Votre e-mail et vos habitudes sont stockés sur le serveur pour la synchronisation : <a href="https://dunandchatellet.fr/mentions-legales.html#donnees" target="_blank" rel="noopener" style="text-decoration:underline">données personnelles</a>.</p>` : ""}
         <div class="modal-actions">
           <button type="submit" class="btn btn-primary" ${AccountUI.busy ? "disabled" : ""}>
             ${AccountUI.busy ? "Patientez…" : (isRegister ? "Créer le compte" : "Se connecter")}
