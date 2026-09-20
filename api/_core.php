@@ -64,6 +64,17 @@ if (PHP_INT_SIZE < 8) {
     fail('PHP 32 bits non supporte : la synchronisation exige des entiers 64 bits.', 500, 'php32');
 }
 
+// Refuse l'API en http : un mot de passe y circulerait en clair. La redirection
+// https du .htaccess racine ne s'applique pas ici (api/.htaccess a son propre
+// RewriteEngine), et rediriger un POST lui ferait perdre son corps.
+// 127.0.0.1 reste permis pour tester en local.
+$https = (!empty($_SERVER['HTTPS']) && strtolower((string) $_SERVER['HTTPS']) !== 'off')
+    || ($_SERVER['REQUEST_SCHEME'] ?? '') === 'https'
+    || (string) ($_SERVER['SERVER_PORT'] ?? '') === '443';
+if (!$https && !in_array($_SERVER['REMOTE_ADDR'] ?? '', ['127.0.0.1', '::1'], true)) {
+    fail('Connexion non chiffree refusee : utilisez https.', 403, 'https_required');
+}
+
 require __DIR__ . '/store.php';
 
 // --- Authentification -------------------------------------------------------

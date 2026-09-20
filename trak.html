@@ -4,6 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Trak — suivi d'habitudes</title>
+<meta name="description" content="Trak, application de suivi d'habitudes : cochez vos journées, suivez vos séries et vos records, synchronisez vos appareils avec un compte.">
+<!-- Icone : la mascotte (Image/favicon.svg), avec des PNG pour les navigateurs
+     sans SVG et pour l'ecran d'accueil des iPhone. -->
+<link rel="icon" type="image/svg+xml" href="Image/favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="Image/favicon-32.png">
+<link rel="apple-touch-icon" href="Image/apple-touch-icon.png">
+<meta name="theme-color" content="#faf7f0">
 <link rel="stylesheet" href="fonts/fonts.css">
 <style>
   :root {
@@ -51,7 +58,8 @@
     padding: 28px 0 20px;
   }
   .brand { display: flex; align-items: center; gap: 10px; margin-right: auto; }
-  .brand .dot { width: 30px; height: 30px; border-radius: 999px; background: var(--color-accent2-500); flex: none; }
+  /* La mascotte remplace l'ancien point vert du logo. */
+  .brand .mascotte-entete { width: 36px; height: 36px; flex: none; margin: -3px 0; }
   .brand span { font-family: var(--font-heading); font-size: 20px; letter-spacing: -0.02em; }
 
   nav.tabs { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -118,6 +126,149 @@
   .goal-bar { height: 100%; border-radius: 999px; background: var(--color-accent-500); }
   .goal-bar.full { background: var(--color-accent2-500); }
 
+  /* ---- Mascotte ---- */
+  /* Les couleurs arrivent par les variables --m-corps / --m-ombre / --m-clair
+     posees sur chaque <svg> : un seul dessin pour toutes les teintes. */
+  .mascotte { display: block; overflow: visible; }
+  .mascotte .m-corps { fill: var(--m-corps); }
+  .mascotte .m-ombre { fill: var(--m-ombre); }
+  .mascotte .m-clair { fill: var(--m-clair); }
+  .mascotte .m-encre { fill: var(--color-text); }
+  .mascotte .m-trait { fill: none; stroke: var(--color-text); stroke-linecap: round; stroke-linejoin: round; }
+  .mascotte .m-joue { fill: #ef8c7a; opacity: .45; }
+  .mascotte.humeur-ravie .m-joue { opacity: .75; }
+  .mascotte.humeur-endormie .m-joue { opacity: .3; }
+  .mascotte .m-tige { fill: none; stroke: var(--color-accent2-800); stroke-width: 2.4; stroke-linecap: round; }
+  .mascotte .m-feuille { fill: var(--color-accent2-400); stroke: var(--color-accent2-800); stroke-width: 1.6; stroke-linejoin: round; }
+  /* Balancement lent, clignement rare : on doit a peine le remarquer. */
+  .mascotte .m-balance { transform-box: view-box; transform-origin: 50% 94%; animation: m-balance 4.8s ease-in-out infinite; }
+  .mascotte.humeur-ravie .m-balance { animation-duration: 3.2s; }
+  .mascotte.humeur-endormie .m-balance { animation: m-souffle 3.6s ease-in-out infinite; }
+  .mascotte.humeur-contente .m-yeux { transform-box: fill-box; transform-origin: center; animation: m-cligne 5.5s infinite; }
+  .mascotte .m-z { opacity: .7; animation: m-z 3.6s ease-in-out infinite; }
+  .mascotte .m-etincelle { animation: m-scintille 2.6s ease-in-out infinite; }
+  .mascotte .m-etincelle + .m-etincelle { animation-delay: 1.3s; }
+  /* Petit saut quand on coche une habitude. */
+  .mascotte .m-saut { transform-box: view-box; transform-origin: 50% 96%; }
+  .mascotte.saute .m-saut { animation: m-saut .55s cubic-bezier(.3,.7,.4,1); }
+  .mascotte.fixe * { animation: none; }
+  @keyframes m-balance { 0%,100% { transform: rotate(0); } 25% { transform: rotate(-3deg); } 75% { transform: rotate(3deg); } }
+  @keyframes m-souffle { 0%,100% { transform: scale(1,1); } 50% { transform: scale(1.025,.975); } }
+  @keyframes m-cligne { 0%,90%,96%,100% { transform: scaleY(1); } 93% { transform: scaleY(.1); } }
+  @keyframes m-z { 0% { opacity: 0; transform: translate(0,4px); } 30%,70% { opacity: .75; } 100% { opacity: 0; transform: translate(4px,-6px); } }
+  @keyframes m-scintille { 0%,100% { opacity: .25; } 50% { opacity: 1; } }
+  @keyframes m-saut {
+    0% { transform: none; }
+    25% { transform: translateY(-9px) scale(.96,1.05); }
+    50% { transform: translateY(0) scale(1.08,.92); }
+    70% { transform: scale(.97,1.03); }
+    100% { transform: none; }
+  }
+
+  .mascotte-card {
+    background: var(--color-neutral-100); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm);
+    padding: 16px 20px; display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px;
+  }
+  .mascotte-card-img { flex: none; width: 120px; height: 120px; }
+  .mascotte-card-texte { flex: 1; min-width: 150px; }
+  .mascotte-phrase { font-size: 15px; font-weight: 600; line-height: 1.35; margin: 6px 0 4px; }
+  .mascotte-record { font-size: 13px; color: var(--color-neutral-600); margin: 0 0 12px; line-height: 1.4; }
+
+  /* Modale « Personnaliser » */
+  .modal.modal-large { max-width: 540px; }
+  .mascotte-apercu {
+    display: flex; justify-content: center; padding: 14px 0 10px; margin-bottom: 16px;
+    background: var(--color-accent2-200); border-radius: var(--radius-lg);
+  }
+  .mascotte-progression { margin-bottom: 4px; }
+  .mascotte-progression .count { white-space: nowrap; }
+  .mascotte-note { font-size: 12px; color: var(--color-neutral-600); margin: 6px 0 0; }
+  .tenue-groupe { border: 0; padding: 0; margin: 20px 0 0; min-width: 0; }
+  .tenue-groupe legend {
+    padding: 0; margin-bottom: 10px; font-size: 12px; letter-spacing: .08em;
+    text-transform: uppercase; color: var(--color-neutral-600);
+  }
+  .tenue-grille { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; }
+  .tenue-option { position: relative; display: block; cursor: pointer; }
+  .tenue-carte {
+    display: flex; flex-direction: column; align-items: center; gap: 2px; height: 100%;
+    padding: 8px 6px 10px; border: 1px solid var(--color-neutral-300); border-radius: 14px;
+    text-align: center; transition: background .15s, border-color .15s;
+  }
+  .tenue-option:hover .tenue-carte { background: var(--color-neutral-200); }
+  .tenue-option input:checked + .tenue-carte {
+    background: var(--color-accent2-200); border-color: var(--color-accent2-600);
+    box-shadow: inset 0 0 0 1px var(--color-accent2-600);
+  }
+  .tenue-option input:focus-visible + .tenue-carte { outline: 2px solid var(--color-accent2-600); outline-offset: 2px; }
+  .tenue-nom { font-size: 13px; font-weight: 600; }
+  .tenue-info { font-size: 11px; line-height: 1.3; color: var(--color-neutral-600); }
+  .tenue-option.verrouille { cursor: not-allowed; }
+  .tenue-option.verrouille:hover .tenue-carte { background: none; }
+  .tenue-option.verrouille .mascotte { filter: grayscale(1); opacity: .45; }
+  .tenue-option.verrouille .tenue-nom { color: var(--color-neutral-600); }
+  .sr-only {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+  }
+
+  /* Toast de deblocage */
+  .toast-zone {
+    position: fixed; left: 0; right: 0; bottom: 20px; z-index: 60;
+    display: flex; justify-content: center; padding: 0 16px; pointer-events: none;
+  }
+  .toast {
+    pointer-events: auto; display: flex; align-items: center; gap: 12px; max-width: 460px;
+    background: var(--color-text); color: var(--color-neutral-100);
+    border-radius: var(--radius-lg); padding: 10px 10px 10px 12px;
+    box-shadow: 0 10px 40px rgba(43,38,32,.22);
+    opacity: 0; transform: translateY(12px); transition: opacity .25s, transform .25s;
+  }
+  .toast.visible { opacity: 1; transform: none; }
+  .toast .mascotte { flex: none; }
+  .toast-texte { flex: 1; min-width: 0; font-size: 13px; line-height: 1.35; }
+  .toast-texte strong { display: block; font-size: 14px; }
+  .toast-texte span { color: var(--color-neutral-300); }
+  .toast .btn-ghost { color: var(--color-neutral-100); font-size: 18px; line-height: 1; padding: 6px 10px; }
+  .toast .btn-ghost:hover { color: var(--color-text); }
+
+  /* Visite guidee : un "trou" lumineux autour de l'element explique (son
+     ombre geante assombrit tout le reste) et une bulle de texte a cote. */
+  .aide-btn { width: 38px; height: 38px; padding: 0; font-size: 15px; display: grid; place-items: center; }
+  .visite { position: fixed; inset: 0; z-index: 70; }
+  .visite[hidden] { display: none; }
+  .visite.sans-cible { background: rgba(43,38,32,.55); }
+  .visite-trou {
+    position: fixed; border-radius: var(--radius-lg); pointer-events: none;
+    box-shadow: 0 0 0 3px var(--color-accent-500), 0 0 0 9999px rgba(43,38,32,.55);
+    transition: top .3s ease, left .3s ease, width .3s ease, height .3s ease;
+  }
+  .visite.sans-cible .visite-trou { display: none; }
+  .visite-bulle {
+    position: fixed; width: min(360px, calc(100vw - 32px));
+    background: var(--color-neutral-100); border-radius: var(--radius-lg);
+    box-shadow: 0 10px 40px rgba(43,38,32,.28); padding: 20px 20px 16px;
+    transition: top .3s ease, left .3s ease;
+  }
+  .visite-bulle:focus { outline: none; }
+  .visite-bulle .mascotte { display: block; margin: -4px auto 8px; }
+  .visite-etape { font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--color-accent-700); margin: 0 0 6px; }
+  .visite-bulle h2 { font-size: 18px; margin: 0 0 6px; }
+  .visite-bulle p.visite-texte { font-size: 14px; line-height: 1.5; color: var(--color-neutral-700); margin: 0; }
+  .visite-points { display: flex; gap: 5px; margin: 16px 0 0; }
+  .visite-points span { width: 6px; height: 6px; border-radius: 50%; background: var(--color-neutral-300); }
+  .visite-points span.actif { background: var(--color-accent-500); width: 16px; border-radius: 3px; }
+  .visite-actions { display: flex; align-items: center; gap: 8px; margin-top: 14px; }
+  .visite-actions .spacer { margin-left: auto; }
+  .visite-actions .btn-ghost { color: var(--color-neutral-700); }
+  @media (max-width: 560px) {
+    /* Sur telephone la bulle se pose en bas de l'ecran, pleine largeur. */
+    .visite-bulle { left: 16px !important; right: 16px; top: auto !important; bottom: 16px; width: auto; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .visite-trou, .visite-bulle { transition: none; }
+  }
+
   /* ---- Week ---- */
   .week-head-row { display: flex; flex-wrap: wrap; align-items: baseline; gap: 14px; margin-bottom: 22px; }
   .week-head-row h1 { margin: 0; margin-right: auto; }
@@ -180,10 +331,13 @@
   .sync-dot.busy { background: var(--color-accent-500); animation: sync-pulse 1s ease-in-out infinite; }
   .sync-dot.err { background: #c0532c; }
   @keyframes sync-pulse { 0%,100% { opacity: 1; } 50% { opacity: .3; } }
-  /* Si le système demande moins d'animations : plus de clignotement pendant la synchro.
+  /* Si le système demande moins d'animations : plus de clignotement pendant la synchro,
+     mascotte immobile (ni balancement, ni clignement, ni saut) et toast sans glissement.
      Les transitions de couleur (0,15 s) restent, elles aident à voir ce qui change. */
   @media (prefers-reduced-motion: reduce) {
     .sync-dot.busy { animation: none; opacity: .6; }
+    .mascotte, .mascotte * { animation: none !important; }
+    .toast { transform: none; transition: opacity .15s; }
   }
 
   .modal-backdrop {
@@ -228,6 +382,11 @@
     .today-grid { grid-template-columns: 1fr; }
     aside.side { position: static; }
   }
+  /* Avec la carte mascotte, la colonne de droite depasse la hauteur des petits
+     ecrans : collee en haut, son bas deviendrait inaccessible. */
+  @media (max-height: 760px) {
+    aside.side { position: static; }
+  }
   @media (max-width: 560px) {
     .wrap { padding: 0 14px 60px; }
     header.app-header { padding: 20px 0 16px; }
@@ -248,7 +407,7 @@
 <div class="wrap">
 
   <header class="app-header">
-    <div class="brand"><div class="dot"></div><span>Trak</span></div>
+    <div class="brand"><div class="mascotte-entete" id="mascotte-entete"></div><span>Trak</span></div>
     <nav class="tabs">
       <button type="button" class="btn" data-tab="today">Aujourd'hui</button>
       <button type="button" class="btn" data-tab="week">Semaine</button>
@@ -258,6 +417,7 @@
     <button type="button" class="btn account-btn" id="account-btn">
       <span class="sync-dot" id="sync-dot"></span><span class="who" id="account-label">Se connecter</span>
     </button>
+    <button type="button" class="btn aide-btn" id="aide-btn" aria-label="Revoir la visite guidée" title="Revoir la visite guidée">?</button>
   </header>
   <div class="divider"></div>
 
@@ -274,17 +434,29 @@
   </div>
 </div>
 
+<div class="modal-backdrop" id="mascotte-modal" hidden>
+  <div class="modal modal-large" role="dialog" aria-modal="true" aria-labelledby="mascotte-title">
+    <div id="mascotte-body"></div>
+  </div>
+</div>
+
+<div class="visite" id="visite" hidden>
+  <div class="visite-trou" id="visite-trou"></div>
+  <div class="visite-bulle" id="visite-bulle" role="dialog" aria-modal="true" aria-labelledby="visite-titre" tabindex="-1"></div>
+</div>
+
+<div class="toast-zone" id="mascotte-toast" role="status" aria-live="polite"></div>
+
 <script>
 (function () {
   "use strict";
 
   const DEFAULT_HABITS = [
-    { id: "douche", name: "Douche", goal: 7 },
-    { id: "boire", name: "Boire", goal: 7 },
-    { id: "dents", name: "Brosser les dents", goal: 7 },
-    { id: "sport", name: "Faire du sport", goal: 4 },
-    { id: "coder", name: "Coder", goal: 5 },
-    { id: "travailler", name: "Travailler", goal: 5 }
+    { id: "eau", name: "Boire de l'eau", goal: 7 },
+    { id: "lecture", name: "Lire 10 minutes", goal: 5 },
+    { id: "sport", name: "Faire du sport", goal: 3 },
+    { id: "marche", name: "Marcher 30 minutes", goal: 5 },
+    { id: "sommeil", name: "Se coucher avant 23 h", goal: 5 }
   ];
   const DOW = ["lun", "mar", "mer", "jeu", "ven", "sam", "dim"];
   const DOW_LONG = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"];
@@ -395,6 +567,9 @@
     const prev = State.log[k];
     State.log[k] = { done: !(prev && prev.done), note: prev ? prev.note || "" : "", u: nowMs() };
     State.dirtyE[k] = 1;
+    // La mascotte saute quand on coche, et un palier franchi ici merite un toast.
+    Mascotte.action = true;
+    Mascotte.saute = State.log[k].done;
     persist(); Sync.schedule(); render();
   }
   function setNote(id, day, note) {
@@ -491,6 +666,7 @@
           <div>${rowsHtml || "<p class=\"p-muted\">Aucune habitude. Ajoutez-en depuis l'onglet Habitudes.</p>"}</div>
         </div>
         <aside class="side">
+          <div class="mascotte-card" id="mascotte-carte"></div>
           <div class="stat-card">
             <p class="eyebrow">Réussite, 30 derniers jours</p>
             <div class="big-num">${pct30}</div>
@@ -510,6 +686,12 @@
     el.querySelectorAll('[data-action="note-input"]').forEach((inp) => {
       inp.addEventListener("change", () => setNote(inp.dataset.id, State.today, inp.value));
     });
+
+    // renderToday passe apres chaque changement (coche, ajout, suppression,
+    // renommage) : c'est ici qu'on tient la mascotte a jour, carte et en-tete.
+    const etat = etatMascotte();
+    renderMascotteCarte(etat);
+    majMascotte(etat);
   }
 
   function renderWeek() {
@@ -729,8 +911,446 @@
     renderWeek();
     renderYear();
     renderManage();
+    placerVisite();
   }
   function render() { renderAll(); }
+
+  /* =========================================================================
+     Mascotte : petite creature ronde, heritiere du point vert du logo.
+     Ses tenues se debloquent avec le record de serie (meilleure serie, toutes
+     habitudes confondues). Le record se recalcule depuis le journal, donc suit
+     la synchro ; la tenue choisie, elle, reste propre a cet appareil.
+     ========================================================================= */
+
+  const MKEY = "trak.mascotte.v1";
+
+  // palier = record (en jours) necessaire ; « le » sert aux phrases du toast.
+  const M_COULEURS = [
+    { id: "vert", nom: "Vert", adj: "verte", palier: 0, le: "le vert",
+      corps: "var(--color-accent2-500)", ombre: "var(--color-accent2-600)", clair: "var(--color-accent2-400)" },
+    { id: "peche", nom: "Pêche", adj: "pêche", palier: 3, le: "la couleur pêche",
+      corps: "#f0a860", ombre: "#d4843a", clair: "#f8cc97" },
+    { id: "bleuet", nom: "Bleuet", adj: "bleuet", palier: 21, le: "la couleur bleuet",
+      corps: "#72a6d9", ombre: "#5186bd", clair: "#abcaec" },
+    { id: "lavande", nom: "Lavande", adj: "lavande", palier: 45, le: "la couleur lavande",
+      corps: "#a88cd4", ombre: "#8a6dbb", clair: "#cbb9ea" },
+    { id: "dore", nom: "Doré", adj: "dorée", palier: 60, le: "la teinte dorée",
+      corps: "#e8b93a", ombre: "#c7962a", clair: "#f6dc85" }
+  ];
+  const M_ACCESSOIRES = [
+    { id: "aucun", nom: "Aucun", palier: 0, avec: "", le: "" },
+    { id: "echarpe", nom: "Écharpe", palier: 7, avec: "une écharpe", le: "l'écharpe" },
+    { id: "lunettes", nom: "Lunettes", palier: 14, avec: "des lunettes", le: "les lunettes" },
+    { id: "chapeau", nom: "Chapeau", palier: 30, avec: "un chapeau", le: "le chapeau" },
+    { id: "couronne", nom: "Couronne", palier: 100, avec: "une couronne", le: "la couronne" },
+    { id: "cape", nom: "Cape", palier: 365, avec: "une cape", le: "la cape" }
+  ];
+  // Tous les paliers, couleurs et accessoires melanges, du plus proche au plus lointain.
+  const M_PALIERS = M_COULEURS.map((c) => Object.assign({ type: "couleur" }, c))
+    .concat(M_ACCESSOIRES.map((a) => Object.assign({ type: "accessoire" }, a)))
+    .filter((p) => p.palier > 0)
+    .sort((a, b) => a.palier - b.palier);
+  const M_HUMEURS = { endormie: 1, contente: 1, ravie: 1 };
+
+  const Mascotte = {
+    couleur: "vert", accessoire: "aucun",
+    dernierPalier: null,           // plus haut palier deja fete (ne redescend jamais)
+    action: false, saute: false,   // poses par toggle(), consommes par majMascotte()
+    cleEntete: "", retourFocus: null, toastTimer: null
+  };
+
+  function trouverTenue(liste, id) {
+    for (let i = 0; i < liste.length; i++) if (liste[i].id === id) return liste[i];
+    return null;
+  }
+
+  // Dessin en SVG inline, viewBox 100 x 100 : lisible de 30 a 140 px.
+  // o = { humeur, couleur, accessoire, taille, saute, fixe (sans animation), decoratif (cache aux lecteurs d'ecran) }
+  function mascotteSVG(o) {
+    o = o || {};
+    const humeur = M_HUMEURS[o.humeur] ? o.humeur : "contente";
+    const coul = trouverTenue(M_COULEURS, o.couleur) || M_COULEURS[0];
+    const acc = trouverTenue(M_ACCESSOIRES, o.accessoire) || M_ACCESSOIRES[0];
+    const taille = o.taille || 120;
+    // En tout petit (en-tete), zzz, etincelles et ombre au sol ne seraient que du bruit.
+    const details = taille >= 60;
+    const surLaTete = acc.id === "chapeau" || acc.id === "couronne";
+
+    // Derriere le corps : cape, bras et pieds (seuls les bouts depassent).
+    let derriere = "";
+    if (acc.id === "cape") {
+      derriere += `<path d="M27 50 Q13 76 10 95 Q50 101 90 95 Q87 76 73 50 Z" fill="#c2502f"/>`
+        + `<path d="M31 58 Q21 78 19 93 Q50 98 81 93 Q79 78 69 58 Z" fill="#93361f"/>`;
+    }
+    derriere += `<ellipse class="m-ombre" cx="14" cy="66" rx="6" ry="8" transform="rotate(20 14 66)"/>`
+      + `<ellipse class="m-ombre" cx="86" cy="66" rx="6" ry="8" transform="rotate(-20 86 66)"/>`
+      + `<ellipse class="m-ombre" cx="37" cy="92" rx="10" ry="5.5"/>`
+      + `<ellipse class="m-ombre" cx="63" cy="92" rx="10" ry="5.5"/>`;
+
+    // Corps : un disque d'ombre decale sous le disque principal donne le volume,
+    // puis le ventre plus clair et le petit reflet en haut a gauche.
+    const corps = `<circle class="m-ombre" cx="50" cy="58" r="37.5"/>`
+      + `<circle class="m-corps" cx="50" cy="56" r="36.5"/>`
+      + `<ellipse class="m-clair" cx="50" cy="75" rx="19" ry="12" opacity=".55"/>`
+      + `<ellipse cx="35" cy="35" rx="8.5" ry="5.5" fill="#fff" opacity=".45" transform="rotate(-35 35 35)"/>`
+      + `<circle cx="46.5" cy="27.5" r="2.4" fill="#fff" opacity=".5"/>`;
+
+    // Une pousse sur le crane, sauf si un chapeau ou une couronne prend la place.
+    const pousse = surLaTete ? ""
+      : `<path class="m-tige" d="M50 21 Q49 15 52 10"/><path class="m-feuille" d="M52 11 Q57 3 66 5 Q62 13 52 11 Z"/>`;
+
+    let yeux, bouche;
+    if (humeur === "endormie") {
+      yeux = `<path class="m-trait" stroke-width="3" d="M33 53 Q38 58 43 53 M57 53 Q62 58 67 53"/>`;
+      bouche = `<ellipse class="m-encre" cx="50" cy="65" rx="2.6" ry="2.1" opacity=".75"/>`;
+    } else if (humeur === "ravie") {
+      yeux = `<path class="m-trait" stroke-width="3.4" d="M33 55 Q38 47 43 55 M57 55 Q62 47 67 55"/>`;
+      bouche = `<path class="m-encre" d="M42.5 61 L57.5 61 Q57.5 72 50 72 Q42.5 72 42.5 61 Z"/>`
+        + `<ellipse cx="50" cy="68.8" rx="3.8" ry="2.4" fill="#ef8c7a"/>`;
+    } else {
+      yeux = `<ellipse class="m-encre" cx="38" cy="53" rx="4.3" ry="5.6"/><ellipse class="m-encre" cx="62" cy="53" rx="4.3" ry="5.6"/>`
+        + `<circle cx="39.6" cy="51" r="1.6" fill="#fff"/><circle cx="63.6" cy="51" r="1.6" fill="#fff"/>`;
+      bouche = `<path class="m-trait" stroke-width="2.8" d="M45 62 Q50 67 55 62"/>`;
+    }
+    const visage = `<ellipse class="m-joue" cx="28" cy="64" rx="6" ry="3.6"/><ellipse class="m-joue" cx="72" cy="64" rx="6" ry="3.6"/>`
+      + `<g class="m-yeux">${yeux}</g>${bouche}`;
+
+    // Devant le corps : l'accessoire.
+    let devant = "";
+    if (acc.id === "echarpe") {
+      devant = `<path d="M15 68 Q50 86 85 68 L86.5 77 Q50 96 13.5 77 Z" fill="#d9573b"/>`
+        + `<path d="M29 74.5 L28.5 83.5 M50 77.5 L50 86.5 M71 74.5 L71.5 83.5" stroke="#f6c7a4" stroke-width="2.6" stroke-linecap="round"/>`
+        + `<path d="M60 82 L71 79.5 L74 95 L63.5 97 Z" fill="#b8452f"/>`
+        + `<path d="M64.5 97 L64 99.5 M68.8 96.2 L68.8 98.7 M73 95.3 L73.3 97.8" stroke="#b8452f" stroke-width="1.6" stroke-linecap="round"/>`;
+    } else if (acc.id === "lunettes") {
+      devant = `<g fill="#fff" fill-opacity=".18" stroke="#2b2620" stroke-width="2.6" stroke-linecap="round">`
+        + `<circle cx="38" cy="53" r="9"/><circle cx="62" cy="53" r="9"/>`
+        + `<path fill="none" d="M47 52 Q50 49.5 53 52 M29.2 51 L16 47 M70.8 51 L84 47"/></g>`;
+    } else if (acc.id === "chapeau") {
+      devant = `<g transform="rotate(-8 50 22)">`
+        + `<ellipse cx="50" cy="23" rx="23" ry="5" fill="#2b2620"/>`
+        + `<path d="M37 22 L39 4 Q50 1 61 4 L63 22 Q50 25 37 22 Z" fill="#40382f"/>`
+        + `<path d="M37.6 15.5 Q50 18.5 62.4 15.5 L63 22 Q50 25 37 22 Z" fill="#e79a3a"/>`
+        + `<path class="m-feuille" d="M58 17 Q63 10 70 12 Q66 18 58 17 Z"/></g>`;
+    } else if (acc.id === "couronne") {
+      devant = `<g stroke="#b8861a" stroke-width="1.5" stroke-linejoin="round" fill="#f2c230">`
+        + `<path d="M32 27 L30 10 L40.5 18.5 L50 6 L59.5 18.5 L70 10 L68 27 Q50 30.5 32 27 Z"/>`
+        + `<circle cx="30" cy="10" r="2.6"/><circle cx="50" cy="6" r="2.8"/><circle cx="70" cy="10" r="2.6"/></g>`
+        + `<circle cx="50" cy="21.5" r="3" fill="#d9573b"/>`
+        + `<circle cx="40" cy="23" r="1.9" fill="#72a6d9"/><circle cx="60" cy="23" r="1.9" fill="#72a6d9"/>`;
+    } else if (acc.id === "cape") {
+      devant = `<path d="M20 69 Q50 84 80 69" fill="none" stroke="#93361f" stroke-width="2.6" stroke-linecap="round"/>`
+        + `<circle cx="50" cy="76.5" r="3.8" fill="#f2c230" stroke="#b8861a" stroke-width="1.3"/>`;
+    }
+
+    // Autour : zzz si elle dort, etincelles si elle est doree (grandes tailles seulement).
+    let autour = "";
+    if (details && humeur === "endormie") {
+      autour += `<g class="m-z"><path class="m-trait" stroke-width="2.2" d="M76 18 H83 L76 26 H83"/>`
+        + `<path class="m-trait" stroke-width="1.8" d="M86 6 H91 L86 12 H91"/></g>`;
+    }
+    if (details && coul.id === "dore") {
+      autour += `<path class="m-etincelle" d="M90 24.4 L91.6 28.4 L95.6 30 L91.6 31.6 L90 35.6 L88.4 31.6 L84.4 30 L88.4 28.4 Z" fill="#f6dc85" stroke="#c7962a" stroke-width=".8"/>`
+        + `<path class="m-etincelle" d="M10 35.8 L11.2 38.8 L14.2 40 L11.2 41.2 L10 44.2 L8.8 41.2 L5.8 40 L8.8 38.8 Z" fill="#f6dc85" stroke="#c7962a" stroke-width=".8"/>`;
+    }
+    const sol = details ? `<ellipse cx="50" cy="97" rx="27" ry="3" fill="#2b2620" opacity=".1"/>` : "";
+
+    const label = "Mascotte " + coul.adj + " " + humeur + (acc.avec ? ", avec " + acc.avec : "");
+    const a11y = o.decoratif ? `aria-hidden="true" focusable="false"` : `role="img" aria-label="${esc(label)}"`;
+    const cls = "mascotte humeur-" + humeur + (o.fixe ? " fixe" : "") + (o.saute ? " saute" : "");
+    return `<svg class="${cls}" viewBox="0 0 100 100" width="${taille}" height="${taille}" ${a11y}`
+      + ` style="--m-corps:${coul.corps};--m-ombre:${coul.ombre};--m-clair:${coul.clair}">`
+      + `${sol}<g class="m-saut"><g class="m-balance">${derriere}${corps}${pousse}${visage}${devant}</g></g>${autour}</svg>`;
+  }
+
+  function recordGlobal() {
+    return State.habits.reduce((m, h) => Math.max(m, best(h.id)), 0);
+  }
+  function palierAtteint(record) {
+    let p = 0;
+    M_PALIERS.forEach((x) => { if (x.palier <= record) p = x.palier; });
+    return p;
+  }
+  function prochainPalier(record) {
+    for (let i = 0; i < M_PALIERS.length; i++) if (M_PALIERS[i].palier > record) return M_PALIERS[i];
+    return null;
+  }
+  function etatMascotte() {
+    const total = State.habits.length;
+    const fait = State.habits.filter((h) => isDone(h.id, State.today)).length;
+    const humeur = !total || !fait ? "endormie" : fait === total ? "ravie" : "contente";
+    return { total: total, fait: fait, humeur: humeur, record: recordGlobal() };
+  }
+  // Ce qui est reellement porte. Un choix verrouille (record retombe, donnees pas
+  // encore synchronisees...) laisse place au defaut, sans que le choix soit oublie.
+  function tenueEffective(record) {
+    const c = trouverTenue(M_COULEURS, Mascotte.couleur);
+    const a = trouverTenue(M_ACCESSOIRES, Mascotte.accessoire);
+    return {
+      couleur: c && c.palier <= record ? c : M_COULEURS[0],
+      accessoire: a && a.palier <= record ? a : M_ACCESSOIRES[0]
+    };
+  }
+
+  function chargerMascotte() {
+    try {
+      const d = JSON.parse(localStorage.getItem(MKEY) || "null");
+      if (d && typeof d === "object") {
+        if (trouverTenue(M_COULEURS, d.couleur)) Mascotte.couleur = d.couleur;
+        if (trouverTenue(M_ACCESSOIRES, d.accessoire)) Mascotte.accessoire = d.accessoire;
+        if (typeof d.dernierPalier === "number" && isFinite(d.dernierPalier)) Mascotte.dernierPalier = d.dernierPalier;
+      }
+    } catch (e) { /* stockage illisible : on repart du defaut */ }
+    // Premiere visite depuis l'arrivee de la mascotte : les paliers deja acquis
+    // sont notes sans toast, sinon on feterait d'un coup des mois de series.
+    if (Mascotte.dernierPalier === null) {
+      Mascotte.dernierPalier = palierAtteint(recordGlobal());
+      sauverMascotte();
+    }
+  }
+  function sauverMascotte() {
+    try {
+      localStorage.setItem(MKEY, JSON.stringify({
+        couleur: Mascotte.couleur, accessoire: Mascotte.accessoire, dernierPalier: Mascotte.dernierPalier
+      }));
+    } catch (e) { /* ignore */ }
+  }
+
+  // Appelee a chaque renderToday. Le toast ne part que si le palier vient d'une
+  // coche faite ici : ce qui arrive par la synchro ou au chargement est note en
+  // silence (le toast a deja eu lieu sur l'appareil ou l'on a coche).
+  function majMascotte(etat) {
+    const atteint = palierAtteint(etat.record);
+    if (atteint > Mascotte.dernierPalier) {
+      const nouveaux = M_PALIERS.filter((p) => p.palier > Mascotte.dernierPalier && p.palier <= etat.record);
+      Mascotte.dernierPalier = atteint;
+      sauverMascotte();
+      if (Mascotte.action && nouveaux.length) afficherToast(nouveaux, etat.record);
+    }
+    majMascotteEntete(etat);
+    Mascotte.action = false;
+    Mascotte.saute = false;
+  }
+
+  // En-tete : hors des sections, donc jamais recree par les rendus. On ne remplace
+  // le SVG que si l'humeur ou la tenue change, pour ne pas relancer ses animations.
+  function majMascotteEntete(etat) {
+    const el = document.getElementById("mascotte-entete");
+    const t = tenueEffective(etat.record);
+    const cle = etat.humeur + "|" + t.couleur.id + "|" + t.accessoire.id;
+    if (cle !== Mascotte.cleEntete) {
+      Mascotte.cleEntete = cle;
+      el.innerHTML = mascotteSVG({ humeur: etat.humeur, couleur: t.couleur.id, accessoire: t.accessoire.id, taille: 36, saute: Mascotte.saute });
+    } else if (Mascotte.saute && el.firstElementChild) {
+      rejouerSaut(el.firstElementChild);
+    }
+  }
+  function rejouerSaut(svg) {
+    svg.classList.remove("saute");
+    void svg.getBoundingClientRect(); // oblige le navigateur a oublier l'ancien saut
+    svg.classList.add("saute");
+  }
+
+  function phraseMascotte(etat) {
+    if (!etat.total) return "Elle attend une première habitude pour se réveiller.";
+    if (etat.humeur === "endormie") return "Elle somnole. Cochez une habitude pour la réveiller.";
+    if (etat.humeur === "ravie") return "Journée parfaite : elle est aux anges !";
+    const reste = etat.total - etat.fait;
+    return "Encore " + reste + " habitude" + (reste > 1 ? "s" : "") + " et la journée est parfaite.";
+  }
+
+  // Carte de l'onglet Aujourd'hui, au-dessus de « Réussite, 30 derniers jours ».
+  function renderMascotteCarte(etat) {
+    const el = document.getElementById("mascotte-carte");
+    if (!el) return;
+    etat = etat || etatMascotte();
+    const t = tenueEffective(etat.record);
+    const suivant = prochainPalier(etat.record);
+    const recordTxt = "Record : " + etat.record + " jour" + (etat.record > 1 ? "s" : "") + ". "
+      + (suivant ? "Prochain cadeau : " + suivant.le + " à " + suivant.palier + " jours." : "Tout est débloqué.");
+    el.innerHTML = `
+      <div class="mascotte-card-img">${mascotteSVG({ humeur: etat.humeur, couleur: t.couleur.id, accessoire: t.accessoire.id, taille: 120, saute: Mascotte.saute })}</div>
+      <div class="mascotte-card-texte">
+        <p class="eyebrow">Votre mascotte</p>
+        <p class="mascotte-phrase">${esc(phraseMascotte(etat))}</p>
+        <p class="mascotte-record">${esc(recordTxt)}</p>
+        <button type="button" class="btn" data-action="mascotte-perso">Personnaliser</button>
+      </div>`;
+    el.querySelector('[data-action="mascotte-perso"]').addEventListener("click", ouvrirMascotte);
+  }
+
+  // --- Modale « Personnaliser » -------------------------------------------
+  function isMascotteOuverte() { return !document.getElementById("mascotte-modal").hidden; }
+
+  function ouvrirMascotte() {
+    if (isModalOpen()) closeAccount();
+    Mascotte.retourFocus = document.activeElement;
+    masquerToast();
+    document.getElementById("mascotte-modal").hidden = false;
+    renderMascotteModal();
+    const cible = document.querySelector("#mascotte-body input:checked") || document.querySelector("#mascotte-body button");
+    if (cible) cible.focus();
+  }
+  function fermerMascotte() {
+    document.getElementById("mascotte-modal").hidden = true;
+    // Le bouton d'origine a pu etre redessine (ou le toast avoir disparu) :
+    // on retombe alors sur le bouton de la carte, s'il est visible.
+    let cible = Mascotte.retourFocus;
+    if (!cible || !document.body.contains(cible) || !cible.offsetParent) {
+      cible = document.querySelector('[data-action="mascotte-perso"]');
+    }
+    if (cible && cible.offsetParent) cible.focus();
+    Mascotte.retourFocus = null;
+  }
+
+  function dessinVignette(couleur, accessoire) {
+    return mascotteSVG({ humeur: "contente", couleur: couleur, accessoire: accessoire, taille: 52, fixe: true, decoratif: true });
+  }
+  function optionTenue(nom, item, choisi, record, dessin, dataAttr) {
+    const verrou = item.palier > record;
+    const info = verrou ? "Série de " + item.palier + " jours requise" : item.palier ? item.palier + " jours" : "Dès le départ";
+    return `<label class="tenue-option${verrou ? " verrouille" : ""}">
+        <input class="sr-only" type="radio" name="${nom}" value="${item.id}"${choisi ? " checked" : ""}${verrou ? " disabled" : ""}>
+        <span class="tenue-carte">
+          <span ${dataAttr}>${dessin}</span>
+          <span class="tenue-nom">${esc(item.nom)}</span>
+          <span class="tenue-info">${info}</span>
+        </span>
+      </label>`;
+  }
+
+  function renderMascotteModal() {
+    const el = document.getElementById("mascotte-body");
+    const etat = etatMascotte();
+    const t = tenueEffective(etat.record);
+    const suivant = prochainPalier(etat.record);
+
+    let progression;
+    if (suivant) {
+      const pct = Math.min(100, Math.round(etat.record / suivant.palier * 100));
+      const manque = suivant.palier - etat.record;
+      progression = `
+        <div class="goal-head"><span>Prochain : ${esc(suivant.le)}</span><span class="count">${etat.record} / ${suivant.palier} j</span></div>
+        <div class="goal-bar-bg" role="progressbar" aria-label="Record vers le prochain palier" aria-valuemin="0" aria-valuemax="${suivant.palier}" aria-valuenow="${etat.record}"><div class="goal-bar" style="width:${pct}%"></div></div>
+        <p class="mascotte-note">Il manque ${manque} jour${manque > 1 ? "s" : ""} à votre record pour le débloquer.</p>`;
+    } else {
+      progression = `<p class="mascotte-note">Tout est débloqué : une série de 365 jours, chapeau bas.</p>`;
+    }
+
+    const couleursHtml = M_COULEURS.map((c) =>
+      optionTenue("m-couleur", c, c.id === t.couleur.id, etat.record, dessinVignette(c.id, "aucun"), "")).join("");
+    const accessoiresHtml = M_ACCESSOIRES.map((a) =>
+      optionTenue("m-accessoire", a, a.id === t.accessoire.id, etat.record, dessinVignette(t.couleur.id, a.id), `data-acc="${a.id}"`)).join("");
+
+    el.innerHTML = `
+      <h2 id="mascotte-title">Personnaliser la mascotte</h2>
+      <p class="p-muted">Les tenues se débloquent avec votre meilleure série, toutes habitudes confondues (record : ${etat.record} jour${etat.record > 1 ? "s" : ""}). Votre choix reste propre à cet appareil.</p>
+      <div class="mascotte-apercu" id="mascotte-apercu">${mascotteSVG({ humeur: "contente", couleur: t.couleur.id, accessoire: t.accessoire.id, taille: 140 })}</div>
+      <div class="mascotte-progression">${progression}</div>
+      <fieldset class="tenue-groupe"><legend>Couleur</legend><div class="tenue-grille">${couleursHtml}</div></fieldset>
+      <fieldset class="tenue-groupe"><legend>Accessoire</legend><div class="tenue-grille">${accessoiresHtml}</div></fieldset>
+      <div class="modal-actions"><button type="button" class="btn btn-primary" data-act="fermer">Terminé</button></div>`;
+
+    el.querySelectorAll('input[type="radio"]').forEach((inp) => inp.addEventListener("change", () => {
+      if (inp.name === "m-couleur") Mascotte.couleur = inp.value; else Mascotte.accessoire = inp.value;
+      sauverMascotte();
+      majApresChoix(inp.name === "m-couleur");
+    }));
+    el.querySelector('[data-act="fermer"]').addEventListener("click", fermerMascotte);
+  }
+
+  // Apres un choix : on ne redessine que l'apercu, les vignettes d'accessoires
+  // (si la couleur a change) et la mascotte hors modale — le focus reste en place.
+  function majApresChoix(couleurChangee) {
+    const etat = etatMascotte();
+    const t = tenueEffective(etat.record);
+    document.getElementById("mascotte-apercu").innerHTML =
+      mascotteSVG({ humeur: "contente", couleur: t.couleur.id, accessoire: t.accessoire.id, taille: 140 });
+    if (couleurChangee) {
+      document.querySelectorAll("#mascotte-body [data-acc]").forEach((s) => {
+        s.innerHTML = dessinVignette(t.couleur.id, s.dataset.acc);
+      });
+    }
+    renderMascotteCarte(etat);
+    majMascotteEntete(etat);
+  }
+
+  // --- Toast de deblocage --------------------------------------------------
+  function listeFr(mots) {
+    if (mots.length < 2) return mots.join("");
+    return mots.slice(0, -1).join(", ") + " et " + mots[mots.length - 1];
+  }
+
+  function afficherToast(nouveaux, record) {
+    const zone = document.getElementById("mascotte-toast");
+    const t = tenueEffective(record);
+    // Apercu : la tenue actuelle avec les nouveautes enfilees.
+    const essai = { couleur: t.couleur.id, accessoire: t.accessoire.id };
+    nouveaux.forEach((p) => { essai[p.type] = p.id; });
+    const titre = (nouveaux.length > 1 ? "Débloqués : " : "Débloqué : ") + listeFr(nouveaux.map((p) => p.le));
+    const palier = nouveaux[nouveaux.length - 1].palier;
+
+    zone.innerHTML = `
+      <div class="toast">
+        ${mascotteSVG({ humeur: "ravie", couleur: essai.couleur, accessoire: essai.accessoire, taille: 48, decoratif: true })}
+        <div class="toast-texte"><strong>${esc(titre)}</strong><span>Série de ${palier} jours atteinte.</span></div>
+        <button type="button" class="btn" data-act="essayer">Essayer</button>
+        <button type="button" class="btn btn-ghost" data-act="fermer" aria-label="Fermer">×</button>
+      </div>`;
+    const toast = zone.firstElementChild;
+    toast.querySelector('[data-act="essayer"]').addEventListener("click", () => {
+      Mascotte.couleur = essai.couleur;
+      Mascotte.accessoire = essai.accessoire;
+      sauverMascotte();
+      const etat = etatMascotte();
+      renderMascotteCarte(etat);
+      majMascotteEntete(etat);
+      ouvrirMascotte();
+    });
+    toast.querySelector('[data-act="fermer"]').addEventListener("click", masquerToast);
+    // Pas de disparition pendant qu'on le survole ou qu'on y est au clavier.
+    const pause = () => clearTimeout(Mascotte.toastTimer);
+    const reprise = () => { clearTimeout(Mascotte.toastTimer); Mascotte.toastTimer = setTimeout(masquerToast, 4000); };
+    toast.addEventListener("mouseenter", pause);
+    toast.addEventListener("focusin", pause);
+    toast.addEventListener("mouseleave", reprise);
+    toast.addEventListener("focusout", reprise);
+
+    requestAnimationFrame(() => requestAnimationFrame(() => toast.classList.add("visible")));
+    clearTimeout(Mascotte.toastTimer);
+    Mascotte.toastTimer = setTimeout(masquerToast, 8000);
+  }
+  function masquerToast() {
+    clearTimeout(Mascotte.toastTimer);
+    const zone = document.getElementById("mascotte-toast");
+    const toast = zone.firstElementChild;
+    if (!toast) return;
+    toast.classList.remove("visible");
+    setTimeout(() => { if (zone.firstElementChild === toast) zone.innerHTML = ""; }, 300);
+  }
+
+  function wireMascotte() {
+    const modal = document.getElementById("mascotte-modal");
+    modal.addEventListener("click", (ev) => { if (ev.target === modal) fermerMascotte(); });
+    document.addEventListener("keydown", (ev) => {
+      if (!isMascotteOuverte()) return;
+      if (ev.key === "Escape") { ev.preventDefault(); fermerMascotte(); return; }
+      if (ev.key !== "Tab") return;
+      // Le focus tourne dans la modale au lieu de filer vers la page derriere.
+      // Un groupe de boutons radio ne compte qu'une fois : son bouton coche.
+      const f = Array.from(modal.querySelectorAll('button:not([disabled]), input[type="radio"]:checked:not([disabled])'));
+      if (!f.length) return;
+      const dedans = modal.contains(document.activeElement);
+      if (ev.shiftKey && (!dedans || document.activeElement === f[0])) { ev.preventDefault(); f[f.length - 1].focus(); }
+      else if (!ev.shiftKey && (!dedans || document.activeElement === f[f.length - 1])) { ev.preventDefault(); f[0].focus(); }
+    });
+    // Le saut fini, on retire la classe pour pouvoir le rejouer a la prochaine coche.
+    document.addEventListener("animationend", (ev) => {
+      if (ev.animationName !== "m-saut") return;
+      const svg = ev.target.closest ? ev.target.closest("svg") : null;
+      if (svg) svg.classList.remove("saute");
+    });
+  }
 
   /* =========================================================================
      Compte et synchronisation multi-appareils
@@ -931,6 +1551,20 @@
       if (data.first && (data.habits || []).length === 0 && State.habits.length) {
         const t = nowMs();
         State.habits.forEach((h) => { if (!h.u) h.u = t; State.dirtyH[h.id] = 1; });
+      }
+
+      // Compte qui a déjà ses habitudes : celles par défaut de cet appareil,
+      // jamais touchées (u = 0, aucune coche), sont retirées. Avant, elles
+      // portaient les mêmes identifiants que celles du compte et se fondaient
+      // dedans ; depuis le changement de la liste par défaut, elles
+      // s'ajouteraient en double à celles d'un compte plus ancien.
+      if (data.first && (data.habits || []).length) {
+        const cochees = new Set(Object.keys(State.log).map((k) => k.split("|")[0]));
+        State.habits = State.habits.filter((h) => h.u || State.dirtyH[h.id] || cochees.has(h.id));
+        // Celles qu'on garde parce qu'elles ont des coches partent au serveur,
+        // sinon ces coches arriveraient sur les autres appareils sans habitude.
+        const t = nowMs();
+        State.habits.forEach((h) => { if (!h.u) { h.u = t; State.dirtyH[h.id] = 1; } });
       }
 
       // Les suppressions parties au serveur n'ont plus besoin d'occuper le
@@ -1279,16 +1913,161 @@
     setInterval(() => { if (!document.hidden) Sync.schedule(0); }, 60000);
   }
 
+  /* =========================================================================
+     Visite guidee : explique chaque onglet a la premiere ouverture. Elle
+     bascule sur l'onglet concerne et met en evidence la zone decrite.
+     Relancable avec le bouton « ? » de l'en-tete.
+     ========================================================================= */
+  const VKEY = "trak.visite.v1";
+  const VISITE = [
+    { tab: "today", titre: "Bienvenue sur Trak",
+      texte: "Trak vous aide à tenir vos habitudes, un jour après l'autre. Voici un petit tour des écrans : une minute, pas plus." },
+    { tab: "today", cible: "#view-today .today-grid > div:first-child", titre: "Aujourd'hui",
+      texte: "Cochez le rond d'une habitude dès qu'elle est faite. « + note » garde un mot sur la journée. Sous chaque habitude s'affiche votre série : le nombre de jours d'affilée." },
+    { tab: "today", cible: "#mascotte-carte", titre: "Votre mascotte",
+      texte: "Elle dort tant que rien n'est coché, sourit quand vous avancez et jubile quand la journée est complète. Vos meilleures séries lui débloquent des couleurs et des accessoires : bouton « Personnaliser »." },
+    { tab: "week", cible: "#view-week .week-table-wrap", titre: "Semaine",
+      texte: "Toute la semaine d'un coup d'œil. Une case oubliée ? Cliquez-la pour cocher un jour passé. Les flèches remontent aux semaines précédentes." },
+    { tab: "year", cible: "#view-year .year-card", titre: "Année",
+      texte: "Une case par jour : plus le vert est foncé, plus la journée était remplie. En dessous, la série en cours et le record de chaque habitude." },
+    { tab: "manage", cible: "#view-manage .manage-wrap", titre: "Habitudes",
+      texte: "Ajoutez, renommez ou supprimez vos habitudes, et réglez combien de jours par semaine vous visez pour chacune." },
+    { tab: "today", cible: "#account-btn", titre: "Sur tous vos appareils",
+      texte: "Facultatif : avec un compte, vos habitudes se synchronisent entre téléphone et ordinateur. Sans compte, tout reste dans ce navigateur." },
+    { tab: "today", cible: "#aide-btn", titre: "C'est parti !",
+      texte: "Ce bouton relance cette visite quand vous voulez." }
+  ];
+  const Visite = { i: -1 };
+
+  function visiteActive() { return Visite.i >= 0; }
+
+  function lancerVisite() {
+    if (isModalOpen()) closeAccount();
+    if (isMascotteOuverte()) fermerMascotte();
+    document.getElementById("visite").hidden = false;
+    allerEtape(0);
+  }
+
+  function finirVisite() {
+    Visite.i = -1;
+    document.getElementById("visite").hidden = true;
+    try { localStorage.setItem(VKEY, "1"); } catch (e) { /* stockage indisponible */ }
+    State.tab = "today"; renderTabs();
+    window.scrollTo(0, 0);
+    document.getElementById("aide-btn").focus();
+  }
+
+  function allerEtape(i) {
+    Visite.i = i;
+    const e = VISITE[i];
+    if (State.tab !== e.tab) { State.tab = e.tab; renderTabs(); }
+    const der = i === VISITE.length - 1;
+    const points = VISITE.map((_, k) => `<span class="${k === i ? "actif" : ""}"></span>`).join("");
+    const t = tenueEffective(etatMascotte().record);
+    const bulle = document.getElementById("visite-bulle");
+    bulle.innerHTML = `
+      ${e.cible ? "" : mascotteSVG({ humeur: "ravie", couleur: t.couleur.id, accessoire: t.accessoire.id, taille: 84, decoratif: true })}
+      <p class="visite-etape">${i === 0 ? "Visite guidée" : `Étape ${i} sur ${VISITE.length - 1}`}</p>
+      <h2 id="visite-titre">${esc(e.titre)}</h2>
+      <p class="visite-texte">${esc(e.texte)}</p>
+      <div class="visite-points" aria-hidden="true">${points}</div>
+      <div class="visite-actions">
+        ${der ? "" : `<button type="button" class="btn btn-ghost" data-v="passer">Passer</button>`}
+        <span class="spacer"></span>
+        ${i > 0 ? `<button type="button" class="btn" data-v="prec">Précédent</button>` : ""}
+        <button type="button" class="btn btn-primary" data-v="suiv">${i === 0 ? "C'est parti" : der ? "Terminer" : "Suivant"}</button>
+      </div>`;
+    const cible = e.cible && document.querySelector(e.cible);
+    // Sur telephone la bulle occupe le bas de l'ecran : on remonte la zone en haut.
+    if (cible) cible.scrollIntoView({ block: window.innerWidth <= 560 ? "start" : "center", behavior: "instant" });
+    else window.scrollTo(0, 0);
+    placerVisite();
+    bulle.querySelector('[data-v="suiv"]').focus();
+  }
+
+  // Place le trou sur la cible et la bulle dessous, sinon dessus, sinon en bas.
+  function placerVisite() {
+    if (!visiteActive()) return;
+    const e = VISITE[Visite.i];
+    const fond = document.getElementById("visite");
+    const trou = document.getElementById("visite-trou");
+    const bulle = document.getElementById("visite-bulle");
+    const cible = e.cible && document.querySelector(e.cible);
+    const r = cible ? cible.getBoundingClientRect() : null;
+    const vw = window.innerWidth, vh = window.innerHeight;
+    const sansCible = !r || !r.width;
+    fond.classList.toggle("sans-cible", sansCible);
+    if (sansCible) {
+      bulle.style.left = Math.max(16, (vw - bulle.offsetWidth) / 2) + "px";
+      bulle.style.top = Math.max(16, (vh - bulle.offsetHeight) / 2) + "px";
+      return;
+    }
+    const m = 8;
+    const top = Math.max(r.top - m, 4), bas = Math.min(r.bottom + m, vh - 4);
+    trou.style.left = (r.left - m) + "px";
+    trou.style.top = top + "px";
+    trou.style.width = (r.width + 2 * m) + "px";
+    trou.style.height = Math.max(0, bas - top) + "px";
+    const bw = bulle.offsetWidth, bh = bulle.offsetHeight, ecart = 14;
+    const auMilieu = Math.min(Math.max(16, r.left + r.width / 2 - bw / 2), vw - bw - 16);
+    const enFace = Math.min(Math.max(8, top), vh - bh - 8);
+    let x = auMilieu, y;
+    if (bas + ecart + bh <= vh - 8) y = bas + ecart;
+    else if (top - ecart - bh >= 8) y = top - ecart - bh;
+    // Zone trop haute pour loger la bulle dessus ou dessous : on la met a cote.
+    else if (r.right + m + ecart + bw <= vw - 16) { x = r.right + m + ecart; y = enFace; }
+    else if (r.left - m - ecart - bw >= 16) { x = r.left - m - ecart - bw; y = enFace; }
+    else y = Math.max(8, vh - bh - 16);
+    bulle.style.left = x + "px";
+    bulle.style.top = y + "px";
+  }
+
+  function wireVisite() {
+    document.getElementById("aide-btn").addEventListener("click", lancerVisite);
+    const bulle = document.getElementById("visite-bulle");
+    bulle.addEventListener("click", (ev) => {
+      const b = ev.target.closest("[data-v]");
+      if (!b) return;
+      if (b.dataset.v === "passer") finirVisite();
+      else if (b.dataset.v === "prec") allerEtape(Visite.i - 1);
+      else if (Visite.i === VISITE.length - 1) finirVisite();
+      else allerEtape(Visite.i + 1);
+    });
+    document.addEventListener("keydown", (ev) => {
+      if (!visiteActive()) return;
+      if (ev.key === "Escape") { ev.preventDefault(); finirVisite(); return; }
+      if (ev.key === "ArrowRight" && Visite.i < VISITE.length - 1) { ev.preventDefault(); allerEtape(Visite.i + 1); return; }
+      if (ev.key === "ArrowLeft" && Visite.i > 0) { ev.preventDefault(); allerEtape(Visite.i - 1); return; }
+      if (ev.key !== "Tab") return;
+      // Le focus reste dans la bulle tant que la visite est ouverte.
+      const f = Array.from(bulle.querySelectorAll("button"));
+      const dedans = bulle.contains(document.activeElement);
+      if (ev.shiftKey && (!dedans || document.activeElement === f[0])) { ev.preventDefault(); f[f.length - 1].focus(); }
+      else if (!ev.shiftKey && (!dedans || document.activeElement === f[f.length - 1])) { ev.preventDefault(); f[0].focus(); }
+    });
+    let attente = 0;
+    const replacer = () => { cancelAnimationFrame(attente); attente = requestAnimationFrame(placerVisite); };
+    window.addEventListener("resize", replacer);
+    window.addEventListener("scroll", replacer, { passive: true });
+  }
+
   document.querySelectorAll(".tabs .btn").forEach((b) => {
     b.addEventListener("click", () => { State.tab = b.dataset.tab; renderTabs(); });
   });
 
   load();
+  chargerMascotte();
   loadAccount();
   renderAll();
   wireAccount();
+  wireMascotte();
+  wireVisite();
   renderAccountButton();
   if (Account.token) Sync.run();
+  // Premiere ouverture sur cet appareil : la visite se lance d'elle-meme.
+  let visiteVue = true;
+  try { visiteVue = localStorage.getItem(VKEY) === "1"; } catch (e) { /* stockage indisponible */ }
+  if (!visiteVue) lancerVisite();
 })();
 </script>
 </body>
