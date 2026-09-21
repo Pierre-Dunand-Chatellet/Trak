@@ -1,5 +1,7 @@
 # Trak
 
+![Aperçu du projet](Image/apercu.webp)
+
 Suivi d'habitudes quotidien : un compte, plusieurs appareils, les mêmes données partout.
 Fonctionne hors ligne et se resynchronise au retour du réseau. Je l'utilise tous les jours —
 c'est d'ailleurs pour ça qu'il existe.
