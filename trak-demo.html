@@ -4,20 +4,26 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Trak — suivi d'habitudes</title>
+<meta name="description" content="Démonstration de Trak, application de suivi d'habitudes : cochez vos journées, suivez vos séries et vos records.">
+<link rel="icon" type="image/svg+xml" href="Image/favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="Image/favicon-32.png">
+<link rel="apple-touch-icon" href="Image/apple-touch-icon.png">
+<meta name="theme-color" content="#e7e2d7">
 <link rel="stylesheet" href="fonts/fonts.css">
 <style>
+  /* Trak — même famille que le portfolio (papier / encre, Syne, Geist, JetBrains Mono) ; la mascotte et ses couleurs restent à Trak. */
   :root {
-    --color-bg: #faf7f0;
-    --color-text: #2b2620;
-    --color-neutral-100: #ffffff;
-    --color-neutral-200: #f1ece2;
-    --color-neutral-300: #e4dcce;
-    --color-neutral-400: #cfc4ae;
-    --color-neutral-600: #8a7f6c;
-    --color-neutral-700: #675e4e;
+    --color-bg: #e7e2d7;           /* papier */
+    --color-text: #16130f;         /* encre */
+    --color-neutral-100: #f3efe6;  /* surfaces : cartes, champs, boutons */
+    --color-neutral-200: #ddd7ca;
+    --color-neutral-300: #cdc6b5;
+    --color-neutral-400: #857e6e;  /* bordures des boutons et champs : 3,1:1 sur le papier */
+    --color-neutral-600: #5f5849;  /* texte discret : 5,5:1 sur le papier */
+    --color-neutral-700: #4a4438;
     --color-accent-200: #ffe3b0;
     --color-accent-500: #e79a3a;
-    --color-accent-700: #a6641a;
+    --color-accent-700: #8a4f10;  /* orange foncé pour le texte : 5,1:1 sur le papier */
     --color-accent2-200: #d9ecd3;
     --color-accent2-300: #bfe0b4;
     --color-accent2-400: #9ed08d;
@@ -25,12 +31,13 @@
     --color-accent2-600: #58994a;
     --color-accent2-800: #315e2c;
     --color-accent2-900: #21401e;
-    --color-empty-grey: #d6d6d6;
-    --color-future-beige: #f1ece2;
-    --radius-lg: 18px;
-    --shadow-sm: 0 1px 2px rgba(43,38,32,.06), 0 1px 8px rgba(43,38,32,.05);
-    --font-heading: "Caprasimo", serif;
-    --font-body: "Figtree", system-ui, sans-serif;
+    --color-empty-grey: #cfc8b8;
+    --color-future-beige: #ddd7ca;
+    --radius-lg: 10px;
+    --shadow-sm: 0 1px 2px rgba(22,19,15,.07), 0 1px 8px rgba(22,19,15,.05);
+    --font-heading: "Syne", "Helvetica Neue", Arial, sans-serif;
+    --font-body: "Geist", system-ui, sans-serif;
+    --font-mono: "JetBrains Mono", ui-monospace, monospace;
   }
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; }
@@ -52,43 +59,45 @@
   }
   .brand { display: flex; align-items: center; gap: 10px; margin-right: auto; }
   .brand .dot { width: 30px; height: 30px; border-radius: 999px; background: var(--color-accent2-500); flex: none; }
-  .brand span { font-family: var(--font-heading); font-size: 20px; letter-spacing: -0.02em; }
+  .brand span { font-family: var(--font-heading); font-weight: 800; font-size: 19px; letter-spacing: .04em; text-transform: uppercase; }
 
   nav.tabs { display: flex; flex-wrap: wrap; gap: 8px; }
   .btn {
-    font-family: var(--font-body); font-size: 13px; font-weight: 600;
+    font-family: var(--font-mono); font-size: 11px; font-weight: 400; letter-spacing: .12em; text-transform: uppercase;
     border: 1px solid var(--color-neutral-400); background: var(--color-neutral-100);
-    color: var(--color-text); border-radius: 999px; padding: 9px 16px;
+    color: var(--color-text); border-radius: 999px; padding: 11px 16px;
     cursor: pointer; transition: background .15s, border-color .15s, color .15s;
   }
   .btn:hover { background: var(--color-accent-200); border-color: var(--color-accent-200); }
   .btn.active { background: var(--color-text); border-color: var(--color-text); color: var(--color-neutral-100); }
   .btn-primary {
-    background: var(--color-accent2-500); border-color: var(--color-accent2-600); color: #fff;
+    background: var(--color-accent2-500); border-color: var(--color-accent2-600); color: var(--color-text);
   }
   .btn-primary:hover { background: var(--color-accent2-600); }
-  .btn-ghost { border: none; background: none; padding: 8px 10px; }
+  .btn-ghost { border: none; background: none; padding: 10px 10px; }
   .btn-ghost:hover { background: var(--color-accent-200); }
 
-  .divider { height: 1px; background: var(--color-neutral-300); margin-bottom: 30px; }
+  .divider { height: 2px; background: var(--color-text); margin-bottom: 30px; }
 
   .input {
     font-family: var(--font-body); font-size: 14px; border: 1px solid var(--color-neutral-400);
     border-radius: 999px; padding: 10px 16px; background: var(--color-neutral-100); color: var(--color-text);
   }
-  .input:focus { outline: 2px solid var(--color-accent2-400); outline-offset: 1px; }
+  .input:focus { outline: 2px solid var(--color-accent2-800); outline-offset: 1px; }
   /* Focus clavier visible sur les boutons, liens et cases (pas au clic souris). */
-  :focus-visible { outline: 2px solid var(--color-accent2-600); outline-offset: 2px; }
+  :focus-visible { outline: 2px solid var(--color-accent2-800); outline-offset: 2px; }
 
   .card {
     background: var(--color-neutral-100); border-radius: var(--radius-lg);
     box-shadow: var(--shadow-sm); padding: 20px 22px;
   }
+  .card, .habit-row, .mascotte-card, .note-card, .streak-card, .manage-row, .modal, .visite-bulle { border: 1px solid var(--color-neutral-300); }
 
   /* ---- Today ---- */
   .today-grid { display: grid; grid-template-columns: minmax(0,1.55fr) minmax(0,1fr); gap: 40px; align-items: start; }
-  .eyebrow { margin: 0; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--color-neutral-600); }
-  h1.big { font-family: var(--font-body); font-size: 36px; margin: 6px 0 4px; font-weight: 700; }
+  .eyebrow { margin: 0; font-family: var(--font-mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--color-neutral-600); }
+  h1.big, h1.num { font-family: var(--font-body); font-weight: 700; letter-spacing: -0.02em; text-transform: none; }
+  h1.big { font-size: 34px; margin: 6px 0 4px; }
   .summary { font-size: 15px; color: var(--color-neutral-700); margin: 0 0 24px; }
 
   .habit-row { background: var(--color-neutral-100); border-radius: var(--radius-lg); padding: 14px 18px; box-shadow: var(--shadow-sm); margin-bottom: 12px; }
@@ -99,7 +108,7 @@
     font-size: 15px; border: 1px solid var(--color-neutral-400); background: transparent; color: transparent;
     transition: background .15s, border-color .15s;
   }
-  .check.done { background: var(--color-accent2-500); border-color: var(--color-accent2-600); color: #fff; }
+  .check.done { background: var(--color-accent2-500); border-color: var(--color-accent2-600); color: var(--color-accent2-900); }
   .habit-name { font-size: 16px; font-weight: 600; line-height: 1.3; }
   .habit-meta { font-size: 13px; color: var(--color-neutral-600); margin-top: 2px; }
   .note-toggle { margin-left: auto; white-space: nowrap; }
@@ -108,7 +117,7 @@
   aside.side { display: flex; flex-direction: column; gap: 16px; position: sticky; top: 20px; }
   .stat-card { background: var(--color-accent2-200); border-radius: var(--radius-lg); padding: 22px 24px; }
   .stat-card .eyebrow { color: var(--color-accent2-800); }
-  .stat-card .big-num { font-family: var(--font-heading); font-size: 46px; line-height: 1; margin-top: 8px; color: var(--color-accent2-900); }
+  .stat-card .big-num { font-family: var(--font-body); font-weight: 700; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; font-size: 46px; line-height: 1; margin-top: 8px; color: var(--color-accent2-900); }
 
   .goal-item { margin-bottom: 14px; }
   .goal-item:last-child { margin-bottom: 0; }
@@ -127,7 +136,7 @@
     gap: 8px; align-items: center; min-width: 600px;
   }
   .week-table .colhead { text-align: center; }
-  .week-table .colhead .dow { font-size: 10px; letter-spacing: .06em; text-transform: uppercase; color: var(--color-neutral-600); }
+  .week-table .colhead .dow { font-family: var(--font-mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--color-neutral-600); }
   .week-table .colhead .daynum { font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; }
   .week-table .rowname { font-size: 14px; font-weight: 600; padding-right: 6px; }
   .week-table .total { text-align: right; font-size: 13px; font-variant-numeric: tabular-nums; color: var(--color-neutral-700); }
@@ -135,12 +144,12 @@
     width: 38px; height: 38px; border-radius: 999px; border: 1px solid var(--color-neutral-400);
     background: transparent; color: transparent; cursor: pointer; font-size: 14px;
   }
-  .week-cell.done { background: var(--color-accent2-500); border-color: var(--color-accent2-600); color: #fff; }
+  .week-cell.done { background: var(--color-accent2-500); border-color: var(--color-accent2-600); color: var(--color-accent2-900); }
   .week-cell.future { border-style: dashed; border-color: var(--color-neutral-300); cursor: default; }
   .week-hint { font-size: 13px; color: var(--color-neutral-600); margin-top: 12px; }
 
   .note-card { background: var(--color-neutral-100); border-radius: var(--radius-lg); padding: 14px 18px; box-shadow: var(--shadow-sm); display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: baseline; margin-bottom: 10px; }
-  .note-when { font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--color-neutral-600); min-width: 100px; }
+  .note-when { font-family: var(--font-mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--color-neutral-600); min-width: 100px; }
   .note-name { font-size: 14px; font-weight: 600; }
   .note-text { font-size: 14px; color: var(--color-neutral-700); flex: 1; min-width: 180px; }
 
@@ -148,7 +157,7 @@
   .year-card { padding: 24px; overflow-x: auto; }
   .year-inner { min-width: 760px; }
   .month-row { display: flex; gap: 3px; margin-bottom: 6px; }
-  .month-label { width: 12px; font-size: 10px; color: var(--color-neutral-600); white-space: nowrap; overflow: visible; }
+  .month-label { width: 12px; font-family: var(--font-mono); font-size: 11px; color: var(--color-neutral-600); white-space: nowrap; overflow: visible; }
   .year-grid { display: flex; gap: 3px; }
   .year-col { display: flex; flex-direction: column; gap: 3px; }
   .year-cell { width: 12px; height: 12px; border-radius: 4px; background: var(--color-neutral-200); }
@@ -159,7 +168,7 @@
   .streak-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px,1fr)); gap: 14px; margin-top: 20px; }
   .streak-card { background: var(--color-neutral-100); border-radius: var(--radius-lg); padding: 18px 20px; box-shadow: var(--shadow-sm); }
   .streak-card .name { font-size: 14px; font-weight: 600; }
-  .streak-card .num { font-family: var(--font-heading); font-size: 30px; line-height: 1.1; margin-top: 6px; color: var(--color-accent-700); }
+  .streak-card .num { font-family: var(--font-body); font-weight: 700; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; font-size: 30px; line-height: 1.1; margin-top: 6px; color: var(--color-accent-700); }
   .streak-card .detail { font-size: 12px; color: var(--color-neutral-600); }
 
   /* ---- Manage ---- */
@@ -172,7 +181,12 @@
   .manage-add .input { flex: 1; min-width: 180px; }
   .reset-link { margin-top: 24px; }
 
-  h1, h2 { font-weight: 700; }
+  .pied { display: flex; flex-wrap: wrap; gap: 4px 24px; margin-top: 56px; padding-top: 14px; border-top: 1px solid var(--color-neutral-300);
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; }
+  .pied a { color: var(--color-neutral-700); text-underline-offset: 3px; padding: 7px 0; }
+  .pied a:hover { color: var(--color-accent-700); }
+
+  h1, h2 { font-family: var(--font-heading); font-weight: 800; letter-spacing: -0.02em; text-transform: uppercase; line-height: 1.08; }
   h1 { font-size: 30px; margin: 0 0 4px; }
   h2 { font-size: 20px; margin: 34px 0 14px; }
   p { line-height: 1.5; }
@@ -185,16 +199,21 @@
   }
   @media (max-width: 560px) {
     .wrap { padding: 0 14px 60px; }
-    header.app-header { padding: 20px 0 16px; }
-    .btn { font-size: 12px; padding: 7px 12px; }
-    h1.big, h1 { font-size: 26px; }
+    header.app-header { padding: 20px 0 16px; gap: 12px 10px; }
+    #account-btn { order: 2; }
+    #aide-btn { order: 3; }
+    nav.tabs { order: 4; width: 100%; gap: 6px; }
+    nav.tabs .btn { flex: 1 1 auto; padding: 10px 8px; letter-spacing: .05em; }
+    .account-btn .who { max-width: 112px; }
+    .btn { padding: 9px 12px; letter-spacing: .1em; }
+    h1.big, h1 { font-size: 24px; }
     .habit-row, .card { padding: 14px 16px; }
     .week-table { grid-template-columns: minmax(80px,1fr) repeat(7, 30px); min-width: 0; }
     .week-table .total { display: none; }
     .week-cell { width: 28px; height: 28px; font-size: 12px; }
     .year-inner { min-width: 560px; }
     .year-cell { width: 9px; height: 9px; }
-    .month-label { width: 9px; font-size: 8px; }
+    .month-label { width: 9px; font-size: 11px; }
   }
 </style>
 </head>
@@ -218,6 +237,11 @@
   <section id="view-year" style="display:none"></section>
   <section id="view-manage" style="display:none"></section>
 
+  <footer class="pied">
+    <a href="https://dunandchatellet.fr/">← dunandchatellet.fr</a>
+    <a href="https://dunandchatellet.fr/mentions-legales.html">Mentions légales</a>
+  </footer>
+
 </div>
 
 <script>
@@ -225,12 +249,11 @@
   "use strict";
 
   const DEFAULT_HABITS = [
-    { id: "douche", name: "Douche", goal: 7, p: 0.94 },
-    { id: "boire", name: "Boire", goal: 7, p: 0.82 },
-    { id: "dents", name: "Brosser les dents", goal: 7, p: 0.9 },
-    { id: "sport", name: "Faire du sport", goal: 4, p: 0.45 },
-    { id: "coder", name: "Coder", goal: 5, p: 0.68 },
-    { id: "travailler", name: "Travailler", goal: 5, p: 0.74 }
+    { id: "eau", name: "Boire de l'eau", goal: 7, p: 0.88 },
+    { id: "lecture", name: "Lire 10 minutes", goal: 5, p: 0.7 },
+    { id: "sport", name: "Faire du sport", goal: 3, p: 0.45 },
+    { id: "marche", name: "Marcher 30 minutes", goal: 5, p: 0.62 },
+    { id: "sommeil", name: "Se coucher avant 23 h", goal: 5, p: 0.55 }
   ];
   const DOW = ["lun", "mar", "mer", "jeu", "ven", "sam", "dim"];
   const DOW_LONG = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"];
@@ -461,7 +484,7 @@
 
     el.innerHTML = `
       <div class="week-head-row">
-        <h1>${esc(weekLabel)}</h1>
+        <h1${State.weekOffset === 0 ? "" : ' class="num"'}>${esc(weekLabel)}</h1>
         <div style="display:flex;gap:8px">
           <button type="button" class="btn" data-action="week-prev">← Précédente</button>
           <button type="button" class="btn" data-action="week-next">Suivante →</button>
@@ -534,7 +557,7 @@
       </div>`).join("");
 
     el.innerHTML = `
-      <h1>${year}</h1>
+      <h1 class="num">${year}</h1>
       <p class="p-muted">${full} jours parfaits en ${year}.</p>
       <div class="card year-card">
         <div class="year-inner">
