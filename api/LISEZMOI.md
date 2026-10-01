@@ -37,7 +37,7 @@ data/
 ├── .htaccess          refus d'accès web
 ├── .lock              verrou
 ├── users.php          adresse e-mail -> identifiant, empreinte du mot de passe
-├── sessions.php       jeton -> appareil
+├── sessions.php       empreinte sha256 du jeton -> appareil (jamais le jeton lui-même)
 ├── attempts.php       tentatives de connexion ratées (anti-force brute)
 └── user-<id>.php      les habitudes et les jours cochés d'un compte
 ```
@@ -107,8 +107,8 @@ HTTP cohérent. Le code `unauthorized` déconnecte l'appareil côté application
 ## Sécurité
 
 - Mots de passe hachés avec `password_hash` (bcrypt), jamais stockés en clair.
-- Jetons de session de 256 bits, valables un an, révocables depuis le panneau Compte.
-- Connexion limitée à 10 tentatives ratées par quart d'heure et par IP ou par adresse e-mail.
+- Jetons de session de 256 bits, valables un an, révocables depuis le panneau Compte. Le serveur n'en garde que l'empreinte (sha256, clé `h:<empreinte>`) : une fuite de `sessions.php` ne donne aucune session utilisable. Les sessions créées avant ce changement (jeton en clair) sont converties toutes ensemble à la première lecture, sans déconnecter personne.
+- Connexion limitée à 20 tentatives ratées par quart d'heure et par IP (pas par adresse e-mail : un tiers ne peut pas verrouiller un compte à distance). Inscriptions : 3 par heure et par IP, comptées à part dans `registers.php`.
 - Le message d'erreur de connexion ne distingue pas « compte inconnu » de « mauvais mot de passe ».
 - Changer son mot de passe déconnecte les autres appareils.
 

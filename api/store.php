@@ -134,10 +134,43 @@ function userSetPassword(string $email, string $hash): void {
 }
 
 // --- Sessions ----------------------------------------------------------------
+// Le jeton ne vit que chez l'appareil. Le serveur n'en garde que l'empreinte (sha256) : une fuite de
+// sessions.php (sauvegarde, dossier mal protege) ne donne aucune session utilisable. Le jeton a 256
+// bits au hasard : un simple sha256 suffit, inutile d'un hachage lent comme pour un mot de passe.
+// Les cles hachees portent le prefixe "h:". Les sessions creees avant ce changement (jeton en clair)
+// sont converties une seule fois, sous verrou, a la premiere lecture : personne n'est deconnecte.
+const SESSION_PREFIX = 'h:';
+
+function sessionKey(string $token): string {
+    return SESSION_PREFIX . hash('sha256', $token);
+}
+
+/** @return array<string,array> empreinte du jeton => session (convertit au passage les anciennes) */
+function sessionsRead(): array {
+    $sessions = storeRead('sessions');
+    foreach (array_keys($sessions) as $key) {
+        if (strncmp((string) $key, SESSION_PREFIX, strlen(SESSION_PREFIX)) !== 0) return sessionsMigrate();
+    }
+    return $sessions;
+}
+
+function sessionsMigrate(): array {
+    return withLock(function () {
+        $old = storeRead('sessions');
+        $new = [];
+        foreach ($old as $key => $s) {
+            $key = (string) $key;
+            $new[strncmp($key, SESSION_PREFIX, strlen(SESSION_PREFIX)) === 0 ? $key : sessionKey($key)] = $s;
+        }
+        if ($new !== $old) storeWrite('sessions', $new);
+        return $new;
+    });
+}
+
 function sessionCreate(string $token, array $user, string $label): void {
     withLock(function () use ($token, $user, $label) {
-        $sessions = storeRead('sessions');
-        $sessions[$token] = [
+        $sessions = sessionsRead();
+        $sessions[sessionKey($token)] = [
             'id'         => $user['id'],
             'email'      => $user['email'],
             'label'      => $label,
@@ -149,49 +182,54 @@ function sessionCreate(string $token, array $user, string $label): void {
 }
 
 function sessionGet(string $token): ?array {
-    $sessions = storeRead('sessions');
-    return isset($sessions[$token]) && is_array($sessions[$token]) ? $sessions[$token] : null;
+    $sessions = sessionsRead();
+    $key = sessionKey($token);
+    return isset($sessions[$key]) && is_array($sessions[$key]) ? $sessions[$key] : null;
 }
 
 /** Ne reecrit le fichier que si la derniere visite date de plus d'une minute. */
 function sessionTouch(string $token): void {
-    $sessions = storeRead('sessions');
-    if (!isset($sessions[$token])) return;
-    if (time() - (int) ($sessions[$token]['last_seen'] ?? 0) < 60) return;
+    $key = sessionKey($token);
+    $sessions = sessionsRead();
+    if (!isset($sessions[$key])) return;
+    if (time() - (int) ($sessions[$key]['last_seen'] ?? 0) < 60) return;
 
-    withLock(function () use ($token) {
-        $sessions = storeRead('sessions');
-        if (!isset($sessions[$token])) return;
-        $sessions[$token]['last_seen'] = time();
+    withLock(function () use ($key) {
+        $sessions = sessionsRead();
+        if (!isset($sessions[$key])) return;
+        $sessions[$key]['last_seen'] = time();
         storeWrite('sessions', $sessions);
     });
 }
 
 function sessionDelete(string $token): void {
-    withLock(function () use ($token) {
-        $sessions = storeRead('sessions');
-        if (!isset($sessions[$token])) return;
-        unset($sessions[$token]);
+    $key = sessionKey($token);
+    withLock(function () use ($key) {
+        $sessions = sessionsRead();
+        if (!isset($sessions[$key])) return;
+        unset($sessions[$key]);
         storeWrite('sessions', $sessions);
     });
 }
 
-/** @return array<string,array> jeton => session */
+/** @return array<string,array> empreinte du jeton => session */
 function sessionsOfUser(string $userId): array {
     $out = [];
-    foreach (storeRead('sessions') as $token => $s) {
-        if (is_array($s) && ($s['id'] ?? '') === $userId) $out[$token] = $s;
+    foreach (sessionsRead() as $key => $s) {
+        if (is_array($s) && ($s['id'] ?? '') === $userId) $out[$key] = $s;
     }
     return $out;
 }
 
+/** $keep = le jeton (en clair) de l'appareil a garder. */
 function sessionsDeleteOthers(string $userId, string $keep): int {
-    return withLock(function () use ($userId, $keep) {
-        $sessions = storeRead('sessions');
+    $keepKey = sessionKey($keep);
+    return withLock(function () use ($userId, $keepKey) {
+        $sessions = sessionsRead();
         $n = 0;
-        foreach ($sessions as $token => $s) {
-            if (is_array($s) && ($s['id'] ?? '') === $userId && !hash_equals($keep, (string) $token)) {
-                unset($sessions[$token]);
+        foreach ($sessions as $key => $s) {
+            if (is_array($s) && ($s['id'] ?? '') === $userId && !hash_equals($keepKey, (string) $key)) {
+                unset($sessions[$key]);
                 $n++;
             }
         }
@@ -201,11 +239,14 @@ function sessionsDeleteOthers(string $userId, string $keep): int {
 }
 
 // --- Tentatives de connexion -------------------------------------------------
-function attemptsCount(string $ip, string $email, int $since): int {
+// Echecs de connexion recents pour CETTE IP seulement. Compter aussi par e-mail
+// permettait a un tiers connaissant l'adresse de verrouiller le compte a distance
+// (10 tentatives ratees suffisaient a bloquer la victime, meme depuis d'autres IP).
+function attemptsCount(string $ip, int $since): int {
     $n = 0;
     foreach (storeRead('attempts') as $a) {
         if (!is_array($a) || (int) ($a['at'] ?? 0) < $since) continue;
-        if (($a['ip'] ?? '') === $ip || ($a['email'] ?? '') === $email) $n++;
+        if (($a['ip'] ?? '') === $ip) $n++;
     }
     return $n;
 }
@@ -217,7 +258,7 @@ function attemptAdd(string $ip, string $email, int $since): void {
             if (is_array($a) && (int) ($a['at'] ?? 0) >= $since) $kept[] = $a;
         }
         $kept[] = ['ip' => $ip, 'email' => $email, 'at' => time()];
-        storeWrite('attempts', array_slice($kept, -200));
+        storeWrite('attempts', array_slice($kept, -500));
     });
 }
 
@@ -240,11 +281,13 @@ function userCount(): int {
     return count(storeRead('users'));
 }
 
+// Inscriptions comptees dans leur propre fichier : une rafale d'echecs de connexion ne
+// peut plus evincer ces enregistrements et diluer la limite de 3 inscriptions par heure.
 function registerCount(string $ip, int $since): int {
     $n = 0;
-    foreach (storeRead('attempts') as $a) {
+    foreach (storeRead('registers') as $a) {
         if (!is_array($a) || (int) ($a['at'] ?? 0) < $since) continue;
-        if (($a['kind'] ?? '') === 'register' && ($a['ip'] ?? '') === $ip) $n++;
+        if (($a['ip'] ?? '') === $ip) $n++;
     }
     return $n;
 }
@@ -252,11 +295,11 @@ function registerCount(string $ip, int $since): int {
 function registerRecord(string $ip, int $since): void {
     withLock(function () use ($ip, $since) {
         $kept = [];
-        foreach (storeRead('attempts') as $a) {
+        foreach (storeRead('registers') as $a) {
             if (is_array($a) && (int) ($a['at'] ?? 0) >= $since) $kept[] = $a;
         }
-        $kept[] = ['kind' => 'register', 'ip' => $ip, 'email' => '', 'at' => time()];
-        storeWrite('attempts', array_slice($kept, -200));
+        $kept[] = ['ip' => $ip, 'at' => time()];
+        storeWrite('registers', array_slice($kept, -200));
     });
 }
 

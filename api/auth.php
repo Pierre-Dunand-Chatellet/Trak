@@ -114,12 +114,13 @@ function devices(): void {
     $user = requireUser();
 
     $list = [];
-    foreach (sessionsOfUser($user['id']) as $token => $s) {
+    $mine = sessionKey($user['token']);
+    foreach (sessionsOfUser($user['id']) as $key => $s) {
         $list[] = [
             'label'   => (string) ($s['label'] ?? 'Appareil'),
             'since'   => (int) ($s['created_at'] ?? 0),
             'seen'    => (int) ($s['last_seen'] ?? 0),
-            'current' => hash_equals($user['token'], (string) $token),
+            'current' => hash_equals($mine, (string) $key),
         ];
     }
     usort($list, fn($a, $b) => $b['seen'] <=> $a['seen']);
@@ -162,7 +163,8 @@ function issueSession(array $user, bool $created): void {
 }
 
 function throttle(string $email): void {
-    if (attemptsCount(clientIp(), $email, time() - 900) >= 10) {
+    // Par IP : freine le devinage de mot de passe sans permettre de bloquer un compte a distance.
+    if (attemptsCount(clientIp(), time() - 900) >= 20) {
         fail('Trop de tentatives. Reessayez dans quelques minutes.', 429, 'throttled');
     }
 }
