@@ -312,14 +312,17 @@ function registerRecord(string $ip, int $since): void {
  * gagne. A egalite, la derniere arrivee gagne — c'est le meme comportement que
  * la version SQL de ce projet.
  *
- * @return array{habits:array,entries:array}
+ * Les chronos (temps de course) suivent la meme regle, temps par temps.
+ *
+ * @return array{habits:array,entries:array,times:array}
  */
-function syncMerge(string $userId, int $now, int $since, array $habits, array $entries): array {
-    return withLock(function () use ($userId, $now, $since, $habits, $entries) {
+function syncMerge(string $userId, int $now, int $since, array $habits, array $entries, array $times = []): array {
+    return withLock(function () use ($userId, $now, $since, $habits, $entries, $times) {
         $name = 'user-' . $userId;
         $data = storeRead($name);
         $H = isset($data['habits']) && is_array($data['habits']) ? $data['habits'] : [];
         $E = isset($data['entries']) && is_array($data['entries']) ? $data['entries'] : [];
+        $T = isset($data['times']) && is_array($data['times']) ? $data['times'] : [];
         $changed = false;
 
         foreach ($habits as $h) {
@@ -333,6 +336,7 @@ function syncMerge(string $userId, int $now, int $since, array $habits, array $e
             $H[$id] = [
                 'name' => mb_substr((string) ($h['name'] ?? ''), 0, 120),
                 'goal' => max(1, min(7, (int) ($h['goal'] ?? 5))),
+                'dist' => !empty($h['dist']) ? 1 : 0,
                 'pos'  => max(0, min(9999, (int) ($h['pos'] ?? 0))),
                 'del'  => !empty($h['del']) ? 1 : 0,
                 'cu'   => $cu,
@@ -355,6 +359,7 @@ function syncMerge(string $userId, int $now, int $since, array $habits, array $e
             $E[$k] = [
                 'done' => !empty($e['done']) ? 1 : 0,
                 'note' => mb_substr((string) ($e['note'] ?? ''), 0, 2000),
+                'm'    => max(0, min(100000, (int) ($e['m'] ?? 0))),
                 'del'  => !empty($e['del']) ? 1 : 0,
                 'cu'   => $cu,
                 'ua'   => $now,
@@ -362,8 +367,35 @@ function syncMerge(string $userId, int $now, int $since, array $habits, array $e
             $changed = true;
         }
 
+        foreach ($times as $t) {
+            if (!is_array($t)) continue;
+            $id = trim((string) ($t['id'] ?? ''));
+            if ($id === '' || strlen($id) > 64) continue;
+            $del = !empty($t['del']) ? 1 : 0;
+            $ev  = (string) ($t['ev'] ?? '');
+            $day = (string) ($t['d'] ?? '');
+            // Un temps supprime n'a plus besoin d'epreuve ni de date valides.
+            if (!$del && (!preg_match('/^[a-z0-9-]{1,20}$/', $ev) || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $day))) continue;
+
+            $cu = max(0, (int) ($t['u'] ?? 0));
+            if (isset($T[$id]) && $cu < (int) ($T[$id]['cu'] ?? 0)) continue;
+
+            $T[$id] = $del ? ['del' => 1, 'cu' => $cu, 'ua' => $now] : [
+                'ev'   => $ev,
+                'pool' => ((int) ($t['pool'] ?? 25)) === 50 ? 50 : 25,
+                't'    => max(1, min(360000, (int) ($t['t'] ?? 0))),   // centiemes, 1 h au plus
+                'd'    => $day,
+                'comp' => !empty($t['comp']) ? 1 : 0,
+                'lieu' => mb_substr((string) ($t['lieu'] ?? ''), 0, 120),
+                'del'  => 0,
+                'cu'   => $cu,
+                'ua'   => $now,
+            ];
+            $changed = true;
+        }
+
         if ($changed) {
-            storeWrite($name, ['habits' => $H, 'entries' => $E]);
+            storeWrite($name, ['habits' => $H, 'entries' => $E, 'times' => $T]);
         }
 
         // Tout ce qui a bouge depuis la derniere synchro de cet appareil.
@@ -374,6 +406,7 @@ function syncMerge(string $userId, int $now, int $since, array $habits, array $e
                 'id'   => (string) $id,
                 'name' => (string) ($h['name'] ?? ''),
                 'goal' => (int) ($h['goal'] ?? 5),
+                'dist' => (int) ($h['dist'] ?? 0),
                 'pos'  => (int) ($h['pos'] ?? 0),
                 'del'  => (int) ($h['del'] ?? 0),
                 'u'    => (int) ($h['cu'] ?? 0),
@@ -391,12 +424,29 @@ function syncMerge(string $userId, int $now, int $since, array $habits, array $e
                 'd'    => substr((string) $k, $sep + 1),
                 'done' => (int) ($e['done'] ?? 0),
                 'note' => (string) ($e['note'] ?? ''),
+                'm'    => (int) ($e['m'] ?? 0),
                 'del'  => (int) ($e['del'] ?? 0),
                 'u'    => (int) ($e['cu'] ?? 0),
             ];
         }
         usort($outE, fn($a, $b) => strcmp($a['d'], $b['d']));
 
-        return ['habits' => $outH, 'entries' => $outE];
+        $outT = [];
+        foreach ($T as $id => $t) {
+            if ((int) ($t['ua'] ?? 0) <= $since) continue;
+            $outT[] = [
+                'id'   => (string) $id,
+                'ev'   => (string) ($t['ev'] ?? ''),
+                'pool' => (int) ($t['pool'] ?? 25),
+                't'    => (int) ($t['t'] ?? 0),
+                'd'    => (string) ($t['d'] ?? ''),
+                'comp' => (int) ($t['comp'] ?? 0),
+                'lieu' => (string) ($t['lieu'] ?? ''),
+                'del'  => (int) ($t['del'] ?? 0),
+                'u'    => (int) ($t['cu'] ?? 0),
+            ];
+        }
+
+        return ['habits' => $outH, 'entries' => $outE, 'times' => $outT];
     });
 }

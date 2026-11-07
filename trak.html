@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Trak — suivi d'habitudes</title>
-<meta name="description" content="Trak, application de suivi d'habitudes : cochez vos journées, suivez vos séries et vos records, synchronisez vos appareils avec un compte.">
+<title>Trak — natation : habitudes et chronos</title>
+<meta name="description" content="Trak, carnet de natation : cochez vos séances, comptez les mètres nagés, notez vos chronos et suivez vos records personnels par épreuve, synchronisés entre vos appareils.">
 <!-- Icone : la mascotte (Image/favicon.svg), avec des PNG pour les navigateurs
      sans SVG et pour l'ecran d'accueil des iPhone. -->
 <link rel="icon" type="image/svg+xml" href="Image/favicon.svg">
@@ -13,10 +13,13 @@
 <meta name="theme-color" content="#e7e2d7">
 <link rel="canonical" href="https://dunandchatellet.fr/Trak/trak.html">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Trak — suivi d'habitudes">
-<meta property="og:description" content="Trak, application de suivi d'habitudes : cochez vos journées, suivez vos séries et vos records, synchronisez vos appareils avec un compte.">
+<meta property="og:title" content="Trak — natation : habitudes et chronos">
+<meta property="og:description" content="Trak, carnet de natation : cochez vos séances, comptez les mètres nagés, notez vos chronos et suivez vos records personnels par épreuve, synchronisés entre vos appareils.">
 <meta property="og:url" content="https://dunandchatellet.fr/Trak/trak.html">
-<meta property="og:image" content="https://dunandchatellet.fr/Trak/Image/apercu.webp">
+<meta property="og:image" content="https://dunandchatellet.fr/Trak/Image/apercu.jpg">
+<meta property="og:site_name" content="Pierre Dunand-Chatellet">
+<meta property="og:locale" content="fr_FR">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="fonts/fonts.css">
 <style>
   /* Trak — même famille que le portfolio (papier / encre, Syne, Geist, JetBrains Mono) ; la mascotte et ses couleurs restent à Trak. */
@@ -333,6 +336,70 @@
   .manage-add .input { flex: 1; min-width: 180px; }
   .reset-link { margin-top: 24px; }
 
+  .manage-dist { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--color-neutral-700); cursor: pointer; }
+  .manage-dist input { width: 16px; height: 16px; accent-color: var(--color-accent2-600); margin: 0; }
+
+  /* ---- Natation : metres d'une seance ---- */
+  .metres { display: inline-flex; align-items: center; gap: 6px; margin-top: 8px; font-size: 13px; color: var(--color-neutral-700); }
+  .metres .input { width: 96px; padding: 6px 12px; text-align: right; font-variant-numeric: tabular-nums; }
+  .stat-card + .stat-card { background: var(--color-accent-200); }
+  .stat-card + .stat-card .eyebrow { color: var(--color-accent-700); }
+  .stat-card + .stat-card .big-num { color: var(--color-text); }
+  .stat-card .stat-detail { font-size: 13px; margin: 8px 0 0; color: var(--color-neutral-700); }
+
+  /* ---- Chronos ---- */
+  .chrono-form { display: grid; grid-template-columns: minmax(0,1.6fr) minmax(0,.8fr) minmax(0,1fr) minmax(0,1.1fr); gap: 12px 14px; align-items: end; }
+  .chrono-form .field { margin: 0; }
+  .chrono-form .field-large { grid-column: span 3; }
+  .chrono-form select.input { appearance: none; -webkit-appearance: none; padding-right: 34px; cursor: pointer;
+    background-image: linear-gradient(45deg, transparent 50%, var(--color-text) 50%), linear-gradient(135deg, var(--color-text) 50%, transparent 50%);
+    background-position: calc(100% - 18px) 55%, calc(100% - 13px) 55%; background-size: 5px 5px; background-repeat: no-repeat; }
+  .chrono-form .chrono-actions { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+  .chrono-form .form-msg { margin: 0; }
+  .temps { font-variant-numeric: tabular-nums; }
+  .rp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px,1fr)); gap: 12px; }
+  .rp-card {
+    text-align: left; font: inherit; color: inherit; cursor: pointer; width: 100%;
+    background: var(--color-neutral-100); border: 1px solid var(--color-neutral-300); border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm); padding: 16px 18px; transition: border-color .15s, background .15s;
+  }
+  .rp-card:hover { border-color: var(--color-neutral-400); }
+  .rp-card.active { border-color: var(--color-accent2-600); box-shadow: inset 0 0 0 1px var(--color-accent2-600); background: var(--color-accent2-200); }
+  .rp-card .name { font-size: 14px; font-weight: 600; }
+  .rp-card .bassin { font-family: var(--font-mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--color-neutral-600); }
+  .rp-card .num { font-weight: 700; letter-spacing: -0.03em; font-size: 28px; line-height: 1.1; margin-top: 6px; color: var(--color-accent2-900); }
+  .rp-card .detail { font-size: 12px; color: var(--color-neutral-600); margin-top: 2px; }
+  .gain { color: var(--color-accent2-800); font-weight: 600; }
+  .perte { color: var(--color-accent-700); }
+  .courbe { position: relative; margin-top: 4px; }
+  .courbe svg { display: block; width: 100%; overflow: visible; }
+  .courbe .grille { stroke: var(--color-neutral-300); stroke-width: 1; }
+  .courbe .axe { font-family: var(--font-mono); font-size: 11px; fill: var(--color-neutral-600); }
+  .courbe .ligne { fill: none; stroke: var(--color-accent2-600); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+  .courbe .point { fill: var(--color-accent2-600); stroke: var(--color-neutral-100); stroke-width: 2; }
+  .courbe .point.rp { fill: var(--color-accent2-900); }
+  .courbe .cible { fill: transparent; cursor: pointer; }
+  .courbe .cible:focus { outline: none; }
+  .courbe .cible:focus-visible + .halo, .courbe .halo.on { opacity: 1; }
+  .courbe .halo { fill: none; stroke: var(--color-accent2-800); stroke-width: 2; opacity: 0; pointer-events: none; }
+  .bulle-courbe {
+    position: absolute; pointer-events: none; transform: translate(-50%, calc(-100% - 12px));
+    background: var(--color-text); color: var(--color-neutral-100); border-radius: 8px; padding: 7px 10px;
+    font-size: 12px; line-height: 1.35; white-space: nowrap; z-index: 2;
+  }
+  .bulle-courbe strong { font-size: 14px; font-variant-numeric: tabular-nums; }
+  .bulle-courbe[hidden] { display: none; }
+  .histo { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .histo th { text-align: left; font-family: var(--font-mono); font-size: 11px; font-weight: 400; letter-spacing: .1em; text-transform: uppercase; color: var(--color-neutral-600); padding: 0 10px 8px 0; }
+  .histo td { padding: 9px 10px 9px 0; border-top: 1px solid var(--color-neutral-200); vertical-align: middle; }
+  .histo td.temps { font-weight: 600; }
+  .histo .badge { display: inline-block; margin-left: 6px; font-family: var(--font-mono); font-size: 10px; letter-spacing: .08em; padding: 2px 6px; border-radius: 999px; background: var(--color-accent2-200); color: var(--color-accent2-900); vertical-align: 1px; }
+  .histo .btn-ghost { padding: 6px 8px; color: var(--color-accent-700); }
+  .histo-wrap { overflow-x: auto; }
+  .histo td { white-space: nowrap; }
+  .histo .ctx-mobile { display: none; font-size: 12px; color: var(--color-neutral-600); }
+  .chrono-form .input { height: 42px; }
+
   .pied { display: flex; flex-wrap: wrap; gap: 4px 24px; margin-top: 56px; padding-top: 14px; border-top: 1px solid var(--color-neutral-300);
     font-family: var(--font-mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; }
   .pied a { color: var(--color-neutral-700); text-underline-offset: 3px; padding: 7px 0; }
@@ -407,12 +474,21 @@
     header.app-header { padding: 20px 0 16px; gap: 12px 10px; }
     #account-btn { order: 2; }
     #aide-btn { order: 3; }
-    nav.tabs { order: 4; width: 100%; gap: 6px; }
-    nav.tabs .btn { flex: 1 1 auto; padding: 10px 8px; letter-spacing: .05em; }
+    /* Cinq onglets : trois puis deux sur toute la largeur, plutot qu'un orphelin en bas. */
+    nav.tabs { order: 4; width: 100%; gap: 6px; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); }
+    nav.tabs .btn { grid-column: span 2; padding: 10px 6px; letter-spacing: .05em; }
+    nav.tabs .btn:nth-child(n+4) { grid-column: span 3; }
     .account-btn .who { max-width: 112px; }
     .btn { padding: 9px 12px; letter-spacing: .1em; }
     h1.big, h1 { font-size: 24px; }
     .habit-row, .card { padding: 14px 16px; }
+    .chrono-form { grid-template-columns: 1fr 1fr; }
+    .chrono-form .field-large, .chrono-form .field-epreuve { grid-column: 1 / -1; }
+    .chrono-form .chrono-actions { grid-column: 1 / -1; }
+    /* Telephone : contexte replie sous la date, lieu masque (il reste dans la bulle de la courbe). */
+    .histo .col-lieu, .histo .col-ctx { display: none; }
+    .histo .ctx-mobile { display: block; }
+    .histo td, .histo th { padding-right: 8px; }
     .week-table { grid-template-columns: minmax(80px,1fr) repeat(7, 30px); min-width: 0; }
     .week-table .total { display: none; }
     .week-cell { width: 28px; height: 28px; font-size: 12px; }
@@ -432,6 +508,7 @@
       <button type="button" class="btn" data-tab="today">Aujourd'hui</button>
       <button type="button" class="btn" data-tab="week">Semaine</button>
       <button type="button" class="btn" data-tab="year">Année</button>
+      <button type="button" class="btn" data-tab="chronos">Chronos</button>
       <button type="button" class="btn" data-tab="manage">Habitudes</button>
     </nav>
     <button type="button" class="btn account-btn" id="account-btn">
@@ -444,6 +521,7 @@
   <section id="view-today"></section>
   <section id="view-week" style="display:none"></section>
   <section id="view-year" style="display:none"></section>
+  <section id="view-chronos" style="display:none"></section>
   <section id="view-manage" style="display:none"></section>
 
   <footer class="pied">
@@ -476,13 +554,31 @@
 (function () {
   "use strict";
 
+  // Habitudes de depart d'un nageur. dist = 1 : on y note aussi les metres nages.
+  // Identifiants nouveaux (prefixe n-) : Sync.run retire celles qu'on n'a jamais
+  // touchees quand on rejoint un compte qui a deja ses habitudes.
   const DEFAULT_HABITS = [
-    { id: "eau", name: "Boire de l'eau", goal: 7 },
-    { id: "lecture", name: "Lire 10 minutes", goal: 5 },
-    { id: "sport", name: "Faire du sport", goal: 3 },
-    { id: "marche", name: "Marcher 30 minutes", goal: 5 },
-    { id: "sommeil", name: "Se coucher avant 23 h", goal: 5 }
+    { id: "n-seance", name: "Séance de natation", goal: 5, dist: 1 },
+    { id: "n-prepa", name: "Prépa physique / gainage", goal: 3 },
+    { id: "n-etirements", name: "Étirements", goal: 5 },
+    { id: "n-sommeil", name: "Dormir 8 h ou plus", goal: 6 },
+    { id: "n-eau", name: "Boire 1,5 L d'eau", goal: 7 }
   ];
+
+  // Epreuves officielles, regroupees par nage. Identifiant = "<distance>-<nage>".
+  const NAGES = [
+    { id: "nl", nom: "nage libre", distances: [50, 100, 200, 400, 800, 1500] },
+    { id: "dos", nom: "dos", distances: [50, 100, 200] },
+    { id: "br", nom: "brasse", distances: [50, 100, 200] },
+    { id: "pap", nom: "papillon", distances: [50, 100, 200] },
+    { id: "4n", nom: "4 nages", distances: [100, 200, 400] }
+  ];
+  const EPREUVES = [];
+  NAGES.forEach((n) => n.distances.forEach((d) => EPREUVES.push({ id: d + "-" + n.id, nage: n.id, nom: d + " m " + n.nom })));
+  function nomEpreuve(id) {
+    const e = EPREUVES.find((x) => x.id === id);
+    return e ? e.nom : id;
+  }
   const DOW = ["lun", "mar", "mer", "jeu", "ven", "sam", "dim"];
   const DOW_LONG = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"];
   const MONTHS = ["janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc."];
@@ -505,7 +601,37 @@
   function nowMs() { return Date.now(); }
 
   function defaultHabits() {
-    return DEFAULT_HABITS.map((h, i) => ({ id: h.id, name: h.name, goal: h.goal, pos: i, u: 0 }));
+    return DEFAULT_HABITS.map((h, i) => ({ id: h.id, name: h.name, goal: h.goal, dist: h.dist || 0, pos: i, u: 0 }));
+  }
+
+  // --- Temps de course : centiemes <-> texte ------------------------------
+  // Accepte « 1:05.32 », « 1'05"32 », « 65,32 », « 32.4 » (dixiemes) ou « 28 ».
+  function parseTemps(s) {
+    const m = String(s || "").trim().match(/^(?:(\d{1,2})\s*[:'h]\s*)?(\d{1,2})(?:\s*[.,"]\s*(\d{1,2}))?$/);
+    if (!m) return null;
+    const min = Number(m[1] || 0), sec = Number(m[2]);
+    if (m[1] && sec > 59) return null;
+    const cs = m[3] ? (m[3].length === 1 ? Number(m[3]) * 10 : Number(m[3])) : 0;
+    const t = (min * 60 + sec) * 100 + cs;
+    return t > 0 && t <= 360000 ? t : null;
+  }
+  function formatTemps(t) {
+    const p = (n) => String(n).padStart(2, "0");
+    const min = Math.floor(t / 6000), sec = Math.floor((t % 6000) / 100), cs = t % 100;
+    return min ? min + ":" + p(sec) + "." + p(cs) : sec + "." + p(cs);
+  }
+  // Ecart en secondes, signe explicite : « −0.84 s » (plus rapide) ou « +1.20 s ».
+  function formatEcart(cs) {
+    const s = (Math.abs(cs) / 100).toFixed(2);
+    return (cs < 0 ? "−" : cs > 0 ? "+" : "±") + s + " s";
+  }
+  function formatDistance(m) {
+    if (m < 1000) return m + " m";
+    return (m / 1000).toLocaleString("fr-FR", { maximumFractionDigits: 1 }) + " km";
+  }
+  function dateCourte(day) {
+    const d = new Date(day + "T12:00:00");
+    return d.getDate() + " " + MONTHS[d.getMonth()] + " " + d.getFullYear();
   }
 
   const State = {
@@ -519,9 +645,13 @@
     // Habitudes supprimees : { id: { u } }. Conservees pour que la suppression
     // se propage aux autres appareils au lieu d'etre "reparee" par eux.
     gone: {},
+    // Chronos : { id: { ev, pool, t (centiemes), d, comp, lieu, u } } ; { del: 1, u } une fois supprime.
+    times: {},
+    chrono: { sel: "", ev: "100-nl", pool: 25, comp: 1, msg: "", msgType: "" },
     // Ce qui reste a envoyer au serveur.
     dirtyH: {},
-    dirtyE: {}
+    dirtyE: {},
+    dirtyT: {}
   };
 
   function load() {
@@ -535,6 +665,8 @@
           State.gone = d.gone || {};
           State.dirtyH = d.dirtyH || {};
           State.dirtyE = d.dirtyE || {};
+          State.times = d.times || {};
+          State.dirtyT = d.dirtyT || {};
           if (!d.v) migrateToSync();
           return;
         }
@@ -561,8 +693,8 @@
     try {
       localStorage.setItem(KEY, JSON.stringify({
         v: 2,
-        habits: State.habits, log: State.log, gone: State.gone,
-        dirtyH: State.dirtyH, dirtyE: State.dirtyE
+        habits: State.habits, log: State.log, gone: State.gone, times: State.times,
+        dirtyH: State.dirtyH, dirtyE: State.dirtyE, dirtyT: State.dirtyT
       }));
     } catch (e) { /* ignore */ }
   }
@@ -590,7 +722,7 @@
   function toggle(id, day) {
     const k = id + "|" + day;
     const prev = State.log[k];
-    State.log[k] = { done: !(prev && prev.done), note: prev ? prev.note || "" : "", u: nowMs() };
+    State.log[k] = { done: !(prev && prev.done), note: prev ? prev.note || "" : "", m: prev ? prev.m || 0 : 0, u: nowMs() };
     State.dirtyE[k] = 1;
     // La mascotte saute quand on coche, et un palier franchi ici merite un toast.
     Mascotte.action = true;
@@ -600,9 +732,35 @@
   function setNote(id, day, note) {
     const k = id + "|" + day;
     const prev = State.log[k] || { done: false, note: "" };
-    State.log[k] = { done: prev.done, note: note, u: nowMs() };
+    State.log[k] = { done: prev.done, note: note, m: prev.m || 0, u: nowMs() };
     State.dirtyE[k] = 1;
     persist(); Sync.schedule();
+  }
+  // Distance nagee d'une seance. Saisir des metres coche la seance ; les effacer
+  // ne la decoche pas (on a pu nager sans compter).
+  function setMeters(id, day, m) {
+    const k = id + "|" + day;
+    const prev = State.log[k] || { done: false, note: "" };
+    const metres = Math.max(0, Math.min(100000, Math.round(Number(m) || 0)));
+    const coche = !prev.done && metres > 0;
+    State.log[k] = { done: prev.done || metres > 0, note: prev.note || "", m: metres, u: nowMs() };
+    State.dirtyE[k] = 1;
+    if (coche) { Mascotte.action = true; Mascotte.saute = true; }
+    persist(); Sync.schedule(); render();
+  }
+  function metersOf(id, day) { const e = State.log[id + "|" + day]; return e && e.m ? e.m : 0; }
+  // Metres nages sur [debut, debut + n jours[, toutes habitudes « distance » confondues.
+  function volume(debut, n) {
+    let total = 0, seances = 0;
+    for (let i = 0; i < n; i++) {
+      const day = ymd(addDays(debut, i));
+      State.habits.forEach((h) => {
+        if (!h.dist) return;
+        const m = metersOf(h.id, day);
+        if (m) { total += m; seances++; }
+      });
+    }
+    return { total: total, seances: seances };
   }
 
   function streak(id) {
@@ -635,7 +793,7 @@
     document.querySelectorAll(".tabs .btn").forEach((b) => {
       b.classList.toggle("active", b.dataset.tab === State.tab);
     });
-    ["today", "week", "year", "manage"].forEach((t) => {
+    ["today", "week", "year", "chronos", "manage"].forEach((t) => {
       document.getElementById("view-" + t).style.display = t === State.tab ? "" : "none";
     });
   }
@@ -669,12 +827,16 @@
       const st = streak(h.id);
       const meta = st > 0 ? "Série de " + st + " jour" + (st > 1 ? "s" : "") : "Série interrompue";
       const noteOpen = State.openNote === h.id || !!entry.note;
+      const metres = h.dist
+        ? `<label class="metres">Distance <input class="input" type="number" inputmode="numeric" min="0" max="100000" step="100" placeholder="0" data-action="metres" data-id="${esc(h.id)}" value="${entry.m || ""}"> m</label>`
+        : "";
       return `<div class="habit-row" data-id="${esc(h.id)}">
         <div class="top">
           <button type="button" class="check${entry.done ? " done" : ""}" data-action="toggle" data-id="${esc(h.id)}" aria-label="Marquer comme fait">${entry.done ? "✓" : ""}</button>
           <div style="flex:1;min-width:0">
             <div class="habit-name">${esc(h.name)}</div>
             <div class="habit-meta">${meta}</div>
+            ${metres}
           </div>
           <button type="button" class="btn btn-ghost note-toggle" data-action="note-toggle" data-id="${esc(h.id)}">${entry.note ? "Note" : "+ note"}</button>
         </div>
@@ -696,6 +858,7 @@
             <p class="eyebrow">Réussite, 30 derniers jours</p>
             <div class="big-num">${pct30}</div>
           </div>
+          ${volumeCarte(monday)}
           <div class="card">
             <p class="eyebrow" style="margin:0 0 16px">Objectifs de la semaine</p>
             ${goalsHtml || "<p class=\"p-muted\" style=\"margin:0\">—</p>"}
@@ -711,12 +874,28 @@
     el.querySelectorAll('[data-action="note-input"]').forEach((inp) => {
       inp.addEventListener("change", () => setNote(inp.dataset.id, State.today, inp.value));
     });
+    el.querySelectorAll('[data-action="metres"]').forEach((inp) => {
+      inp.addEventListener("change", () => setMeters(inp.dataset.id, State.today, inp.value));
+    });
 
     // renderToday passe apres chaque changement (coche, ajout, suppression,
     // renommage) : c'est ici qu'on tient la mascotte a jour, carte et en-tete.
     const etat = etatMascotte();
     renderMascotteCarte(etat);
     majMascotte(etat);
+  }
+
+  // Carte « Nagé cette semaine », seulement s'il existe une habitude qui compte les metres.
+  function volumeCarte(monday) {
+    if (!State.habits.some((h) => h.dist)) return "";
+    const v = volume(monday, 7);
+    const avant = volume(addDays(monday, -7), 7).total;
+    const comp = avant ? "Semaine dernière : " + formatDistance(avant) + "." : "";
+    return `<div class="stat-card">
+        <p class="eyebrow">Nagé cette semaine</p>
+        <div class="big-num">${formatDistance(v.total)}</div>
+        <p class="stat-detail">${v.seances} séance${v.seances > 1 ? "s" : ""} avec distance. ${comp}</p>
+      </div>`;
   }
 
   function renderWeek() {
@@ -739,7 +918,8 @@
         if (done) c++;
         const future = day > State.today;
         const cls = done ? "done" : future ? "future" : "";
-        return `<button type="button" class="week-cell ${cls}" title="${esc(h.name)} — ${day}" ${future ? "disabled" : `data-action="toggle" data-id="${esc(h.id)}" data-day="${day}"`}>${done ? "✓" : ""}</button>`;
+        const m = h.dist ? metersOf(h.id, day) : 0;
+        return `<button type="button" class="week-cell ${cls}" title="${esc(h.name)} — ${day}${m ? " — " + m + " m" : ""}" ${future ? "disabled" : `data-action="toggle" data-id="${esc(h.id)}" data-day="${day}"`}>${done ? "✓" : ""}</button>`;
       }).join("");
       return `<div class="rowname">${esc(h.name)}</div>${cellsHtml}<div class="total">${c}/7</div>`;
     }).join("");
@@ -778,7 +958,7 @@
           ${rowsHtml}
         </div>
       </div>
-      <p class="week-hint">Cliquez une case pour basculer le statut. Les jours à venir restent vides.</p>
+      <p class="week-hint">${State.habits.some((h) => h.dist) ? "Nagé : <strong>" + formatDistance(volume(wStart, 7).total) + "</strong>. " : ""}Cliquez une case pour basculer le statut. Les jours à venir restent vides.</p>
       <h2>Notes de la semaine</h2>
       ${notesHtml}`;
 
@@ -838,7 +1018,8 @@
 
     el.innerHTML = `
       <h1 class="num">${year}</h1>
-      <p class="p-muted">${full} jours parfaits en ${year}.</p>
+      <p class="p-muted">${full} jours parfaits en ${year}.${State.habits.some((h) => h.dist)
+        ? " " + formatDistance(volume(jan1, Math.round((addDays(today, 1) - jan1) / 864e5)).total) + " nagés depuis le 1er janvier." : ""}</p>
       <div class="card year-card">
         <div class="year-inner">
           <div class="month-row">${monthsHtml}</div>
@@ -859,13 +1040,14 @@
         <input class="input" type="text" data-action="name" data-id="${esc(h.id)}" value="${esc(h.name)}">
         <input class="input goal-input" type="number" min="1" max="7" data-action="goal" data-id="${esc(h.id)}" value="${h.goal}">
         <span class="manage-unit">j/sem.</span>
+        <label class="manage-dist"><input type="checkbox" data-action="dist" data-id="${esc(h.id)}"${h.dist ? " checked" : ""}>Compter les mètres</label>
         <button type="button" class="btn btn-ghost" data-action="delete" data-id="${esc(h.id)}" style="color:var(--color-accent-700)">Supprimer</button>
       </div>`).join("");
 
     el.innerHTML = `
       <div class="manage-wrap">
         <h1>Habitudes</h1>
-        <p class="p-muted">Le nom et l'objectif hebdomadaire, en jours par semaine.</p>
+        <p class="p-muted">Le nom, l'objectif en jours par semaine, et pour les séances dans l'eau, la distance nagée.</p>
         <div>${rowsHtml || "<p class=\"p-muted\">Aucune habitude pour l'instant.</p>"}</div>
         <div class="manage-add">
           <input class="input" type="text" id="new-habit-name" placeholder="Nouvelle habitude" value="${esc(State.newName)}">
@@ -888,10 +1070,17 @@
       inp.value = v;
       touchHabit(h); renderToday();
     }));
+    el.querySelectorAll('[data-action="dist"]').forEach((inp) => inp.addEventListener("change", () => {
+      const h = findHabit(inp.dataset.id);
+      if (!h) return;
+      h.dist = inp.checked ? 1 : 0;
+      touchHabit(h); renderToday(); renderWeek(); renderYear();
+    }));
     el.querySelectorAll('[data-action="delete"]').forEach((b) => b.addEventListener("click", () => {
       const id = b.dataset.id;
       const idx = State.habits.findIndex((h) => h.id === id);
       if (idx < 0) return;
+      if (!window.confirm("Supprimer « " + State.habits[idx].name + " » ? Ses jours cochés ne seront plus comptés.")) return;
       State.habits.splice(idx, 1);
       State.gone[id] = { u: nowMs() };
       State.dirtyH[id] = 1;
@@ -904,7 +1093,7 @@
       // Identifiant aleatoire : deux appareils peuvent creer une habitude
       // en meme temps sans se retrouver avec le meme id.
       const id = "h" + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
-      const h = { id: id, name: n, goal: 5, pos: nextPos(), u: nowMs() };
+      const h = { id: id, name: n, goal: 5, dist: 0, pos: nextPos(), u: nowMs() };
       State.habits.push(h);
       State.newName = "";
       touchHabit(h); renderManage(); renderToday(); renderWeek(); renderYear();
@@ -925,6 +1114,8 @@
       State.log[k] = { done: false, note: "", del: 1, u: t };
       State.dirtyE[k] = 1;
     });
+    Object.keys(State.times).forEach((id) => { State.times[id] = { del: 1, u: t }; State.dirtyT[id] = 1; });
+    State.chrono.sel = "";
     State.habits = defaultHabits();
     State.habits.forEach((h) => { h.u = t; delete State.gone[h.id]; State.dirtyH[h.id] = 1; });
     persist(); Sync.schedule(200); renderAll();
@@ -935,8 +1126,223 @@
     renderToday();
     renderWeek();
     renderYear();
+    renderChronos();
     renderManage();
     placerVisite();
+  }
+
+  /* =========================================================================
+     Chronos : les temps realises, par epreuve et par bassin (25 et 50 m ne se
+     comparent pas). Le meilleur temps d'un couple epreuve + bassin est le
+     record personnel (RP) ; la courbe montre la progression.
+     ========================================================================= */
+  function tempsVivants() {
+    return Object.keys(State.times).map((id) => Object.assign({ id: id }, State.times[id])).filter((x) => !x.del);
+  }
+  // Temps d'une epreuve dans un bassin, du plus ancien au plus recent ; chacun
+  // marque rp s'il battait tous ceux d'avant (le premier compte comme RP).
+  function serie(ev, pool) {
+    const liste = tempsVivants().filter((x) => x.ev === ev && x.pool === pool)
+      .sort((a, b) => a.d.localeCompare(b.d) || a.u - b.u);
+    let meilleur = Infinity;
+    liste.forEach((x) => { x.rp = x.t < meilleur; if (x.rp) meilleur = x.t; });
+    return liste;
+  }
+  function records() {
+    const groupes = {};
+    tempsVivants().forEach((x) => { const k = x.ev + "|" + x.pool; (groupes[k] = groupes[k] || []).push(x); });
+    return Object.keys(groupes).map((k) => {
+      const [ev, pool] = [k.split("|")[0], Number(k.split("|")[1])];
+      const s = serie(ev, pool);
+      const best = s.reduce((m, x) => (x.t < m.t ? x : m), s[0]);
+      return { cle: k, ev: ev, pool: pool, best: best, n: s.length, premier: s[0], dernier: s[s.length - 1] };
+    }).sort((a, b) => {
+      const ia = EPREUVES.findIndex((e) => e.id === a.ev), ib = EPREUVES.findIndex((e) => e.id === b.ev);
+      return ia - ib || a.pool - b.pool;
+    });
+  }
+
+  function ajouterTemps() {
+    const C = State.chrono;
+    const ev = document.getElementById("ch-ev").value;
+    const pool = Number(document.getElementById("ch-pool").value) === 50 ? 50 : 25;
+    const brut = document.getElementById("ch-temps").value;
+    const d = document.getElementById("ch-date").value;
+    const comp = document.getElementById("ch-comp").value === "1" ? 1 : 0;
+    const lieu = document.getElementById("ch-lieu").value.trim().slice(0, 120);
+    C.ev = ev; C.pool = pool; C.comp = comp;
+    const t = parseTemps(brut);
+    if (!t) { C.msg = "Temps illisible. Écrivez par exemple 1:05.32 ou 31.84."; C.msgType = "err"; renderChronos(); focusTemps(brut); return; }
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(d) || d > State.today) { C.msg = "Date invalide (pas dans le futur)."; C.msgType = "err"; renderChronos(); focusTemps(brut); return; }
+
+    const avant = serie(ev, pool);
+    const ancienRp = avant.length ? Math.min.apply(null, avant.map((x) => x.t)) : null;
+    const id = "t" + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+    State.times[id] = { ev: ev, pool: pool, t: t, d: d, comp: comp, lieu: lieu, u: nowMs() };
+    State.dirtyT[id] = 1;
+    C.sel = ev + "|" + pool;
+    const nom = nomEpreuve(ev) + " (" + pool + " m)";
+    if (ancienRp === null) { C.msg = "Premier temps sur " + nom + " : " + formatTemps(t) + "."; C.msgType = "ok"; }
+    else if (t < ancienRp) { C.msg = "Record personnel sur " + nom + " : " + formatTemps(t) + " (" + formatEcart(t - ancienRp) + ")."; C.msgType = "ok"; }
+    else { C.msg = formatTemps(t) + " noté. Record : " + formatTemps(ancienRp) + " (" + formatEcart(t - ancienRp) + ")."; C.msgType = ""; }
+    persist(); Sync.schedule(); renderChronos();
+    const champ = document.getElementById("ch-temps");
+    if (champ) champ.focus();
+  }
+  // Apres une erreur on garde ce qui a ete tape et on y remet le curseur.
+  function focusTemps(valeur) {
+    const champ = document.getElementById("ch-temps");
+    if (!champ) return;
+    champ.value = valeur;
+    champ.focus();
+  }
+
+  function supprimerTemps(id) {
+    const x = State.times[id];
+    if (!x || x.del) return;
+    if (!window.confirm("Supprimer le temps " + formatTemps(x.t) + " du " + dateCourte(x.d) + " ?")) return;
+    State.times[id] = { del: 1, u: nowMs() };
+    State.dirtyT[id] = 1;
+    State.chrono.msg = "";
+    persist(); Sync.schedule(); renderChronos();
+  }
+
+  function renderChronos() {
+    const el = document.getElementById("view-chronos");
+    const C = State.chrono;
+    const recs = records();
+    if (!recs.some((r) => r.cle === C.sel)) C.sel = recs.length ? recs[0].cle : "";
+
+    const options = NAGES.map((n) => `<optgroup label="${esc(n.nom[0].toUpperCase() + n.nom.slice(1))}">${
+      EPREUVES.filter((e) => e.nage === n.id).map((e) => `<option value="${e.id}"${e.id === C.ev ? " selected" : ""}>${esc(e.nom)}</option>`).join("")
+    }</optgroup>`).join("");
+
+    const cartes = recs.map((r) => {
+      const gain = r.n > 1 ? r.best.t - r.premier.t : 0;
+      return `<button type="button" class="rp-card${r.cle === C.sel ? " active" : ""}" data-action="chrono-sel" data-cle="${r.cle}" aria-pressed="${r.cle === C.sel}">
+          <div class="name">${esc(nomEpreuve(r.ev))}</div>
+          <div class="bassin">Bassin ${r.pool} m</div>
+          <div class="num temps">${formatTemps(r.best.t)}</div>
+          <div class="detail">${esc(dateCourte(r.best.d))} · ${r.n} temps${gain < 0 ? ` · <span class="gain">${formatEcart(gain)}</span> depuis le premier` : ""}</div>
+        </button>`;
+    }).join("");
+
+    let detail = "";
+    const r = recs.find((x) => x.cle === C.sel);
+    if (r) {
+      const s = serie(r.ev, r.pool);
+      const lignes = s.slice().reverse().map((x) => `<tr>
+          <td>${esc(dateCourte(x.d))}<span class="ctx-mobile">${x.comp ? "Compétition" : "Entraînement"}</span></td>
+          <td class="temps">${formatTemps(x.t)}${x.t === r.best.t ? '<span class="badge">RP</span>' : ""}</td>
+          <td class="temps ${x.t > r.best.t ? "perte" : ""}">${x.t === r.best.t ? "—" : formatEcart(x.t - r.best.t)}</td>
+          <td class="col-ctx">${x.comp ? "Compétition" : "Entraînement"}</td>
+          <td class="col-lieu">${esc(x.lieu || "")}</td>
+          <td><button type="button" class="btn btn-ghost" data-action="chrono-del" data-id="${esc(x.id)}" aria-label="Supprimer le temps ${formatTemps(x.t)} du ${esc(dateCourte(x.d))}">Supprimer</button></td>
+        </tr>`).join("");
+      detail = `
+        <h2>${esc(nomEpreuve(r.ev))}, bassin de ${r.pool} m</h2>
+        <div class="card">
+          ${s.length > 1
+            ? `<p class="eyebrow" style="margin:0 0 6px">Progression — plus haut = plus rapide</p><div class="courbe" id="courbe"></div>`
+            : `<p class="p-muted" style="margin:0">Un seul temps pour l'instant : la courbe de progression apparaît dès le deuxième.</p>`}
+        </div>
+        <div class="card histo-wrap" style="margin-top:14px">
+          <table class="histo">
+            <thead><tr><th>Date</th><th>Temps</th><th>Écart au RP</th><th class="col-ctx">Contexte</th><th class="col-lieu">Lieu</th><th><span class="sr-only">Action</span></th></tr></thead>
+            <tbody>${lignes}</tbody>
+          </table>
+        </div>`;
+    }
+
+    el.innerHTML = `
+      <h1>Chronos</h1>
+      <p class="p-muted">Vos temps en compétition et à l'entraînement. Le meilleur de chaque épreuve, bassin par bassin, devient votre record personnel.</p>
+      <form class="card chrono-form" id="chrono-form" novalidate>
+        <label class="field field-epreuve"><span>Épreuve</span><select class="input" id="ch-ev">${options}</select></label>
+        <label class="field"><span>Bassin</span><select class="input" id="ch-pool">
+          <option value="25"${C.pool === 25 ? " selected" : ""}>25 m</option><option value="50"${C.pool === 50 ? " selected" : ""}>50 m</option></select></label>
+        <label class="field"><span>Temps</span><input class="input temps" id="ch-temps" type="text" inputmode="decimal" autocomplete="off" placeholder="1:05.32" required></label>
+        <label class="field"><span>Date</span><input class="input" id="ch-date" type="date" max="${State.today}" value="${State.today}" required></label>
+        <label class="field"><span>Contexte</span><select class="input" id="ch-comp">
+          <option value="1"${C.comp ? " selected" : ""}>Compétition</option><option value="0"${C.comp ? "" : " selected"}>Entraînement</option></select></label>
+        <label class="field field-large"><span>Lieu ou compétition (facultatif)</span><input class="input" id="ch-lieu" type="text" maxlength="120" placeholder="Interclubs, Annecy"></label>
+        <div class="chrono-actions">
+          <button type="submit" class="btn btn-primary">Ajouter le temps</button>
+          ${C.msg ? `<p class="form-msg ${C.msgType}" role="status">${esc(C.msg)}</p>` : ""}
+        </div>
+      </form>
+      <h2>Records personnels</h2>
+      ${cartes ? `<div class="rp-grid">${cartes}</div>` : `<p class="p-muted">Aucun temps pour l'instant. Ajoutez votre dernier chrono ci-dessus.</p>`}
+      ${detail}`;
+
+    el.querySelector("#chrono-form").addEventListener("submit", (ev) => { ev.preventDefault(); ajouterTemps(); });
+    el.querySelectorAll('[data-action="chrono-sel"]').forEach((b) => b.addEventListener("click", () => {
+      C.sel = b.dataset.cle; C.msg = "";
+      renderChronos();
+      const nb = document.querySelector(`[data-action="chrono-sel"][data-cle="${C.sel}"]`);
+      if (nb) nb.focus();
+    }));
+    el.querySelectorAll('[data-action="chrono-del"]').forEach((b) => b.addEventListener("click", () => supprimerTemps(b.dataset.id)));
+    if (r) dessinerCourbe(serie(r.ev, r.pool));
+  }
+
+  // Courbe SVG dessinee a la largeur reelle du conteneur (le texte garde sa
+  // taille sur telephone). Axe vertical inverse : un temps plus court monte.
+  function dessinerCourbe(s) {
+    const box = document.getElementById("courbe");
+    if (!box || s.length < 2) return;
+    const W = Math.max(260, box.clientWidth || 600), H = 220;
+    const g = { l: 52, r: 14, t: 14, b: 28 };
+    const jours = s.map((x) => new Date(x.d + "T12:00:00").getTime());
+    let x0 = Math.min.apply(null, jours), x1 = Math.max.apply(null, jours);
+    if (x1 === x0) { x0 -= 864e5; x1 += 864e5; }
+    const ts = s.map((x) => x.t);
+    let lo = Math.min.apply(null, ts), hi = Math.max.apply(null, ts);
+    const marge = Math.max(10, (hi - lo) * 0.1);
+    lo -= marge; hi += marge;
+    // Graduations rondes (0,5 s, 1 s, 2 s...) : 4 intervalles au plus, bornes calees dessus.
+    const pas = [10, 20, 25, 50, 100, 200, 500, 1000, 2000, 3000, 6000, 12000, 30000].find((p) => (hi - lo) / p <= 4) || 60000;
+    lo = Math.floor(lo / pas) * pas; hi = Math.ceil(hi / pas) * pas;
+    const graduation = (t) => (pas % 100 === 0 ? formatTemps(t).replace(/\.00$/, "") : formatTemps(t));
+    const X = (ms) => g.l + (ms - x0) / (x1 - x0) * (W - g.l - g.r);
+    const Y = (t) => g.t + (t - lo) / (hi - lo) * (H - g.t - g.b);   // petit temps = haut
+
+    let grille = "";
+    for (let t = lo; t <= hi; t += pas) {
+      const y = Y(t).toFixed(1);
+      grille += `<line class="grille" x1="${g.l}" x2="${W - g.r}" y1="${y}" y2="${y}"/><text class="axe" x="${g.l - 8}" y="${y}" dy="4" text-anchor="end">${graduation(t)}</text>`;
+    }
+    const dates = [s[0], s[s.length - 1]].map((x, i) =>
+      `<text class="axe" x="${X(jours[i ? s.length - 1 : 0]).toFixed(1)}" y="${H - 6}" text-anchor="${i ? "end" : "start"}">${esc(dateCourte(x.d))}</text>`).join("");
+    const pts = s.map((x, i) => X(jours[i]).toFixed(1) + "," + Y(x.t).toFixed(1));
+    const points = s.map((x, i) => {
+      const cx = X(jours[i]).toFixed(1), cy = Y(x.t).toFixed(1);
+      return `<circle class="point${x.rp ? " rp" : ""}" cx="${cx}" cy="${cy}" r="4.5"/>`
+        + `<circle class="cible" cx="${cx}" cy="${cy}" r="14" tabindex="0" data-i="${i}" role="img" aria-label="${esc(dateCourte(x.d))} : ${formatTemps(x.t)}${x.rp ? ", record à ce moment" : ""}"/>`
+        + `<circle class="halo" cx="${cx}" cy="${cy}" r="8"/>`;
+    }).join("");
+
+    box.innerHTML = `<svg viewBox="0 0 ${W} ${H}" height="${H}" aria-label="Progression des temps">${grille}${dates}`
+      + `<polyline class="ligne" points="${pts.join(" ")}"/>${points}</svg><div class="bulle-courbe" hidden></div>`;
+
+    const bulle = box.querySelector(".bulle-courbe");
+    const montrer = (c) => {
+      const x = s[Number(c.dataset.i)];
+      box.querySelectorAll(".halo.on").forEach((h) => h.classList.remove("on"));
+      c.nextElementSibling.classList.add("on");
+      bulle.innerHTML = `<strong>${formatTemps(x.t)}</strong>${x.rp ? " · RP" : ""}<br>${esc(dateCourte(x.d))}${x.lieu ? " · " + esc(x.lieu) : ""}`;
+      bulle.style.left = Math.min(Math.max(c.cx.baseVal.value, 70), W - 70) + "px";
+      bulle.style.top = c.cy.baseVal.value + "px";
+      bulle.hidden = false;
+    };
+    const cacher = () => { bulle.hidden = true; box.querySelectorAll(".halo.on").forEach((h) => h.classList.remove("on")); };
+    box.querySelectorAll(".cible").forEach((c) => {
+      c.addEventListener("mouseenter", () => montrer(c));
+      c.addEventListener("focus", () => montrer(c));
+      c.addEventListener("click", () => montrer(c));
+      c.addEventListener("mouseleave", cacher);
+      c.addEventListener("blur", cacher);
+    });
   }
   function render() { renderAll(); }
 
@@ -1455,9 +1861,9 @@
   // --- Conversion état local <-> format d'échange -------------------------
   function payloadHabit(id) {
     const h = findHabit(id);
-    if (h) return { id: h.id, name: h.name, goal: h.goal, pos: h.pos || 0, del: 0, u: h.u || 0 };
+    if (h) return { id: h.id, name: h.name, goal: h.goal, dist: h.dist ? 1 : 0, pos: h.pos || 0, del: 0, u: h.u || 0 };
     const g = State.gone[id];
-    if (g) return { id: id, name: "", goal: 5, pos: 0, del: 1, u: g.u || 0 };
+    if (g) return { id: id, name: "", goal: 5, dist: 0, pos: 0, del: 1, u: g.u || 0 };
     return null;
   }
   function payloadEntry(k) {
@@ -1465,8 +1871,14 @@
     if (i < 0) return null;
     const e = State.log[k];
     const base = { h: k.slice(0, i), d: k.slice(i + 1) };
-    if (!e) return { h: base.h, d: base.d, done: 0, note: "", del: 1, u: nowMs() };
-    return { h: base.h, d: base.d, done: e.done ? 1 : 0, note: e.note || "", del: e.del ? 1 : 0, u: e.u || 0 };
+    if (!e) return { h: base.h, d: base.d, done: 0, note: "", m: 0, del: 1, u: nowMs() };
+    return { h: base.h, d: base.d, done: e.done ? 1 : 0, note: e.note || "", m: e.m || 0, del: e.del ? 1 : 0, u: e.u || 0 };
+  }
+  function payloadTime(id) {
+    const x = State.times[id];
+    if (!x) return null;
+    if (x.del) return { id: id, ev: "", pool: 25, t: 0, d: "", comp: 0, lieu: "", del: 1, u: x.u || 0 };
+    return { id: id, ev: x.ev, pool: x.pool, t: x.t, d: x.d, comp: x.comp ? 1 : 0, lieu: x.lieu || "", del: 0, u: x.u || 0 };
   }
 
   // Applique ce que renvoie le serveur. Le serveur a déjà tranché les conflits ;
@@ -1485,8 +1897,9 @@
         State.gone[rh.id] = { u: rh.u };
       } else {
         delete State.gone[rh.id];
-        if (local) { local.name = rh.name; local.goal = rh.goal; local.pos = rh.pos; local.u = rh.u; }
-        else State.habits.push({ id: rh.id, name: rh.name, goal: rh.goal, pos: rh.pos, u: rh.u });
+        const dist = rh.dist ? 1 : 0;
+        if (local) { local.name = rh.name; local.goal = rh.goal; local.dist = dist; local.pos = rh.pos; local.u = rh.u; }
+        else State.habits.push({ id: rh.id, name: rh.name, goal: rh.goal, dist: dist, pos: rh.pos, u: rh.u });
       }
     });
 
@@ -1496,13 +1909,22 @@
       if (local && (local.u || 0) > re.u) return;
       appliedE[k] = 1; touched = true;
       if (re.del) delete State.log[k];
-      else State.log[k] = { done: !!re.done, note: re.note || "", u: re.u };
+      else State.log[k] = { done: !!re.done, note: re.note || "", m: re.m || 0, u: re.u };
+    });
+
+    const appliedT = {};
+    (data.times || []).forEach((rt) => {
+      const local = State.times[rt.id];
+      if (local && (local.u || 0) > rt.u) return;
+      appliedT[rt.id] = 1; touched = true;
+      if (rt.del) delete State.times[rt.id];
+      else State.times[rt.id] = { ev: rt.ev, pool: rt.pool === 50 ? 50 : 25, t: rt.t, d: rt.d, comp: rt.comp ? 1 : 0, lieu: rt.lieu || "", u: rt.u };
     });
 
     if (touched) {
       State.habits.sort((a, b) => ((a.pos || 0) - (b.pos || 0)) || String(a.id).localeCompare(String(b.id)));
     }
-    return { habits: appliedH, entries: appliedE };
+    return { habits: appliedH, entries: appliedE, times: appliedT };
   }
 
   // --- Moteur de synchronisation ------------------------------------------
@@ -1549,15 +1971,18 @@
 
     const sentH = Object.keys(State.dirtyH);
     const sentE = Object.keys(State.dirtyE);
-    const stampH = {}, stampE = {};
+    const sentT = Object.keys(State.dirtyT);
+    const stampH = {}, stampE = {}, stampT = {};
     sentH.forEach((id) => { stampH[id] = habitStamp(id); });
     sentE.forEach((k) => { stampE[k] = State.log[k] ? State.log[k].u || 0 : 0; });
+    sentT.forEach((id) => { stampT[id] = State.times[id] ? State.times[id].u || 0 : 0; });
 
     try {
       const data = await api("sync.php", {
         since: Account.lastSync,
         habits: sentH.map(payloadHabit).filter(Boolean),
-        entries: sentE.map(payloadEntry).filter(Boolean)
+        entries: sentE.map(payloadEntry).filter(Boolean),
+        times: sentT.map(payloadTime).filter(Boolean)
       });
 
       const applied = applyRemote(data);
@@ -1570,6 +1995,18 @@
         const cur = State.log[k] ? State.log[k].u || 0 : 0;
         if (applied.entries[k] || cur === stampE[k]) delete State.dirtyE[k];
       });
+      // Un serveur d'avant les chronos ne renvoie pas « times » : il ne les a pas
+      // gardes, on les laisse donc en file pour le jour ou l'API sera a jour.
+      if (Array.isArray(data.times)) {
+        sentT.forEach((id) => {
+          const cur = State.times[id] ? State.times[id].u || 0 : 0;
+          if (applied.times[id] || cur === stampT[id]) delete State.dirtyT[id];
+        });
+        // Premiere synchro de cet appareil : ses chronos partent au compte (le
+        // serveur arbitre ceux qu'il connait deja).
+        if (data.first) Object.keys(State.times).forEach((id) => { if (!State.times[id].del) State.dirtyT[id] = 1; });
+        Object.keys(State.times).forEach((id) => { if (State.times[id].del && !State.dirtyT[id]) delete State.times[id]; });
+      }
 
       // Compte tout neuf et vide côté serveur : on y envoie les habitudes de
       // cet appareil, sinon elles ne quitteraient jamais le navigateur.
@@ -1601,11 +2038,13 @@
       Account.lastSync = data.now;
       Account.lastEmail = Account.email;
       saveAccount(); persist();
-      if (Object.keys(applied.habits).length || Object.keys(applied.entries).length) renderAfterSync();
+      if (Object.keys(applied.habits).length || Object.keys(applied.entries).length || Object.keys(applied.times).length) renderAfterSync();
       Sync.at = Date.now();
       Sync.setState("ok");
 
-      if (Object.keys(State.dirtyH).length || Object.keys(State.dirtyE).length) Sync.schedule(500);
+      // dirtyT reste plein face a une ancienne API : on ne relance pas en boucle pour lui.
+      if (Object.keys(State.dirtyH).length || Object.keys(State.dirtyE).length
+        || (Array.isArray(data.times) && Object.keys(State.dirtyT).length)) Sync.schedule(500);
     } catch (e) {
       if (e.code === "unauthorized") {
         forgetSession();
@@ -1650,7 +2089,7 @@
   }
 
   function pendingCount() {
-    return Object.keys(State.dirtyH).length + Object.keys(State.dirtyE).length;
+    return Object.keys(State.dirtyH).length + Object.keys(State.dirtyE).length + Object.keys(State.dirtyT).length;
   }
 
   function syncText() {
@@ -1702,7 +2141,7 @@
     const isRegister = AccountUI.mode === "register";
     return `
       <h2 id="account-title">${isRegister ? "Créer un compte" : "Se connecter"}</h2>
-      <p class="p-muted">Vos habitudes et vos jours cochés vous suivent sur tous vos appareils.</p>
+      <p class="p-muted">Vos habitudes, vos jours cochés et vos chronos vous suivent sur tous vos appareils.</p>
       <form id="ac-form">
         <label class="field">
           <span>Adresse e-mail</span>
@@ -1861,6 +2300,9 @@
     State.gone = {};
     State.dirtyH = {};
     State.dirtyE = {};
+    State.times = {};
+    State.dirtyT = {};
+    State.chrono.sel = "";
     persist();
   }
 
@@ -1946,17 +2388,19 @@
   const VKEY = "trak.visite.v1";
   const VISITE = [
     { tab: "today", titre: "Bienvenue sur Trak",
-      texte: "Trak vous aide à tenir vos habitudes, un jour après l'autre. Voici un petit tour des écrans : une minute, pas plus." },
+      texte: "Trak est votre carnet de nageur : les habitudes qui font progresser, jour après jour, et vos chronos, épreuve par épreuve. Petit tour des écrans : une minute, pas plus." },
     { tab: "today", cible: "#view-today .today-grid > div:first-child", titre: "Aujourd'hui",
-      texte: "Cochez le rond d'une habitude dès qu'elle est faite. « + note » garde un mot sur la journée. Sous chaque habitude s'affiche votre série : le nombre de jours d'affilée." },
+      texte: "Cochez le rond d'une habitude dès qu'elle est faite. Après une séance, notez la distance nagée : elle s'ajoute au volume de la semaine. Sous chaque habitude s'affiche votre série, le nombre de jours d'affilée." },
     { tab: "today", cible: "#mascotte-carte", titre: "Votre mascotte",
       texte: "Elle dort tant que rien n'est coché, sourit quand vous avancez et jubile quand la journée est complète. Vos meilleures séries lui débloquent des couleurs et des accessoires : bouton « Personnaliser »." },
     { tab: "week", cible: "#view-week .week-table-wrap", titre: "Semaine",
       texte: "Toute la semaine d'un coup d'œil. Une case oubliée ? Cliquez-la pour cocher un jour passé. Les flèches remontent aux semaines précédentes." },
     { tab: "year", cible: "#view-year .year-card", titre: "Année",
       texte: "Une case par jour : plus le vert est foncé, plus la journée était remplie. En dessous, la série en cours et le record de chaque habitude." },
+    { tab: "chronos", cible: "#chrono-form", titre: "Chronos",
+      texte: "Notez vos temps, en compétition ou à l'entraînement. Trak garde votre record personnel par épreuve et par bassin, et trace votre progression." },
     { tab: "manage", cible: "#view-manage .manage-wrap", titre: "Habitudes",
-      texte: "Ajoutez, renommez ou supprimez vos habitudes, et réglez combien de jours par semaine vous visez pour chacune." },
+      texte: "Ajoutez, renommez ou supprimez vos habitudes, réglez combien de jours par semaine vous visez, et cochez « Compter les mètres » pour une séance dans l'eau." },
     { tab: "today", cible: "#account-btn", titre: "Sur tous vos appareils",
       texte: "Facultatif : avec un compte, vos habitudes se synchronisent entre téléphone et ordinateur. Sans compte, tout reste dans ce navigateur." },
     { tab: "today", cible: "#aide-btn", titre: "C'est parti !",
@@ -2076,8 +2520,18 @@
     window.addEventListener("scroll", replacer, { passive: true });
   }
 
+  // La courbe se dessine a la largeur de son conteneur : une section cachee
+  // mesure 0, d'ou un nouveau trace a l'ouverture de l'onglet et au redimensionnement.
+  function retracerCourbe() {
+    if (State.tab !== "chronos") return;
+    const r = records().find((x) => x.cle === State.chrono.sel);
+    if (r) dessinerCourbe(serie(r.ev, r.pool));
+  }
+  let attenteCourbe = 0;
+  window.addEventListener("resize", () => { clearTimeout(attenteCourbe); attenteCourbe = setTimeout(retracerCourbe, 150); });
+
   document.querySelectorAll(".tabs .btn").forEach((b) => {
-    b.addEventListener("click", () => { State.tab = b.dataset.tab; renderTabs(); });
+    b.addEventListener("click", () => { State.tab = b.dataset.tab; renderTabs(); retracerCourbe(); });
   });
 
   load();

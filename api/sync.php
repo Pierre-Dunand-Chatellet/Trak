@@ -5,9 +5,11 @@
 //                         dans le champ "token" du corps)
 //   { "since": 0,
 //     "habits":  [ {"id":"sport","name":"Sport","goal":4,"pos":3,"del":0,"u":1757000000000} ],
-//     "entries": [ {"h":"sport","d":"2026-09-06","done":1,"note":"","del":0,"u":1757000000000} ] }
+//     "entries": [ {"h":"sport","d":"2026-09-06","done":1,"note":"","m":2400,"del":0,"u":1757000000000} ],
+//     "times":   [ {"id":"t...","ev":"100-pap","pool":25,"t":6532,"d":"2026-11-07","comp":1,"lieu":"","del":0,"u":...} ] }
+//   m = metres nages ; t = temps en centiemes (6532 = 1:05.32) ; pool = bassin de 25 ou 50 m.
 //
-// Reponse : { "ok":true, "now":<horloge serveur ms>, "habits":[...], "entries":[...] }
+// Reponse : { "ok":true, "now":<horloge serveur ms>, "habits":[...], "entries":[...], "times":[...] }
 //   - "now" doit etre renvoye tel quel en "since" a la synchro suivante.
 //   - Arbitrage des conflits : la valeur dont le "u" (horloge de l'appareil qui
 //     l'a produite) est le plus recent gagne, par habitude et par jour.
@@ -28,13 +30,14 @@ if ($since < 0) $since = 0;
 
 $pushHabits  = is_array($in['habits'] ?? null) ? $in['habits'] : [];
 $pushEntries = is_array($in['entries'] ?? null) ? $in['entries'] : [];
+$pushTimes   = is_array($in['times'] ?? null) ? $in['times'] : [];
 
-if (count($pushHabits) > TRAK_MAX_PUSH || count($pushEntries) > TRAK_MAX_PUSH) {
+if (count($pushHabits) > TRAK_MAX_PUSH || count($pushEntries) > TRAK_MAX_PUSH || count($pushTimes) > TRAK_MAX_PUSH) {
     fail('Trop de modifications en une fois.', 413, 'too_large');
 }
 
 $now = nowMs();
-$out = syncMerge($user['id'], $now, $since, $pushHabits, $pushEntries);
+$out = syncMerge($user['id'], $now, $since, $pushHabits, $pushEntries, $pushTimes);
 
 jsonOut([
     'ok'      => true,
@@ -42,4 +45,5 @@ jsonOut([
     'first'   => $since === 0,
     'habits'  => $out['habits'],
     'entries' => $out['entries'],
+    'times'   => $out['times'],
 ]);

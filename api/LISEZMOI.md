@@ -39,7 +39,7 @@ data/
 ├── users.php          adresse e-mail -> identifiant, empreinte du mot de passe
 ├── sessions.php       empreinte sha256 du jeton -> appareil (jamais le jeton lui-même)
 ├── attempts.php       tentatives de connexion ratées (anti-force brute)
-└── user-<id>.php      les habitudes et les jours cochés d'un compte
+└── user-<id>.php      les habitudes, les jours cochés (et mètres nagés) et les chronos d'un compte
 ```
 
 Trois précautions, parce que ces fichiers sont dans l'arborescence web :
@@ -118,3 +118,12 @@ nulle part ailleurs.
 
 Il n'y a pas de récupération de mot de passe par e-mail : un mot de passe perdu se
 répare dans `data/users.php`, pas depuis l'application.
+
+## Natation (2026-11-07)
+
+`sync.php` transporte trois listes : `habits` (avec `dist` = 1 si l'habitude compte les
+mètres), `entries` (avec `m`, les mètres nagés ce jour-là) et `times`, les chronos :
+`{ id, ev: "100-pap", pool: 25|50, t: centièmes, d: "AAAA-MM-JJ", comp: 0|1, lieu, del, u }`.
+Même arbitrage que le reste : le `u` le plus récent gagne, chrono par chrono.
+Un client à jour face à une ancienne API (sans `times` dans la réponse) garde ses
+chronos en file d'envoi au lieu de les croire envoyés.

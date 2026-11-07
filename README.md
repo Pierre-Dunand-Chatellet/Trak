@@ -2,7 +2,8 @@
 
 ![Aperçu du projet](Image/apercu.webp)
 
-Suivi d'habitudes quotidien : un compte, plusieurs appareils, les mêmes données partout.
+Carnet de natation : les habitudes d'entraînement au quotidien, les mètres nagés et les chronos,
+épreuve par épreuve. Un compte, plusieurs appareils, les mêmes données partout.
 Fonctionne hors ligne et se resynchronise au retour du réseau. Je l'utilise tous les jours —
 c'est d'ailleurs pour ça qu'il existe.
 
@@ -11,24 +12,26 @@ Démo sans compte : https://dunandchatellet.fr/Trak/trak-demo.html
 
 ## Ce que ça fait
 
-Quatre vues, dans une seule page :
+Cinq vues, dans une seule page :
 
 | Vue | Contenu |
 | --- | --- |
-| Aujourd'hui | Cocher ses habitudes du jour, série en cours, pourcentage de réussite |
+| Aujourd'hui | Cocher ses habitudes du jour, mètres nagés de la séance, série en cours, réussite, volume de la semaine |
 | Semaine | Les sept derniers jours d'un coup d'œil |
-| Année | Calendrier de l'année entière, une case par jour |
+| Année | Calendrier de l'année entière, une case par jour, kilomètres nagés |
+| Chronos | Temps par épreuve et par bassin (25 / 50 m), records personnels, courbe de progression |
 | Habitudes | Créer, renommer, réordonner, supprimer |
 
-Cinq habitudes sont proposées au départ — eau, lecture, sport, marche, sommeil — et se
-remplacent librement.
+Cinq habitudes de nageur sont proposées au départ — séance de natation (avec la distance),
+prépa physique, étirements, sommeil, eau — et se remplacent librement. N'importe quelle
+habitude peut « compter les mètres ».
 
 **Une mascotte** accompagne le suivi : une créature ronde à trois humeurs, qui gagne des
 tenues à mesure que le record de série monte (pêche à 3 jours, écharpe à 7, lunettes à 14,
 bleuet à 21, chapeau à 30, lavande à 45, doré à 60, couronne à 100, cape à 365). Les tenues
 sont gardées par appareil, dans le navigateur : rien ne part sur le serveur.
 
-**Une visite guidée** en huit étapes se lance à la première ouverture, et se rejoue depuis le
+**Une visite guidée** en neuf étapes se lance à la première ouverture, et se rejoue depuis le
 bouton « ? » de l'en-tête.
 
 ## Comment c'est fait
