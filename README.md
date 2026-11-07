@@ -19,7 +19,7 @@ Cinq vues, dans une seule page :
 | Aujourd'hui | Cocher ses habitudes du jour, mètres nagés de la séance, série en cours, réussite, volume de la semaine |
 | Semaine | Les sept derniers jours d'un coup d'œil |
 | Année | Calendrier de l'année entière, une case par jour, kilomètres nagés |
-| Chronos | Temps par épreuve et par bassin (25 / 50 m), records personnels, courbe de progression |
+| Chronos | Temps par épreuve et par bassin (25 / 50 m), temps de passage, records personnels, objectif de temps, courbe de progression, compétitions à venir (compte à rebours), export CSV et fiche PDF pour l'entraîneur |
 | Habitudes | Créer, renommer, réordonner, supprimer |
 
 Cinq habitudes de nageur sont proposées au départ — séance de natation (avec la distance),
@@ -30,6 +30,9 @@ habitude peut « compter les mètres ».
 tenues à mesure que le record de série monte (pêche à 3 jours, écharpe à 7, lunettes à 14,
 bleuet à 21, chapeau à 30, lavande à 45, doré à 60, couronne à 100, cape à 365). Les tenues
 sont gardées par appareil, dans le navigateur : rien ne part sur le serveur.
+
+**Utilisable sans réseau** : `manifest.json` et `sw.js` rendent Trak installable sur l'écran
+d'accueil ; la page, les polices et les icônes restent en cache, les saisies attendent le réseau.
 
 **Une visite guidée** en neuf étapes se lance à la première ouverture, et se rejoue depuis le
 bouton « ? » de l'en-tête.

@@ -304,6 +304,14 @@ function registerRecord(string $ip, int $since): void {
 }
 
 // --- Synchronisation ---------------------------------------------------------
+/** Temps de passage d'un chrono : 30 entiers au plus (centiemes), chacun entre 1 et 360000. */
+function passages($sp): array {
+    if (!is_array($sp)) return [];
+    $out = [];
+    foreach (array_slice($sp, 0, 30) as $x) $out[] = max(1, min(360000, (int) $x));
+    return $out;
+}
+
 /**
  * Fusionne ce que l'appareil envoie, puis renvoie tout ce qui a change depuis sa
  * derniere synchro. Lecture, arbitrage et ecriture se font sous un seul verrou.
@@ -312,17 +320,19 @@ function registerRecord(string $ip, int $since): void {
  * gagne. A egalite, la derniere arrivee gagne — c'est le meme comportement que
  * la version SQL de ce projet.
  *
- * Les chronos (temps de course) suivent la meme regle, temps par temps.
+ * Les chronos (temps de course) suivent la meme regle, temps par temps, et les
+ * items (objectifs, competitions : un type + un petit JSON que le serveur ne lit pas) aussi.
  *
- * @return array{habits:array,entries:array,times:array}
+ * @return array{habits:array,entries:array,times:array,items:array}
  */
-function syncMerge(string $userId, int $now, int $since, array $habits, array $entries, array $times = []): array {
-    return withLock(function () use ($userId, $now, $since, $habits, $entries, $times) {
+function syncMerge(string $userId, int $now, int $since, array $habits, array $entries, array $times = [], array $items = []): array {
+    return withLock(function () use ($userId, $now, $since, $habits, $entries, $times, $items) {
         $name = 'user-' . $userId;
         $data = storeRead($name);
         $H = isset($data['habits']) && is_array($data['habits']) ? $data['habits'] : [];
         $E = isset($data['entries']) && is_array($data['entries']) ? $data['entries'] : [];
         $T = isset($data['times']) && is_array($data['times']) ? $data['times'] : [];
+        $I = isset($data['items']) && is_array($data['items']) ? $data['items'] : [];
         $changed = false;
 
         foreach ($habits as $h) {
@@ -387,6 +397,7 @@ function syncMerge(string $userId, int $now, int $since, array $habits, array $e
                 'd'    => $day,
                 'comp' => !empty($t['comp']) ? 1 : 0,
                 'lieu' => mb_substr((string) ($t['lieu'] ?? ''), 0, 120),
+                'sp'   => passages($t['sp'] ?? []),
                 'del'  => 0,
                 'cu'   => $cu,
                 'ua'   => $now,
@@ -394,8 +405,26 @@ function syncMerge(string $userId, int $now, int $since, array $habits, array $e
             $changed = true;
         }
 
+        foreach ($items as $it) {
+            if (!is_array($it)) continue;
+            $id = trim((string) ($it['id'] ?? ''));
+            if ($id === '' || strlen($id) > 64) continue;
+            $del  = !empty($it['del']) ? 1 : 0;
+            $kind = (string) ($it['k'] ?? '');
+            $json = (string) ($it['data'] ?? '');
+            // Le contenu reste opaque pour le serveur : on borne seulement sa taille et on exige du JSON.
+            if (!$del && (!preg_match('/^[a-z]{1,12}$/', $kind) || strlen($json) > 4000 || !is_array(json_decode($json, true)))) continue;
+
+            $cu = max(0, (int) ($it['u'] ?? 0));
+            if (isset($I[$id]) && $cu < (int) ($I[$id]['cu'] ?? 0)) continue;
+
+            $I[$id] = $del ? ['del' => 1, 'cu' => $cu, 'ua' => $now]
+                : ['k' => $kind, 'data' => $json, 'del' => 0, 'cu' => $cu, 'ua' => $now];
+            $changed = true;
+        }
+
         if ($changed) {
-            storeWrite($name, ['habits' => $H, 'entries' => $E, 'times' => $T]);
+            storeWrite($name, ['habits' => $H, 'entries' => $E, 'times' => $T, 'items' => $I]);
         }
 
         // Tout ce qui a bouge depuis la derniere synchro de cet appareil.
@@ -442,11 +471,24 @@ function syncMerge(string $userId, int $now, int $since, array $habits, array $e
                 'd'    => (string) ($t['d'] ?? ''),
                 'comp' => (int) ($t['comp'] ?? 0),
                 'lieu' => (string) ($t['lieu'] ?? ''),
+                'sp'   => passages($t['sp'] ?? []),
                 'del'  => (int) ($t['del'] ?? 0),
                 'u'    => (int) ($t['cu'] ?? 0),
             ];
         }
 
-        return ['habits' => $outH, 'entries' => $outE, 'times' => $outT];
+        $outI = [];
+        foreach ($I as $id => $it) {
+            if ((int) ($it['ua'] ?? 0) <= $since) continue;
+            $outI[] = [
+                'id'   => (string) $id,
+                'k'    => (string) ($it['k'] ?? ''),
+                'data' => (string) ($it['data'] ?? ''),
+                'del'  => (int) ($it['del'] ?? 0),
+                'u'    => (int) ($it['cu'] ?? 0),
+            ];
+        }
+
+        return ['habits' => $outH, 'entries' => $outE, 'times' => $outT, 'items' => $outI];
     });
 }

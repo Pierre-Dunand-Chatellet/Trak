@@ -10,6 +10,9 @@
 <link rel="icon" type="image/svg+xml" href="Image/favicon.svg">
 <link rel="icon" type="image/png" sizes="32x32" href="Image/favicon-32.png">
 <link rel="apple-touch-icon" href="Image/apple-touch-icon.png">
+<!-- Installable (ecran d'accueil) et utilisable sans reseau : manifest.json + sw.js. -->
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-title" content="Trak">
 <meta name="theme-color" content="#e7e2d7">
 <link rel="canonical" href="https://dunandchatellet.fr/Trak/trak.html">
 <meta property="og:type" content="website">
@@ -108,7 +111,8 @@
   /* ---- Today ---- */
   .today-grid { display: grid; grid-template-columns: minmax(0,1.55fr) minmax(0,1fr); gap: 40px; align-items: start; }
   .eyebrow { margin: 0; font-family: var(--font-mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--color-neutral-600); }
-  h1.big, h1.num { font-family: var(--font-body); font-weight: 700; letter-spacing: -0.02em; text-transform: none; }
+  /* Pas de chiffres en Syne (son « 1 » ressemble a un « I ») : ces titres passent en Geist. */
+  h1.big, h1.num, h2.num { font-family: var(--font-body); font-weight: 700; letter-spacing: -0.02em; text-transform: none; }
   h1.big { font-size: 34px; margin: 6px 0 4px; }
   .summary { font-size: 15px; color: var(--color-neutral-700); margin: 0 0 24px; }
 
@@ -396,6 +400,65 @@
   .histo .badge { display: inline-block; margin-left: 6px; font-family: var(--font-mono); font-size: 10px; letter-spacing: .08em; padding: 2px 6px; border-radius: 999px; background: var(--color-accent2-200); color: var(--color-accent2-900); vertical-align: 1px; }
   .histo .btn-ghost { padding: 6px 8px; color: var(--color-accent-700); }
   .histo-wrap { overflow-x: auto; }
+  .histo .passages { display: block; font-size: 12px; font-weight: 400; color: var(--color-neutral-600); white-space: normal; margin-top: 2px; }
+  .chrono-form .field-passages { grid-column: 1 / -1; }
+
+  /* Objectif de temps */
+  .rp-card .objectif { font-size: 12px; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--color-neutral-300); color: var(--color-accent-700); }
+  .rp-card .objectif.atteint { color: var(--color-accent2-800); font-weight: 600; }
+  .obj-form { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px 12px; }
+  .obj-form .field { margin: 0; }
+  .obj-form .field .input { width: 140px; height: 42px; }
+  .obj-form .form-msg { flex-basis: 100%; margin: 0; }
+  .courbe .objectif-ligne { stroke: var(--color-accent-700); stroke-width: 1.5; stroke-dasharray: 6 5; }
+  .courbe .objectif-txt { font-family: var(--font-mono); font-size: 11px; fill: var(--color-accent-700); }
+
+  /* Competitions */
+  .compet-carte .compet-j { font-weight: 700; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; font-size: 40px; line-height: 1; margin-top: 8px; }
+  .compet-carte .compet-nom { font-size: 15px; font-weight: 600; margin: 8px 0 2px; }
+  .compet-info { font-size: 13px; color: var(--color-neutral-600); margin: 0; }
+  .compet-evs { list-style: none; padding: 0; margin: 12px 0 0; font-size: 13px; }
+  .compet-evs li { display: flex; justify-content: space-between; gap: 10px; padding: 6px 0; border-top: 1px solid var(--color-neutral-200); }
+  .compet-evs li .temps { color: var(--color-neutral-700); white-space: nowrap; }
+  .compet-liste { padding: 6px 22px; }
+  .compet-ligne { display: flex; align-items: center; gap: 14px; padding: 12px 0; border-top: 1px solid var(--color-neutral-200); }
+  .compet-ligne:first-child { border-top: 0; }
+  .compet-j-petit { flex: none; min-width: 64px; font-weight: 700; font-size: 18px; font-variant-numeric: tabular-nums; }
+  .compet-corps { flex: 1; min-width: 0; }
+  .compet-corps strong { display: block; font-size: 15px; }
+  .compet-ligne .btn-ghost { color: var(--color-accent-700); }
+  .compet-ajout { margin-top: 14px; }
+  .compet-ajout summary { cursor: pointer; font-family: var(--font-mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; padding: 4px 0; }
+  .compet-form { display: grid; grid-template-columns: minmax(0,2fr) minmax(0,1fr) minmax(0,1fr); gap: 12px 14px; margin-top: 16px; align-items: end; }
+  .compet-form .field { margin: 0; }
+  .compet-form .input { height: 42px; }
+  .compet-form .field-nom:last-of-type { grid-column: 1 / -1; }
+  .compet-form .chrono-actions { grid-column: 1 / -1; display: flex; }
+  .epreuves-choix { grid-column: 1 / -1; border: 0; padding: 0; margin: 0; min-width: 0; }
+  .epreuves-choix legend { padding: 0; margin-bottom: 8px; font-size: 12px; font-weight: 600; color: var(--color-neutral-700); }
+  .ev-grille { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 6px; }
+  .ev-choix { display: flex; align-items: center; gap: 8px; font-size: 13px; padding: 7px 10px; border: 1px solid var(--color-neutral-300); border-radius: 999px; cursor: pointer; }
+  .ev-choix:hover { background: var(--color-neutral-200); }
+  .ev-choix input { width: 16px; height: 16px; margin: 0; accent-color: var(--color-accent2-600); }
+  .ev-choix:has(input:checked) { background: var(--color-accent2-200); border-color: var(--color-accent2-600); }
+
+  /* Fiche pour l'entraineur : invisible a l'ecran, seule visible a l'impression. */
+  #fiche { color: #000; background: #fff; font-family: var(--font-body); }
+  #fiche h1 { font-size: 22px; text-transform: none; margin: 0 0 4px; }
+  #fiche h2 { font-size: 15px; margin: 22px 0 8px; }
+  #fiche .fiche-date { font-size: 12px; margin: 0; color: #444; }
+  #fiche table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  #fiche th { text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: .06em; color: #444; border-bottom: 1.5px solid #000; padding: 4px 6px 4px 0; }
+  #fiche td { border-bottom: 1px solid #ccc; padding: 6px 6px 6px 0; vertical-align: top; }
+  #fiche ul { font-size: 12px; padding-left: 18px; }
+  #fiche table.fiche-vol { width: auto; }
+  #fiche table.fiche-vol td { padding-right: 32px; }
+  @media print {
+    @page { margin: 14mm; }
+    body { background: #fff; }
+    .wrap, .toast-zone, .modal-backdrop, .visite { display: none !important; }
+    #fiche { display: block !important; }
+  }
   .histo td { white-space: nowrap; }
   .histo .ctx-mobile { display: none; font-size: 12px; color: var(--color-neutral-600); }
   .chrono-form .input { height: 42px; }
@@ -487,6 +550,11 @@
     .chrono-form .chrono-actions { grid-column: 1 / -1; }
     /* Telephone : contexte replie sous la date, lieu masque (il reste dans la bulle de la courbe). */
     .histo .col-lieu, .histo .col-ctx { display: none; }
+    .compet-form { grid-template-columns: 1fr 1fr; }
+    .compet-form .field-nom { grid-column: 1 / -1; }
+    .compet-liste { padding: 4px 16px; }
+    .compet-ligne { flex-wrap: wrap; gap: 4px 12px; }
+    .compet-ligne .btn-ghost { margin-left: auto; }
     .histo .ctx-mobile { display: block; }
     .histo td, .histo th { padding-right: 8px; }
     .week-table { grid-template-columns: minmax(80px,1fr) repeat(7, 30px); min-width: 0; }
@@ -549,6 +617,8 @@
 </div>
 
 <div class="toast-zone" id="mascotte-toast" role="status" aria-live="polite"></div>
+
+<section id="fiche" hidden></section>
 
 <script>
 (function () {
@@ -647,11 +717,14 @@
     gone: {},
     // Chronos : { id: { ev, pool, t (centiemes), d, comp, lieu, u } } ; { del: 1, u } une fois supprime.
     times: {},
-    chrono: { sel: "", ev: "100-nl", pool: 25, comp: 1, msg: "", msgType: "" },
+    // Objectifs (k: "obj", data: { t }) et competitions (k: "comp", data: { nom, d, lieu, pool, evs }).
+    items: {},
+    chrono: { sel: "", ev: "100-nl", pool: 25, comp: 1, msg: "", msgType: "", brouillon: null, objMsg: "", objMsgType: "", compMsg: "", compOuvert: false },
     // Ce qui reste a envoyer au serveur.
     dirtyH: {},
     dirtyE: {},
-    dirtyT: {}
+    dirtyT: {},
+    dirtyI: {}
   };
 
   function load() {
@@ -667,6 +740,8 @@
           State.dirtyE = d.dirtyE || {};
           State.times = d.times || {};
           State.dirtyT = d.dirtyT || {};
+          State.items = d.items || {};
+          State.dirtyI = d.dirtyI || {};
           if (!d.v) migrateToSync();
           return;
         }
@@ -693,8 +768,8 @@
     try {
       localStorage.setItem(KEY, JSON.stringify({
         v: 2,
-        habits: State.habits, log: State.log, gone: State.gone, times: State.times,
-        dirtyH: State.dirtyH, dirtyE: State.dirtyE, dirtyT: State.dirtyT
+        habits: State.habits, log: State.log, gone: State.gone, times: State.times, items: State.items,
+        dirtyH: State.dirtyH, dirtyE: State.dirtyE, dirtyT: State.dirtyT, dirtyI: State.dirtyI
       }));
     } catch (e) { /* ignore */ }
   }
@@ -854,6 +929,7 @@
         </div>
         <aside class="side">
           <div class="mascotte-card" id="mascotte-carte"></div>
+          ${competCarte()}
           <div class="stat-card">
             <p class="eyebrow">Réussite, 30 derniers jours</p>
             <div class="big-num">${pct30}</div>
@@ -1115,6 +1191,7 @@
       State.dirtyE[k] = 1;
     });
     Object.keys(State.times).forEach((id) => { State.times[id] = { del: 1, u: t }; State.dirtyT[id] = 1; });
+    Object.keys(State.items).forEach((id) => { State.items[id] = { del: 1, u: t }; State.dirtyI[id] = 1; });
     State.chrono.sel = "";
     State.habits = defaultHabits();
     State.habits.forEach((h) => { h.u = t; delete State.gone[h.id]; State.dirtyH[h.id] = 1; });
@@ -1162,39 +1239,111 @@
     });
   }
 
+  // --- Objectifs et competitions : « items » synchronises ------------------
+  function itemsDe(kind) {
+    return Object.keys(State.items).map((id) => Object.assign({ id: id }, State.items[id]))
+      .filter((x) => !x.del && x.k === kind && x.data);
+  }
+  function ecrireItem(id, k, data) {
+    State.items[id] = { k: k, data: data, u: nowMs() };
+    State.dirtyI[id] = 1;
+    persist(); Sync.schedule();
+  }
+  function retirerItem(id) {
+    if (!State.items[id]) return;
+    State.items[id] = { del: 1, u: nowMs() };
+    State.dirtyI[id] = 1;
+    persist(); Sync.schedule();
+  }
+  function cleObjectif(ev, pool) { return "obj:" + ev + ":" + pool; }
+  function objectif(ev, pool) {
+    const x = State.items[cleObjectif(ev, pool)];
+    return x && !x.del && x.data && x.data.t > 0 ? x.data.t : null;
+  }
+  // « Objectif 1:05.00 · encore 1.51 s », ou « atteint ».
+  function texteObjectif(best, obj) {
+    if (!obj) return "";
+    return best <= obj ? "Objectif " + formatTemps(obj) + " atteint"
+      : "Objectif " + formatTemps(obj) + " · encore " + ((best - obj) / 100).toFixed(2) + " s";
+  }
+  function meilleurTemps(ev, pool) {
+    const s = serie(ev, pool);
+    return s.length ? Math.min.apply(null, s.map((x) => x.t)) : null;
+  }
+  function competsAVenir() {
+    return itemsDe("comp").filter((c) => c.data.d >= State.today).sort((a, b) => a.data.d.localeCompare(b.data.d));
+  }
+  function joursAvant(d) {
+    return Math.round((new Date(d + "T12:00:00") - new Date(State.today + "T12:00:00")) / 864e5);
+  }
+  function libelleJours(n) { return n === 0 ? "Aujourd'hui" : n === 1 ? "Demain" : "J-" + n; }
+
+  // --- Temps de passage ---------------------------------------------------
+  // Temps cumules tous les 50 m, separes par des espaces, « ; » ou « / » (la virgule
+  // sert aussi de decimale : « 31,20, 1:06,51 » marche grace a l'espace qui suit).
+  // Le temps final peut etre repete en dernier : il est retire. null = illisible.
+  function parsePassages(texte, ev, t) {
+    const brut = String(texte || "").trim();
+    if (!brut) return [];
+    const morceaux = brut.replace(/,\s+/g, " ").split(/[\s;/|]+/).filter(Boolean);
+    const sp = [];
+    for (let i = 0; i < morceaux.length; i++) {
+      const x = parseTemps(morceaux[i]);
+      if (!x) return null;
+      sp.push(x);
+    }
+    if (sp[sp.length - 1] === t) sp.pop();
+    if (sp.length > Number(ev.split("-")[0]) / 50 - 1) return null;
+    for (let i = 0; i < sp.length; i++) if (sp[i] >= t || (i && sp[i] <= sp[i - 1])) return null;
+    return sp;
+  }
+  // Passages complets : le temps de chaque 50 m ; incomplets : les cumules tels quels.
+  function textePassages(x) {
+    if (!x.sp || !x.sp.length) return "";
+    if (x.sp.length === Number(x.ev.split("-")[0]) / 50 - 1) {
+      const tous = x.sp.concat([x.t]);
+      return "Par 50 m : " + tous.map((v, i) => formatTemps(v - (i ? tous[i - 1] : 0))).join(" · ");
+    }
+    return "Passages : " + x.sp.map(formatTemps).join(" · ");
+  }
+
   function ajouterTemps() {
     const C = State.chrono;
-    const ev = document.getElementById("ch-ev").value;
-    const pool = Number(document.getElementById("ch-pool").value) === 50 ? 50 : 25;
-    const brut = document.getElementById("ch-temps").value;
-    const d = document.getElementById("ch-date").value;
-    const comp = document.getElementById("ch-comp").value === "1" ? 1 : 0;
-    const lieu = document.getElementById("ch-lieu").value.trim().slice(0, 120);
+    const val = (id) => document.getElementById(id).value;
+    const ev = val("ch-ev");
+    const pool = Number(val("ch-pool")) === 50 ? 50 : 25;
+    const d = val("ch-date");
+    const comp = val("ch-comp") === "1" ? 1 : 0;
+    const lieu = val("ch-lieu").trim().slice(0, 120);
     C.ev = ev; C.pool = pool; C.comp = comp;
-    const t = parseTemps(brut);
-    if (!t) { C.msg = "Temps illisible. Écrivez par exemple 1:05.32 ou 31.84."; C.msgType = "err"; renderChronos(); focusTemps(brut); return; }
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(d) || d > State.today) { C.msg = "Date invalide (pas dans le futur)."; C.msgType = "err"; renderChronos(); focusTemps(brut); return; }
+    // Ce qui a ete tape survit au redessin en cas d'erreur.
+    C.brouillon = { temps: val("ch-temps"), d: d, lieu: val("ch-lieu"), pass: val("ch-pass") };
+    const erreur = (m, champ) => {
+      C.msg = m; C.msgType = "err"; renderChronos();
+      const c = document.getElementById(champ);
+      if (c) c.focus();
+    };
+    const t = parseTemps(C.brouillon.temps);
+    if (!t) return erreur("Temps illisible. Écrivez par exemple 1:05.32 ou 31.84.", "ch-temps");
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(d) || d > State.today) return erreur("Date invalide (pas dans le futur).", "ch-date");
+    const sp = parsePassages(C.brouillon.pass, ev, t);
+    if (!sp) return erreur("Passages illisibles : les temps cumulés tous les 50 m, du plus petit au plus grand, par exemple 31.20 1:06.51.", "ch-pass");
 
-    const avant = serie(ev, pool);
-    const ancienRp = avant.length ? Math.min.apply(null, avant.map((x) => x.t)) : null;
+    const ancienRp = meilleurTemps(ev, pool);
     const id = "t" + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
-    State.times[id] = { ev: ev, pool: pool, t: t, d: d, comp: comp, lieu: lieu, u: nowMs() };
+    State.times[id] = { ev: ev, pool: pool, t: t, d: d, comp: comp, lieu: lieu, sp: sp, u: nowMs() };
     State.dirtyT[id] = 1;
     C.sel = ev + "|" + pool;
+    C.brouillon = null;
     const nom = nomEpreuve(ev) + " (" + pool + " m)";
     if (ancienRp === null) { C.msg = "Premier temps sur " + nom + " : " + formatTemps(t) + "."; C.msgType = "ok"; }
     else if (t < ancienRp) { C.msg = "Record personnel sur " + nom + " : " + formatTemps(t) + " (" + formatEcart(t - ancienRp) + ")."; C.msgType = "ok"; }
     else { C.msg = formatTemps(t) + " noté. Record : " + formatTemps(ancienRp) + " (" + formatEcart(t - ancienRp) + ")."; C.msgType = ""; }
-    persist(); Sync.schedule(); renderChronos();
+    const obj = objectif(ev, pool);
+    if (obj && t <= obj && (ancienRp === null || ancienRp > obj)) C.msg += " Objectif de " + formatTemps(obj) + " atteint !";
+    persist(); Sync.schedule(); renderChronos(); renderToday();
     const champ = document.getElementById("ch-temps");
     if (champ) champ.focus();
-  }
-  // Apres une erreur on garde ce qui a ete tape et on y remet le curseur.
-  function focusTemps(valeur) {
-    const champ = document.getElementById("ch-temps");
-    if (!champ) return;
-    champ.value = valeur;
-    champ.focus();
   }
 
   function supprimerTemps(id) {
@@ -1204,12 +1353,122 @@
     State.times[id] = { del: 1, u: nowMs() };
     State.dirtyT[id] = 1;
     State.chrono.msg = "";
-    persist(); Sync.schedule(); renderChronos();
+    persist(); Sync.schedule(); renderChronos(); renderToday();
+  }
+
+  function enregistrerObjectif(ev, pool) {
+    const C = State.chrono;
+    const brut = document.getElementById("obj-temps").value;
+    const t = parseTemps(brut);
+    if (!t) {
+      C.objMsg = "Objectif illisible, par exemple 1:05.00."; C.objMsgType = "err"; renderChronos();
+      const c = document.getElementById("obj-temps");
+      if (c) { c.value = brut; c.focus(); }
+      return;
+    }
+    ecrireItem(cleObjectif(ev, pool), "obj", { t: t });
+    C.objMsg = "Objectif enregistré."; C.objMsgType = "ok";
+    renderChronos(); renderToday();
+  }
+
+  function ajouterCompet() {
+    const C = State.chrono;
+    const val = (id) => document.getElementById(id).value;
+    const nom = val("co-nom").trim().slice(0, 80);
+    const d = val("co-date");
+    if (!nom || !/^\d{4}-\d{2}-\d{2}$/.test(d) || d < State.today) return;   // le navigateur a deja signale le champ
+    const evs = Array.from(document.querySelectorAll('#compet-form input[name="co-ev"]:checked')).map((i) => i.value);
+    const id = "c" + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+    ecrireItem(id, "comp", { nom: nom, d: d, lieu: val("co-lieu").trim().slice(0, 80), pool: Number(val("co-pool")) === 50 ? 50 : 25, evs: evs });
+    C.compOuvert = false;
+    C.compMsg = "« " + nom + " » ajoutée.";
+    renderChronos(); renderToday();
+  }
+  function supprimerCompet(id) {
+    const c = State.items[id];
+    if (!c || c.del) return;
+    if (!window.confirm("Supprimer la compétition « " + c.data.nom + " » ?")) return;
+    retirerItem(id);
+    State.chrono.compMsg = "";
+    renderChronos(); renderToday();
+  }
+
+  // Carte « Prochaine compétition » de l'onglet Aujourd'hui : compte a rebours,
+  // et pour chaque epreuve engagee le record et l'objectif dans ce bassin.
+  function competCarte() {
+    const c = competsAVenir()[0];
+    if (!c) return "";
+    const evs = (c.data.evs || []).map((ev) => {
+      const rp = meilleurTemps(ev, c.data.pool), obj = objectif(ev, c.data.pool);
+      return `<li><span>${esc(nomEpreuve(ev))}</span><span class="temps">${rp ? "RP " + formatTemps(rp) : "pas de temps"}${obj ? " · obj. " + formatTemps(obj) : ""}</span></li>`;
+    }).join("");
+    return `<div class="card compet-carte">
+        <p class="eyebrow">Prochaine compétition</p>
+        <div class="compet-j">${libelleJours(joursAvant(c.data.d))}</div>
+        <p class="compet-nom">${esc(c.data.nom)}</p>
+        <p class="compet-info">${esc(dateCourte(c.data.d))}${c.data.lieu ? " · " + esc(c.data.lieu) : ""} · bassin ${c.data.pool} m</p>
+        ${evs ? `<ul class="compet-evs">${evs}</ul>` : ""}
+      </div>`;
+  }
+
+  // --- Pour l'entraineur : CSV et fiche a imprimer --------------------------
+  function exporterCSV() {
+    // Point-virgule : le separateur qu'attend Excel en francais. Un texte qui commence
+    // par = + - @ serait lu comme une formule : on le neutralise d'une apostrophe.
+    const cel = (v) => {
+      let s = String(v);
+      if (/^[=+\-@]/.test(s)) s = "'" + s;
+      return /[";\r\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+    };
+    const lignes = [["Date", "Épreuve", "Bassin", "Temps", "Passages", "Contexte", "Lieu", "Record à ce moment"]];
+    records().forEach((r) => serie(r.ev, r.pool).forEach((x) => lignes.push([
+      x.d, nomEpreuve(x.ev), x.pool + " m", formatTemps(x.t), (x.sp || []).map(formatTemps).join(" "),
+      x.comp ? "Compétition" : "Entraînement", x.lieu || "", x.rp ? "oui" : ""])));
+    const csv = "﻿" + lignes.map((l) => l.map(cel).join(";")).join("\r\n");
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+    a.download = "trak-chronos-" + State.today + ".csv";
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  }
+
+  function remplirFiche() {
+    const recs = records();
+    const lignes = recs.map((r) => {
+      const obj = objectif(r.ev, r.pool), gain = r.n > 1 ? r.best.t - r.premier.t : 0;
+      return `<tr><td>${esc(nomEpreuve(r.ev))}</td><td>${r.pool} m</td><td class="temps"><strong>${formatTemps(r.best.t)}</strong></td>
+        <td>${esc(dateCourte(r.best.d))}${r.best.lieu ? "<br>" + esc(r.best.lieu) : ""}</td>
+        <td>${esc(textePassages(r.best)) || "—"}</td>
+        <td class="temps">${obj ? formatTemps(obj) + (r.best.t <= obj ? " (atteint)" : " (" + formatEcart(r.best.t - obj) + ")") : "—"}</td>
+        <td>${r.n} temps${gain < 0 ? ", " + formatEcart(gain) : ""}</td></tr>`;
+    }).join("");
+    const compets = competsAVenir().map((c) => `<li><strong>${esc(c.data.nom)}</strong> — ${esc(dateCourte(c.data.d))}${c.data.lieu ? ", " + esc(c.data.lieu) : ""}, bassin ${c.data.pool} m${(c.data.evs || []).length ? " : " + esc(c.data.evs.map(nomEpreuve).join(", ")) : ""}</li>`).join("");
+    let vol = "";
+    if (State.habits.some((h) => h.dist)) {
+      const lundi = mondayOf(new Date(State.today + "T12:00:00"));
+      const sem = [3, 2, 1, 0].map((k) => {
+        const debut = addDays(lundi, -7 * k), v = volume(debut, 7);
+        return `<tr><td>Semaine du ${esc(dateCourte(ymd(debut)))}</td><td class="temps">${formatDistance(v.total)}</td><td>${v.seances} séance${v.seances > 1 ? "s" : ""}</td></tr>`;
+      }).join("");
+      vol = `<h2>Volume nagé, quatre dernières semaines</h2><table class="fiche-vol"><tbody>${sem}</tbody></table>`;
+    }
+    document.getElementById("fiche").innerHTML = `
+      <h1>Fiche nageur — records et objectifs</h1>
+      <p class="fiche-date">Éditée le ${esc(dateCourte(State.today))} avec Trak.</p>
+      <h2>Records personnels</h2>
+      ${lignes ? `<table><thead><tr><th>Épreuve</th><th>Bassin</th><th>Record</th><th>Date, lieu</th><th>Passages</th><th>Objectif</th><th>Progression</th></tr></thead><tbody>${lignes}</tbody></table>` : "<p>Aucun temps enregistré.</p>"}
+      ${compets ? `<h2>Compétitions à venir</h2><ul>${compets}</ul>` : ""}
+      ${vol}`;
+  }
+  function imprimerFiche() {
+    remplirFiche();
+    window.print();
   }
 
   function renderChronos() {
     const el = document.getElementById("view-chronos");
     const C = State.chrono;
+    const B = C.brouillon || {};
     const recs = records();
     if (!recs.some((r) => r.cle === C.sel)) C.sel = recs.length ? recs[0].cle : "";
 
@@ -1219,11 +1478,13 @@
 
     const cartes = recs.map((r) => {
       const gain = r.n > 1 ? r.best.t - r.premier.t : 0;
+      const obj = objectif(r.ev, r.pool);
       return `<button type="button" class="rp-card${r.cle === C.sel ? " active" : ""}" data-action="chrono-sel" data-cle="${r.cle}" aria-pressed="${r.cle === C.sel}">
           <div class="name">${esc(nomEpreuve(r.ev))}</div>
           <div class="bassin">Bassin ${r.pool} m</div>
           <div class="num temps">${formatTemps(r.best.t)}</div>
           <div class="detail">${esc(dateCourte(r.best.d))} · ${r.n} temps${gain < 0 ? ` · <span class="gain">${formatEcart(gain)}</span> depuis le premier` : ""}</div>
+          ${obj ? `<div class="objectif${r.best.t <= obj ? " atteint" : ""}">${esc(texteObjectif(r.best.t, obj))}</div>` : ""}
         </button>`;
     }).join("");
 
@@ -1231,20 +1492,28 @@
     const r = recs.find((x) => x.cle === C.sel);
     if (r) {
       const s = serie(r.ev, r.pool);
+      const obj = objectif(r.ev, r.pool);
       const lignes = s.slice().reverse().map((x) => `<tr>
           <td>${esc(dateCourte(x.d))}<span class="ctx-mobile">${x.comp ? "Compétition" : "Entraînement"}</span></td>
-          <td class="temps">${formatTemps(x.t)}${x.t === r.best.t ? '<span class="badge">RP</span>' : ""}</td>
+          <td class="temps">${formatTemps(x.t)}${x.t === r.best.t ? '<span class="badge">RP</span>' : ""}${x.sp && x.sp.length ? `<span class="passages">${esc(textePassages(x))}</span>` : ""}</td>
           <td class="temps ${x.t > r.best.t ? "perte" : ""}">${x.t === r.best.t ? "—" : formatEcart(x.t - r.best.t)}</td>
           <td class="col-ctx">${x.comp ? "Compétition" : "Entraînement"}</td>
           <td class="col-lieu">${esc(x.lieu || "")}</td>
           <td><button type="button" class="btn btn-ghost" data-action="chrono-del" data-id="${esc(x.id)}" aria-label="Supprimer le temps ${formatTemps(x.t)} du ${esc(dateCourte(x.d))}">Supprimer</button></td>
         </tr>`).join("");
       detail = `
-        <h2>${esc(nomEpreuve(r.ev))}, bassin de ${r.pool} m</h2>
+        <h2 class="num">${esc(nomEpreuve(r.ev))}, bassin de ${r.pool} m</h2>
         <div class="card">
+          <form class="obj-form" id="obj-form" novalidate>
+            <label class="field"><span>Objectif de temps</span><input class="input temps" id="obj-temps" type="text" inputmode="decimal" autocomplete="off" placeholder="1:05.00" value="${obj ? formatTemps(obj) : ""}"></label>
+            <button type="submit" class="btn btn-primary">${obj ? "Modifier" : "Fixer l'objectif"}</button>
+            ${obj ? `<button type="button" class="btn btn-ghost" data-action="obj-del">Retirer</button>` : ""}
+            ${C.objMsg ? `<p class="form-msg ${C.objMsgType}" role="status">${esc(C.objMsg)}</p>`
+              : obj ? `<p class="form-msg${r.best.t <= obj ? " ok" : ""}">${esc(texteObjectif(r.best.t, obj))}.</p>` : ""}
+          </form>
           ${s.length > 1
-            ? `<p class="eyebrow" style="margin:0 0 6px">Progression — plus haut = plus rapide</p><div class="courbe" id="courbe"></div>`
-            : `<p class="p-muted" style="margin:0">Un seul temps pour l'instant : la courbe de progression apparaît dès le deuxième.</p>`}
+            ? `<p class="eyebrow" style="margin:18px 0 6px">Progression — plus haut = plus rapide</p><div class="courbe" id="courbe"></div>`
+            : `<p class="p-muted" style="margin:16px 0 0">Un seul temps pour l'instant : la courbe de progression apparaît dès le deuxième.</p>`}
         </div>
         <div class="card histo-wrap" style="margin-top:14px">
           <table class="histo">
@@ -1254,6 +1523,15 @@
         </div>`;
     }
 
+    const compets = competsAVenir().map((c) => `<div class="compet-ligne">
+        <div class="compet-j-petit">${libelleJours(joursAvant(c.data.d))}</div>
+        <div class="compet-corps"><strong>${esc(c.data.nom)}</strong>
+          <span class="compet-info">${esc(dateCourte(c.data.d))}${c.data.lieu ? " · " + esc(c.data.lieu) : ""} · bassin ${c.data.pool} m${(c.data.evs || []).length ? " · " + esc(c.data.evs.map(nomEpreuve).join(", ")) : ""}</span></div>
+        <button type="button" class="btn btn-ghost" data-action="compet-del" data-id="${esc(c.id)}" aria-label="Supprimer ${esc(c.data.nom)}">Supprimer</button>
+      </div>`).join("");
+    const choix = NAGES.map((n) => EPREUVES.filter((e) => e.nage === n.id).map((e) =>
+      `<label class="ev-choix"><input type="checkbox" name="co-ev" value="${e.id}"><span>${esc(e.nom)}</span></label>`).join("")).join("");
+
     el.innerHTML = `
       <h1>Chronos</h1>
       <p class="p-muted">Vos temps en compétition et à l'entraînement. Le meilleur de chaque épreuve, bassin par bassin, devient votre record personnel.</p>
@@ -1261,11 +1539,12 @@
         <label class="field field-epreuve"><span>Épreuve</span><select class="input" id="ch-ev">${options}</select></label>
         <label class="field"><span>Bassin</span><select class="input" id="ch-pool">
           <option value="25"${C.pool === 25 ? " selected" : ""}>25 m</option><option value="50"${C.pool === 50 ? " selected" : ""}>50 m</option></select></label>
-        <label class="field"><span>Temps</span><input class="input temps" id="ch-temps" type="text" inputmode="decimal" autocomplete="off" placeholder="1:05.32" required></label>
-        <label class="field"><span>Date</span><input class="input" id="ch-date" type="date" max="${State.today}" value="${State.today}" required></label>
+        <label class="field"><span>Temps</span><input class="input temps" id="ch-temps" type="text" inputmode="decimal" autocomplete="off" placeholder="1:05.32" required value="${esc(B.temps || "")}"></label>
+        <label class="field"><span>Date</span><input class="input" id="ch-date" type="date" max="${State.today}" value="${esc(B.d || State.today)}" required></label>
         <label class="field"><span>Contexte</span><select class="input" id="ch-comp">
           <option value="1"${C.comp ? " selected" : ""}>Compétition</option><option value="0"${C.comp ? "" : " selected"}>Entraînement</option></select></label>
-        <label class="field field-large"><span>Lieu ou compétition (facultatif)</span><input class="input" id="ch-lieu" type="text" maxlength="120" placeholder="Interclubs, Annecy"></label>
+        <label class="field field-large"><span>Lieu ou compétition (facultatif)</span><input class="input" id="ch-lieu" type="text" maxlength="120" placeholder="Interclubs, Annecy" value="${esc(B.lieu || "")}"></label>
+        <label class="field field-passages"><span>Temps de passage, cumulés tous les 50 m (facultatif)</span><input class="input temps" id="ch-pass" type="text" inputmode="decimal" autocomplete="off" placeholder="31.20 1:06.51 1:42.80" value="${esc(B.pass || "")}"></label>
         <div class="chrono-actions">
           <button type="submit" class="btn btn-primary">Ajouter le temps</button>
           ${C.msg ? `<p class="form-msg ${C.msgType}" role="status">${esc(C.msg)}</p>` : ""}
@@ -1273,22 +1552,62 @@
       </form>
       <h2>Records personnels</h2>
       ${cartes ? `<div class="rp-grid">${cartes}</div>` : `<p class="p-muted">Aucun temps pour l'instant. Ajoutez votre dernier chrono ci-dessus.</p>`}
-      ${detail}`;
+      ${detail}
+      <h2>Compétitions à venir</h2>
+      ${compets ? `<div class="card compet-liste">${compets}</div>` : `<p class="p-muted">Aucune compétition prévue. Ajoutez la prochaine : un compte à rebours apparaîtra sur l'écran Aujourd'hui.</p>`}
+      ${C.compMsg ? `<p class="form-msg ok" role="status">${esc(C.compMsg)}</p>` : ""}
+      <details class="card compet-ajout" id="compet-ajout"${C.compOuvert ? " open" : ""}>
+        <summary>Ajouter une compétition</summary>
+        <form class="compet-form" id="compet-form">
+          <label class="field field-nom"><span>Nom</span><input class="input" id="co-nom" type="text" maxlength="80" required placeholder="Championnats régionaux"></label>
+          <label class="field"><span>Date</span><input class="input" id="co-date" type="date" min="${State.today}" required></label>
+          <label class="field"><span>Bassin</span><select class="input" id="co-pool"><option value="25">25 m</option><option value="50">50 m</option></select></label>
+          <label class="field field-nom"><span>Lieu (facultatif)</span><input class="input" id="co-lieu" type="text" maxlength="80" placeholder="Annecy"></label>
+          <fieldset class="epreuves-choix"><legend>Épreuves engagées</legend><div class="ev-grille">${choix}</div></fieldset>
+          <div class="chrono-actions"><button type="submit" class="btn btn-primary">Ajouter la compétition</button></div>
+        </form>
+      </details>
+      ${recs.length ? `
+      <h2>Pour l'entraîneur</h2>
+      <div class="card">
+        <p class="p-muted" style="margin:0 0 14px">Tous vos temps dans un tableur, ou une fiche d'une page (records, passages, objectifs, compétitions, volume) à imprimer ou enregistrer en PDF.</p>
+        <div class="chrono-actions">
+          <button type="button" class="btn" data-action="export-csv">Télécharger les temps (CSV)</button>
+          <button type="button" class="btn" data-action="fiche">Fiche à imprimer (PDF)</button>
+        </div>
+      </div>` : ""}`;
 
     el.querySelector("#chrono-form").addEventListener("submit", (ev) => { ev.preventDefault(); ajouterTemps(); });
     el.querySelectorAll('[data-action="chrono-sel"]').forEach((b) => b.addEventListener("click", () => {
-      C.sel = b.dataset.cle; C.msg = "";
+      C.sel = b.dataset.cle; C.msg = ""; C.objMsg = "";
       renderChronos();
       const nb = document.querySelector(`[data-action="chrono-sel"][data-cle="${C.sel}"]`);
       if (nb) nb.focus();
     }));
     el.querySelectorAll('[data-action="chrono-del"]').forEach((b) => b.addEventListener("click", () => supprimerTemps(b.dataset.id)));
-    if (r) dessinerCourbe(serie(r.ev, r.pool));
+    if (r) {
+      el.querySelector("#obj-form").addEventListener("submit", (ev) => { ev.preventDefault(); enregistrerObjectif(r.ev, r.pool); });
+      const retirer = el.querySelector('[data-action="obj-del"]');
+      if (retirer) retirer.addEventListener("click", () => {
+        retirerItem(cleObjectif(r.ev, r.pool));
+        C.objMsg = "Objectif retiré."; C.objMsgType = "";
+        renderChronos(); renderToday();
+      });
+    }
+    el.querySelector("#compet-form").addEventListener("submit", (ev) => { ev.preventDefault(); ajouterCompet(); });
+    el.querySelector("#compet-ajout").addEventListener("toggle", (ev) => { C.compOuvert = ev.target.open; });
+    el.querySelectorAll('[data-action="compet-del"]').forEach((b) => b.addEventListener("click", () => supprimerCompet(b.dataset.id)));
+    const csv = el.querySelector('[data-action="export-csv"]');
+    if (csv) csv.addEventListener("click", exporterCSV);
+    const fiche = el.querySelector('[data-action="fiche"]');
+    if (fiche) fiche.addEventListener("click", imprimerFiche);
+    if (r) dessinerCourbe(serie(r.ev, r.pool), objectif(r.ev, r.pool));
   }
 
   // Courbe SVG dessinee a la largeur reelle du conteneur (le texte garde sa
   // taille sur telephone). Axe vertical inverse : un temps plus court monte.
-  function dessinerCourbe(s) {
+  // obj (facultatif) : ligne pointillee de l'objectif.
+  function dessinerCourbe(s, obj) {
     const box = document.getElementById("courbe");
     if (!box || s.length < 2) return;
     const W = Math.max(260, box.clientWidth || 600), H = 220;
@@ -1296,7 +1615,7 @@
     const jours = s.map((x) => new Date(x.d + "T12:00:00").getTime());
     let x0 = Math.min.apply(null, jours), x1 = Math.max.apply(null, jours);
     if (x1 === x0) { x0 -= 864e5; x1 += 864e5; }
-    const ts = s.map((x) => x.t);
+    const ts = s.map((x) => x.t).concat(obj ? [obj] : []);
     let lo = Math.min.apply(null, ts), hi = Math.max.apply(null, ts);
     const marge = Math.max(10, (hi - lo) * 0.1);
     lo -= marge; hi += marge;
@@ -1312,6 +1631,8 @@
       const y = Y(t).toFixed(1);
       grille += `<line class="grille" x1="${g.l}" x2="${W - g.r}" y1="${y}" y2="${y}"/><text class="axe" x="${g.l - 8}" y="${y}" dy="4" text-anchor="end">${graduation(t)}</text>`;
     }
+    const cible = obj ? `<line class="objectif-ligne" x1="${g.l}" x2="${W - g.r}" y1="${Y(obj).toFixed(1)}" y2="${Y(obj).toFixed(1)}"/>`
+      + `<text class="objectif-txt" x="${W - g.r}" y="${(Y(obj) - 6).toFixed(1)}" text-anchor="end">objectif ${formatTemps(obj)}</text>` : "";
     const dates = [s[0], s[s.length - 1]].map((x, i) =>
       `<text class="axe" x="${X(jours[i ? s.length - 1 : 0]).toFixed(1)}" y="${H - 6}" text-anchor="${i ? "end" : "start"}">${esc(dateCourte(x.d))}</text>`).join("");
     const pts = s.map((x, i) => X(jours[i]).toFixed(1) + "," + Y(x.t).toFixed(1));
@@ -1322,7 +1643,7 @@
         + `<circle class="halo" cx="${cx}" cy="${cy}" r="8"/>`;
     }).join("");
 
-    box.innerHTML = `<svg viewBox="0 0 ${W} ${H}" height="${H}" aria-label="Progression des temps">${grille}${dates}`
+    box.innerHTML = `<svg viewBox="0 0 ${W} ${H}" height="${H}" aria-label="Progression des temps${obj ? ", objectif " + formatTemps(obj) : ""}">${grille}${cible}${dates}`
       + `<polyline class="ligne" points="${pts.join(" ")}"/>${points}</svg><div class="bulle-courbe" hidden></div>`;
 
     const bulle = box.querySelector(".bulle-courbe");
@@ -1330,8 +1651,9 @@
       const x = s[Number(c.dataset.i)];
       box.querySelectorAll(".halo.on").forEach((h) => h.classList.remove("on"));
       c.nextElementSibling.classList.add("on");
-      bulle.innerHTML = `<strong>${formatTemps(x.t)}</strong>${x.rp ? " · RP" : ""}<br>${esc(dateCourte(x.d))}${x.lieu ? " · " + esc(x.lieu) : ""}`;
-      bulle.style.left = Math.min(Math.max(c.cx.baseVal.value, 70), W - 70) + "px";
+      bulle.innerHTML = `<strong>${formatTemps(x.t)}</strong>${x.rp ? " · RP" : ""}<br>${esc(dateCourte(x.d))}${x.lieu ? " · " + esc(x.lieu) : ""}`
+        + (x.sp && x.sp.length ? "<br>" + esc(textePassages(x)) : "");
+      bulle.style.left = Math.min(Math.max(c.cx.baseVal.value, 90), W - 90) + "px";
       bulle.style.top = c.cy.baseVal.value + "px";
       bulle.hidden = false;
     };
@@ -1877,8 +2199,14 @@
   function payloadTime(id) {
     const x = State.times[id];
     if (!x) return null;
-    if (x.del) return { id: id, ev: "", pool: 25, t: 0, d: "", comp: 0, lieu: "", del: 1, u: x.u || 0 };
-    return { id: id, ev: x.ev, pool: x.pool, t: x.t, d: x.d, comp: x.comp ? 1 : 0, lieu: x.lieu || "", del: 0, u: x.u || 0 };
+    if (x.del) return { id: id, ev: "", pool: 25, t: 0, d: "", comp: 0, lieu: "", sp: [], del: 1, u: x.u || 0 };
+    return { id: id, ev: x.ev, pool: x.pool, t: x.t, d: x.d, comp: x.comp ? 1 : 0, lieu: x.lieu || "", sp: x.sp || [], del: 0, u: x.u || 0 };
+  }
+  function payloadItem(id) {
+    const x = State.items[id];
+    if (!x) return null;
+    if (x.del) return { id: id, k: "", data: "", del: 1, u: x.u || 0 };
+    return { id: id, k: x.k, data: JSON.stringify(x.data || {}), del: 0, u: x.u || 0 };
   }
 
   // Applique ce que renvoie le serveur. Le serveur a déjà tranché les conflits ;
@@ -1918,13 +2246,25 @@
       if (local && (local.u || 0) > rt.u) return;
       appliedT[rt.id] = 1; touched = true;
       if (rt.del) delete State.times[rt.id];
-      else State.times[rt.id] = { ev: rt.ev, pool: rt.pool === 50 ? 50 : 25, t: rt.t, d: rt.d, comp: rt.comp ? 1 : 0, lieu: rt.lieu || "", u: rt.u };
+      else State.times[rt.id] = { ev: rt.ev, pool: rt.pool === 50 ? 50 : 25, t: rt.t, d: rt.d, comp: rt.comp ? 1 : 0, lieu: rt.lieu || "",
+        sp: Array.isArray(rt.sp) ? rt.sp : [], u: rt.u };
+    });
+
+    const appliedI = {};
+    (data.items || []).forEach((ri) => {
+      const local = State.items[ri.id];
+      if (local && (local.u || 0) > ri.u) return;
+      let contenu = null;
+      if (!ri.del) { try { contenu = JSON.parse(ri.data); } catch (e) { return; } }
+      appliedI[ri.id] = 1; touched = true;
+      if (ri.del) delete State.items[ri.id];
+      else State.items[ri.id] = { k: ri.k, data: contenu, u: ri.u };
     });
 
     if (touched) {
       State.habits.sort((a, b) => ((a.pos || 0) - (b.pos || 0)) || String(a.id).localeCompare(String(b.id)));
     }
-    return { habits: appliedH, entries: appliedE, times: appliedT };
+    return { habits: appliedH, entries: appliedE, times: appliedT, items: appliedI };
   }
 
   // --- Moteur de synchronisation ------------------------------------------
@@ -1976,13 +2316,16 @@
     sentH.forEach((id) => { stampH[id] = habitStamp(id); });
     sentE.forEach((k) => { stampE[k] = State.log[k] ? State.log[k].u || 0 : 0; });
     sentT.forEach((id) => { stampT[id] = State.times[id] ? State.times[id].u || 0 : 0; });
+    const sentI = Object.keys(State.dirtyI), stampI = {};
+    sentI.forEach((id) => { stampI[id] = State.items[id] ? State.items[id].u || 0 : 0; });
 
     try {
       const data = await api("sync.php", {
         since: Account.lastSync,
         habits: sentH.map(payloadHabit).filter(Boolean),
         entries: sentE.map(payloadEntry).filter(Boolean),
-        times: sentT.map(payloadTime).filter(Boolean)
+        times: sentT.map(payloadTime).filter(Boolean),
+        items: sentI.map(payloadItem).filter(Boolean)
       });
 
       const applied = applyRemote(data);
@@ -2006,6 +2349,15 @@
         // serveur arbitre ceux qu'il connait deja).
         if (data.first) Object.keys(State.times).forEach((id) => { if (!State.times[id].del) State.dirtyT[id] = 1; });
         Object.keys(State.times).forEach((id) => { if (State.times[id].del && !State.dirtyT[id]) delete State.times[id]; });
+      }
+      // Meme prudence pour les objectifs et competitions face a une API qui ne connait pas « items ».
+      if (Array.isArray(data.items)) {
+        sentI.forEach((id) => {
+          const cur = State.items[id] ? State.items[id].u || 0 : 0;
+          if (applied.items[id] || cur === stampI[id]) delete State.dirtyI[id];
+        });
+        if (data.first) Object.keys(State.items).forEach((id) => { if (!State.items[id].del) State.dirtyI[id] = 1; });
+        Object.keys(State.items).forEach((id) => { if (State.items[id].del && !State.dirtyI[id]) delete State.items[id]; });
       }
 
       // Compte tout neuf et vide côté serveur : on y envoie les habitudes de
@@ -2038,13 +2390,15 @@
       Account.lastSync = data.now;
       Account.lastEmail = Account.email;
       saveAccount(); persist();
-      if (Object.keys(applied.habits).length || Object.keys(applied.entries).length || Object.keys(applied.times).length) renderAfterSync();
+      if (Object.keys(applied.habits).length || Object.keys(applied.entries).length || Object.keys(applied.times).length
+        || Object.keys(applied.items).length) renderAfterSync();
       Sync.at = Date.now();
       Sync.setState("ok");
 
       // dirtyT reste plein face a une ancienne API : on ne relance pas en boucle pour lui.
       if (Object.keys(State.dirtyH).length || Object.keys(State.dirtyE).length
-        || (Array.isArray(data.times) && Object.keys(State.dirtyT).length)) Sync.schedule(500);
+        || (Array.isArray(data.times) && Object.keys(State.dirtyT).length)
+        || (Array.isArray(data.items) && Object.keys(State.dirtyI).length)) Sync.schedule(500);
     } catch (e) {
       if (e.code === "unauthorized") {
         forgetSession();
@@ -2089,7 +2443,8 @@
   }
 
   function pendingCount() {
-    return Object.keys(State.dirtyH).length + Object.keys(State.dirtyE).length + Object.keys(State.dirtyT).length;
+    return Object.keys(State.dirtyH).length + Object.keys(State.dirtyE).length + Object.keys(State.dirtyT).length
+      + Object.keys(State.dirtyI).length;
   }
 
   function syncText() {
@@ -2302,6 +2657,8 @@
     State.dirtyE = {};
     State.times = {};
     State.dirtyT = {};
+    State.items = {};
+    State.dirtyI = {};
     State.chrono.sel = "";
     persist();
   }
@@ -2398,7 +2755,7 @@
     { tab: "year", cible: "#view-year .year-card", titre: "Année",
       texte: "Une case par jour : plus le vert est foncé, plus la journée était remplie. En dessous, la série en cours et le record de chaque habitude." },
     { tab: "chronos", cible: "#chrono-form", titre: "Chronos",
-      texte: "Notez vos temps, en compétition ou à l'entraînement. Trak garde votre record personnel par épreuve et par bassin, et trace votre progression." },
+      texte: "Notez vos temps (et vos passages), en compétition ou à l'entraînement. Trak garde votre record par épreuve et par bassin, trace votre progression vers l'objectif que vous fixez, compte les jours jusqu'à la prochaine compétition et prépare une fiche pour votre entraîneur." },
     { tab: "manage", cible: "#view-manage .manage-wrap", titre: "Habitudes",
       texte: "Ajoutez, renommez ou supprimez vos habitudes, réglez combien de jours par semaine vous visez, et cochez « Compter les mètres » pour une séance dans l'eau." },
     { tab: "today", cible: "#account-btn", titre: "Sur tous vos appareils",
@@ -2525,7 +2882,7 @@
   function retracerCourbe() {
     if (State.tab !== "chronos") return;
     const r = records().find((x) => x.cle === State.chrono.sel);
-    if (r) dessinerCourbe(serie(r.ev, r.pool));
+    if (r) dessinerCourbe(serie(r.ev, r.pool), objectif(r.ev, r.pool));
   }
   let attenteCourbe = 0;
   window.addEventListener("resize", () => { clearTimeout(attenteCourbe); attenteCourbe = setTimeout(retracerCourbe, 150); });
@@ -2547,6 +2904,12 @@
   let visiteVue = true;
   try { visiteVue = localStorage.getItem(VKEY) === "1"; } catch (e) { /* stockage indisponible */ }
   if (!visiteVue) lancerVisite();
+
+  // Hors ligne : sw.js garde une copie de la page, des polices et des icones.
+  // Seulement en https (ou en local) : ailleurs le navigateur le refuse de toute facon.
+  if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "127.0.0.1" || location.hostname === "localhost")) {
+    navigator.serviceWorker.register("sw.js").catch(() => { /* sans service worker, Trak marche comme avant */ });
+  }
 })();
 </script>
 </body>

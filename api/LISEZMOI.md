@@ -127,3 +127,18 @@ mètres), `entries` (avec `m`, les mètres nagés ce jour-là) et `times`, les c
 Même arbitrage que le reste : le `u` le plus récent gagne, chrono par chrono.
 Un client à jour face à une ancienne API (sans `times` dans la réponse) garde ses
 chronos en file d'envoi au lieu de les croire envoyés.
+
+## Objectifs, compétitions, passages (2026-11-07, 2e série)
+
+- `times[].sp` : temps de passage cumulés (centièmes), 30 au plus.
+- `items` : collection générique `{ id, k, data, del, u }`. `k` = `obj` (objectif d'une
+  épreuve dans un bassin, id `obj:<épreuve>:<bassin>`, data `{"t":6500}`) ou `comp`
+  (compétition : nom, date, lieu, bassin, épreuves engagées). Le serveur ne lit pas
+  `data` : il exige du JSON de 4 000 octets au plus et arbitre par `u`, comme le reste.
+
+## Hors ligne
+
+`sw.js` (service worker) et `manifest.json` rendent Trak installable et utilisable
+sans réseau : la page est servie réseau d'abord (4 s), sinon depuis le cache ; polices
+et icônes depuis le cache. L'API n'est jamais mise en cache. **Changer `VERSION` dans
+`sw.js` dès qu'une police ou une icône change.**

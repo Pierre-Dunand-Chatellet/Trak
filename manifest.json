@@ -1,0 +1,15 @@
+{
+  "name": "Trak — natation",
+  "short_name": "Trak",
+  "description": "Carnet de natation : habitudes, mètres nagés, chronos et records personnels.",
+  "lang": "fr",
+  "start_url": "trak.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#e7e2d7",
+  "theme_color": "#e7e2d7",
+  "icons": [
+    { "src": "Image/icone-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "Image/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
+  ]
+}
