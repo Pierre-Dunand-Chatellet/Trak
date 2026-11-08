@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Trak — natation : habitudes et chronos</title>
 <meta name="description" content="Trak, carnet de natation : cochez vos séances, comptez les mètres nagés, notez vos chronos et suivez vos records personnels par épreuve, synchronisés entre vos appareils.">
 <!-- Icone : la mascotte (Image/favicon.svg), avec des PNG pour les navigateurs
@@ -280,7 +280,7 @@
   .visite-actions .btn-ghost { color: var(--color-neutral-700); }
   @media (max-width: 560px) {
     /* Sur telephone la bulle se pose en bas de l'ecran, pleine largeur. */
-    .visite-bulle { left: 16px !important; right: 16px; top: auto !important; bottom: 16px; width: auto; }
+    .visite-bulle { left: 16px !important; right: 16px; top: auto !important; bottom: calc(16px + env(safe-area-inset-bottom)); width: auto; }
   }
   @media (prefers-reduced-motion: reduce) {
     .visite-trou, .visite-bulle { transition: none; }
@@ -533,18 +533,66 @@
     aside.side { position: static; }
   }
   @media (max-width: 560px) {
-    .wrap { padding: 0 14px 60px; }
-    header.app-header { padding: 20px 0 16px; gap: 12px 10px; }
-    #account-btn { order: 2; }
-    #aide-btn { order: 3; }
-    /* Cinq onglets : trois puis deux sur toute la largeur, plutot qu'un orphelin en bas. */
-    nav.tabs { order: 4; width: 100%; gap: 6px; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); }
-    nav.tabs .btn { grid-column: span 2; padding: 10px 6px; letter-spacing: .05em; }
-    nav.tabs .btn:nth-child(n+4) { grid-column: span 3; }
-    .account-btn .who { max-width: 112px; }
-    .btn { padding: 9px 12px; letter-spacing: .1em; }
+    /* Telephone : les onglets passent dans une barre fixee en bas, a portee de pouce (comme une
+       appli), et l'en-tete ne garde que le logo, le compte et « ? » : 166 px d'en-tete -> environ 75. */
+    .wrap { padding: 0 14px calc(96px + env(safe-area-inset-bottom)); }
+    header.app-header { padding: calc(14px + env(safe-area-inset-top)) 0 12px; gap: 10px; flex-wrap: nowrap; }
+    .divider { margin-bottom: 20px; }
+    nav.tabs {
+      position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; margin: 0;
+      display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px;
+      padding: 6px 8px calc(6px + env(safe-area-inset-bottom));
+      background: var(--color-bg); border-top: 1px solid var(--color-neutral-300);
+      box-shadow: 0 -6px 18px rgba(22,19,15,.07);
+    }
+    nav.tabs .btn {
+      position: relative; min-height: 48px; padding: 8px 0; border: 0; background: none; border-radius: 10px;
+      font-family: var(--font-body); font-size: 12.5px; font-weight: 500; letter-spacing: -0.01em; text-transform: none;
+      color: var(--color-neutral-600); white-space: nowrap;
+    }
+    nav.tabs .btn:hover { background: var(--color-neutral-200); border-color: transparent; }
+    /* Onglet actif : texte en encre et en gras, petit trait vert au-dessus (pas de pastille : « Aujourd'hui » n'y tiendrait pas). */
+    nav.tabs .btn.active { background: none; color: var(--color-text); font-weight: 700; }
+    nav.tabs .btn.active::before {
+      content: ""; position: absolute; top: -7px; left: 22%; right: 22%; height: 3px; border-radius: 0 0 3px 3px;
+      background: var(--color-accent2-600);
+    }
+    .toast-zone { bottom: calc(76px + env(safe-area-inset-bottom)); }
+    .account-btn .who { max-width: 140px; }
+    .btn { padding: 11px 14px; letter-spacing: .1em; min-height: 42px; }
+    .btn-ghost { min-height: 42px; }
     h1.big, h1 { font-size: 24px; }
     .habit-row, .card { padding: 14px 16px; }
+    /* Sous 16 px, Safari iPhone zoome toute la page des qu'on touche un champ. */
+    .input { font-size: 16px; }
+    /* Cibles tactiles d'au moins 44 px. */
+    .check { width: 44px; height: 44px; font-size: 17px; }
+    .habit-row { padding: 12px 14px; }
+    .habit-row .top { gap: 12px; }
+    .note-toggle { padding: 10px 8px; }
+    /* Aujourd'hui : reussite et volume cote a cote plutot que deux grandes cartes empilees. */
+    aside.side { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    aside.side > * { grid-column: 1 / -1; }
+    aside.side > .stat-card + .stat-card, aside.side > .stat-card:has(+ .stat-card) { grid-column: auto; }
+    .stat-card { padding: 16px; }
+    .stat-card .big-num { font-size: 32px; }
+    .stat-card .stat-detail { font-size: 12px; }
+    .compet-carte .compet-j { font-size: 32px; }
+    /* Annee : les series sur deux colonnes. */
+    .streak-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .streak-card { padding: 14px 16px; }
+    .streak-card .num { font-size: 24px; }
+    /* Chronos : records sur deux colonnes, objectif sur une ligne. */
+    .rp-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .rp-card { padding: 12px 14px; }
+    .rp-card .num { font-size: 23px; }
+    .rp-card .detail, .rp-card .objectif { font-size: 11.5px; }
+    .obj-form .field { flex: 1 1 110px; }
+    .obj-form .field .input { width: 100%; }
+    .ev-choix { padding: 11px 12px; }
+    .compet-ajout summary { padding: 14px 0; }
+    .aide-btn { width: 44px; height: 44px; }
+    .pied a { padding: 12px 0; }
     .chrono-form { grid-template-columns: 1fr 1fr; }
     .chrono-form .field-large, .chrono-form .field-epreuve { grid-column: 1 / -1; }
     .chrono-form .chrono-actions { grid-column: 1 / -1; }
@@ -557,9 +605,11 @@
     .compet-ligne .btn-ghost { margin-left: auto; }
     .histo .ctx-mobile { display: block; }
     .histo td, .histo th { padding-right: 8px; }
-    .week-table { grid-template-columns: minmax(80px,1fr) repeat(7, 30px); min-width: 0; }
-    .week-table .total { display: none; }
-    .week-cell { width: 28px; height: 28px; font-size: 12px; }
+    /* Semaine : le nom de l'habitude au-dessus de ses sept cases, qui prennent toute la largeur. */
+    .week-table { grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px 6px; min-width: 0; }
+    .week-table > div:first-child, .week-table .total { display: none; }
+    .week-table .rowname { grid-column: 1 / -1; padding: 8px 0 0; }
+    .week-cell { width: 100%; max-width: 42px; height: 42px; justify-self: center; font-size: 15px; }
     .year-inner { min-width: 560px; }
     .year-cell { width: 9px; height: 9px; }
     .month-label { width: 9px; font-size: 11px; }
@@ -871,6 +921,7 @@
     ["today", "week", "year", "chronos", "manage"].forEach((t) => {
       document.getElementById("view-" + t).style.display = t === State.tab ? "" : "none";
     });
+    if (State.tab === "year") caleAnnee();
   }
 
   function renderToday() {
@@ -1067,7 +1118,7 @@
         const ratio = State.habits.length ? n / State.habits.length : 0;
         const bg = future ? "var(--color-future-beige)" : heatColor(ratio);
         cellsHtml += inYear
-          ? `<div class="year-cell" title="${day} — ${n}/${State.habits.length}" style="background:${bg}"></div>`
+          ? `<div class="year-cell${day === State.today ? " auj" : ""}" title="${day} — ${n}/${State.habits.length}" style="background:${bg}"></div>`
           : `<div class="year-cell" style="background:transparent"></div>`;
       }
       colsHtml += `<div class="year-col">${cellsHtml}</div>`;
@@ -1107,6 +1158,18 @@
         <span class="legend-note">Une case par jour : plus le vert est foncé, plus vous avez coché d'habitudes ce jour-là.</span>
       </div>
       <div class="streak-grid">${streakHtml || "<p class=\"p-muted\">—</p>"}</div>`;
+    caleAnnee();
+  }
+
+  // Sur un ecran etroit la grille de l'annee defile de cote : on l'ouvre sur les
+  // dernieres semaines (aujourd'hui aux trois quarts) plutot que sur janvier.
+  // Sans effet tant que l'onglet est cache (largeur nulle) : rappele a l'ouverture.
+  function caleAnnee() {
+    const carte = document.querySelector("#view-year .year-card");
+    const auj = carte && carte.querySelector(".year-cell.auj");
+    if (!carte || !auj || !carte.clientWidth) return;
+    const x = auj.getBoundingClientRect().left - carte.getBoundingClientRect().left + carte.scrollLeft;
+    carte.scrollLeft = Math.max(0, x - carte.clientWidth * 0.75);
   }
 
   function renderManage() {
@@ -2888,7 +2951,11 @@
   window.addEventListener("resize", () => { clearTimeout(attenteCourbe); attenteCourbe = setTimeout(retracerCourbe, 150); });
 
   document.querySelectorAll(".tabs .btn").forEach((b) => {
-    b.addEventListener("click", () => { State.tab = b.dataset.tab; renderTabs(); retracerCourbe(); });
+    b.addEventListener("click", () => {
+      State.tab = b.dataset.tab; renderTabs(); retracerCourbe(); caleAnnee();
+      // Barre d'onglets en bas (telephone) : on repart du haut du nouvel ecran.
+      window.scrollTo(0, 0);
+    });
   });
 
   load();
