@@ -946,6 +946,13 @@
   }
   /* Titres : pas de mot seul sur la dernière ligne (« 25 / m »). */
   h1, h2 { text-wrap: balance; }
+  /* iPhone : la page passe sous l'heure et la batterie (viewport-fit=cover), et iOS floute ce qui
+     défile dessous. Une bande pleine, de la couleur du fond, couvre cette zone : le contenu
+     disparaît net sous la barre d'état au lieu d'y devenir flou. Hauteur nulle ailleurs. */
+  .bande-statut {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 45; pointer-events: none;
+    height: env(safe-area-inset-top, 0px); background: var(--color-bg);
+  }
   @media (max-width: 560px) {
     /* Cibles tactiles de 44 px au moins : boutons, champs, cases de la semaine. */
     .btn, .btn-ghost { min-height: 44px; }
@@ -957,6 +964,7 @@
 </style>
 </head>
 <body>
+<div class="bande-statut" aria-hidden="true"></div>
 
 <div class="wrap">
 
