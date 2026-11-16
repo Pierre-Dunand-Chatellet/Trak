@@ -38,8 +38,9 @@ tenue gagnée le reste la saison suivante. Elle est gardée par appareil, dans l
 **Utilisable sans réseau** : `manifest.json` et `sw.js` rendent Trak installable sur l'écran
 d'accueil ; la page, les polices et les icônes restent en cache, les saisies attendent le réseau.
 
-**Une visite guidée** en cinq étapes se lance à la première ouverture, et se rejoue depuis le
-bouton « ? » de l'en-tête.
+**Un guide interactif** se lance à la première ouverture, et se rejoue depuis Réglages > Guide.
+En 24 étapes, on essaie chaque bouton soi-même (cocher, noter des mètres, ajouter un temps…)
+sur un carnet d'essai : le vrai carnet n'est pas touché, et l'essai disparaît à la fin.
 
 ## Comment c'est fait
 

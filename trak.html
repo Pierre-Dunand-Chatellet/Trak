@@ -252,7 +252,6 @@
 
   /* Visite guidee : un "trou" lumineux autour de l'element explique (son
      ombre geante assombrit tout le reste) et une bulle de texte a cote. */
-  .aide-btn { width: 38px; height: 38px; padding: 0; font-size: 15px; display: grid; place-items: center; }
   .visite { position: fixed; inset: 0; z-index: 70; }
   .visite[hidden] { display: none; }
   .visite.sans-cible { background: rgba(43,38,32,.55); }
@@ -269,6 +268,20 @@
     transition: top .3s ease, left .3s ease;
   }
   .visite-bulle:focus { outline: none; }
+  /* Guide interactif : la page reste visible et défilable ; seules la bulle et la zone
+     éclairée d'une étape « à vous » répondent (le tri est fait en JS). */
+  .visite { pointer-events: none; }
+  .visite-bulle { pointer-events: auto; }
+  .visite-faire { margin: 12px 0 0; padding: 10px 12px; border-radius: 8px; background: var(--color-accent-200); font-size: 14px; line-height: 1.45; color: var(--color-text); }
+  .visite-faire strong { color: var(--color-accent-700); }
+  .visite-faire.fait { background: #e3f2e5; }
+  .visite-faire.fait strong { color: #22672e; }
+  .visite-progres { height: 4px; margin: 14px 0 0; border-radius: 2px; background: var(--color-neutral-200); overflow: hidden; }
+  .visite-progres span { display: block; height: 100%; background: var(--color-accent-500); transition: width .3s ease; }
+  /* Étape « à vous » : un contour qui respire autour de la zone à toucher. */
+  .visite.attend .visite-trou { outline: 3px solid var(--color-accent-500); outline-offset: 3px; animation: trou-appel 1.4s ease-in-out infinite; }
+  @keyframes trou-appel { 0%, 100% { outline-offset: 3px; outline-color: rgba(29,78,216,1); } 50% { outline-offset: 8px; outline-color: rgba(29,78,216,.35); } }
+  @media (prefers-reduced-motion: reduce) { .visite.attend .visite-trou { animation: none; } .visite-progres span { transition: none; } }
   .visite-bulle .mascotte { display: block; margin: -4px auto 8px; }
   .visite-etape { font-family: var(--font-mono); font-size: 11px; font-weight: 400; letter-spacing: .14em; text-transform: uppercase; color: var(--color-accent-700); margin: 0 0 6px; }
   .visite-bulle h2 { font-size: 18px; margin: 0 0 6px; }
@@ -282,6 +295,8 @@
   @media (max-width: 560px) {
     /* Sur telephone la bulle se pose en bas de l'ecran, pleine largeur. */
     .visite-bulle { left: 16px !important; right: 16px; top: auto !important; bottom: calc(16px + env(safe-area-inset-bottom)); width: auto; }
+    /* Quand la zone expliquée est en bas (barre d'onglets), la bulle passe en haut. */
+    .visite-bulle.en-haut { top: calc(16px + env(safe-area-inset-top)) !important; bottom: auto; }
   }
   @media (prefers-reduced-motion: reduce) {
     .visite-trou, .visite-bulle { transition: none; }
@@ -485,9 +500,15 @@
   .account-btn { display: flex; align-items: center; gap: 8px; }
   .account-btn .who { max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .sync-dot { width: 8px; height: 8px; border-radius: 999px; background: var(--color-neutral-400); flex: none; }
-  .sync-dot.ok { background: var(--color-accent2-500); }
+  /* Vert = à jour. Le rouge des aimants est réservé à l'échec, sinon on croit à une erreur. */
+  .sync-dot.ok { background: #2f8a3e; }
   .sync-dot.busy { background: var(--color-accent-500); animation: sync-pulse 1s ease-in-out infinite; }
-  .sync-dot.err { background: #c0532c; }
+  .sync-dot.err { background: var(--color-accent2-600); }
+  /* Fenêtre du compte : les trois actions secondaires l'une sous l'autre, alignées à gauche. */
+  .compte-liens { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; margin-top: 18px; padding-top: 10px; border-top: 1px solid var(--color-neutral-200); }
+  .compte-liens .btn { padding-left: 0; padding-right: 0; color: var(--color-text); }
+  .compte-liens .btn:hover { background: none; text-decoration: underline; }
+  .compte-liens .btn-alerte { color: var(--color-accent2-600); }
   @keyframes sync-pulse { 0%,100% { opacity: 1; } 50% { opacity: .3; } }
   /* Si le système demande moins d'animations : plus de clignotement pendant la synchro,
      mascotte immobile (ni balancement, ni clignement, ni saut) et toast sans glissement.
@@ -547,7 +568,7 @@
   }
   @media (max-width: 560px) {
     /* Telephone : les onglets passent dans une barre fixee en bas, a portee de pouce (comme une
-       appli), et l'en-tete ne garde que le logo, le compte, les réglages et « ? » : 166 px d'en-tete -> environ 75. */
+       appli), et l'en-tete ne garde que le logo, le compte et les réglages : 166 px d'en-tete -> environ 75. */
     .wrap { padding: 0 14px calc(96px + env(safe-area-inset-bottom)); }
     header.app-header { padding: calc(14px + env(safe-area-inset-top)) 0 12px; gap: 10px; flex-wrap: nowrap; }
     .divider { margin-bottom: 20px; }
@@ -603,7 +624,6 @@
     .obj-form .field .input { width: 100%; }
     .ev-choix { padding: 11px 12px; }
     .compet-ajout summary { padding: 14px 0; }
-    .aide-btn { width: 44px; height: 44px; }
     .pied a { padding: 12px 0; }
     .chrono-form { grid-template-columns: 1fr 1fr; }
     .chrono-form .field-large, .chrono-form .field-epreuve { grid-column: 1 / -1; }
@@ -953,6 +973,14 @@
     position: fixed; top: 0; left: 0; right: 0; z-index: 45; pointer-events: none;
     height: env(safe-area-inset-top, 0px); background: var(--color-bg);
   }
+  /* iOS floute aussi une trentaine de pixels SOUS l'heure : dès qu'on a défilé, la bande
+     descend d'autant (rien sur un écran sans encoche : min(…, 0) = 0). Au repos elle reste
+     courte, sinon elle cacherait l'en-tête. */
+  html.defile .bande-statut {
+    height: calc(env(safe-area-inset-top, 0px) + min(36px, env(safe-area-inset-top, 0px)));
+  }
+  /* Ce qu'on fait défiler jusqu'en haut (guide, ancres) s'arrête sous la bande, pas dessous. */
+  html { scroll-padding-top: calc(env(safe-area-inset-top, 0px) + min(36px, env(safe-area-inset-top, 0px)) + 12px); }
   @media (max-width: 560px) {
     /* Cibles tactiles de 44 px au moins : boutons, champs, cases de la semaine. */
     .btn, .btn-ghost { min-height: 44px; }
@@ -981,7 +1009,6 @@
     <button type="button" class="btn icone-btn" id="reglages-btn" aria-label="Réglages" title="Réglages" aria-pressed="false">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.27 9.78 L21.82 10.09 L21.82 13.91 L19.27 14.22 L18.71 15.57 L20.29 17.59 L17.59 20.29 L15.57 18.71 L14.22 19.27 L13.91 21.82 L10.09 21.82 L9.78 19.27 L8.43 18.71 L6.41 20.29 L3.71 17.59 L5.29 15.57 L4.73 14.22 L2.18 13.91 L2.18 10.09 L4.73 9.78 L5.29 8.43 L3.71 6.41 L6.41 3.71 L8.43 5.29 L9.78 4.73 L10.09 2.18 L13.91 2.18 L14.22 4.73 L15.57 5.29 L17.59 3.71 L20.29 6.41 L18.71 8.43Z"/><circle cx="12" cy="12" r="3.2"/></svg>
     </button>
-    <button type="button" class="btn aide-btn" id="aide-btn" aria-label="Revoir la visite guidée" title="Revoir la visite guidée">?</button>
   </header>
   <div class="divider"></div>
 
@@ -1202,7 +1229,12 @@
     persist();
   }
 
+  // Carnet d'essai du guide : pendant le guide, on manipule des données d'exemple ;
+  // rien n'est enregistré ni synchronisé, et le vrai carnet revient à la fin.
+  const Essai = { actif: false, copie: null };
+
   function persist() {
+    if (Essai.actif) return;
     try {
       localStorage.setItem(KEY, JSON.stringify({
         v: 2,
@@ -2110,6 +2142,14 @@
         <button type="button" class="btn btn-ghost reglages-retour" data-action="reglages-retour"><span aria-hidden="true">←</span> ${esc(libelleRetour())}</button>
         <h1 id="reglages-titre" tabindex="-1">Réglages</h1>
 
+        <section class="reglages-bloc" aria-labelledby="rg-guide">
+          <h2 id="rg-guide">Guide</h2>
+          <p class="p-muted">Le tour de l'application, écran par écran : où toucher et à quoi ça sert.</p>
+          <div class="reglages-actions">
+            <button type="button" class="btn" data-action="guide" id="guide-btn">Revoir le guide</button>
+          </div>
+        </section>
+
         <section class="reglages-bloc" aria-labelledby="rg-habitudes">
           <h2 id="rg-habitudes">Habitudes</h2>
           <p class="p-muted">Le nom, l'objectif en jours par semaine, et pour les séances dans l'eau, la distance nagée.</p>
@@ -2210,7 +2250,8 @@
         if (!window.confirm(warning)) return;
         wipeAll();
         majMsgSauvegarde("");
-      } else if (act === "sauvegarder") telechargerSauvegarde();
+      } else if (act === "guide") lancerVisite();
+      else if (act === "sauvegarder") telechargerSauvegarde();
       else if (act === "restaurer") document.getElementById("restaurer-fichier").click();
       else if (act === "compte-ouvrir") openAccount();
       else if (act === "compte-supprimer") openAccount("delete");
@@ -3678,6 +3719,7 @@
     }
   }
   function sauverMascotte() {
+    if (Essai.actif) return;
     try {
       localStorage.setItem(MKEY, JSON.stringify({
         couleur: Mascotte.couleur, accessoire: Mascotte.accessoire, dernierPalier: Mascotte.dernierPalier, unite: "km"
@@ -4137,13 +4179,13 @@
   };
 
   Sync.schedule = function (delay) {
-    if (!Account.token) return;
+    if (!Account.token || Essai.actif) return;
     clearTimeout(Sync.timer);
     Sync.timer = setTimeout(() => { Sync.run(); }, delay == null ? 1200 : delay);
   };
 
   Sync.run = async function () {
-    if (!Account.token) return;
+    if (!Account.token || Essai.actif) return;
     if (Sync.running) { Sync.again = true; return; }
     Sync.running = true;
     clearTimeout(Sync.timer);
@@ -4454,12 +4496,10 @@
       </div>
       ${msgHtml()}
       ${devicesHtml()}
-      <div class="modal-actions" style="margin-top:22px">
-        <button type="button" class="btn btn-ghost" data-act="password" style="padding-left:0">Changer le mot de passe</button>
-        <button type="button" class="btn btn-ghost spacer" data-act="logout" style="color:var(--color-accent-700)">Se déconnecter</button>
-      </div>
-      <div class="modal-actions" style="margin-top:4px">
-        <button type="button" class="btn btn-ghost btn-alerte" data-act="delete" style="padding-left:0">Supprimer mon compte</button>
+      <div class="compte-liens">
+        <button type="button" class="btn btn-ghost" data-act="password">Changer le mot de passe</button>
+        <button type="button" class="btn btn-ghost" data-act="logout">Se déconnecter</button>
+        <button type="button" class="btn btn-ghost btn-alerte" data-act="delete">Supprimer mon compte</button>
       </div>`;
   }
 
@@ -4651,78 +4691,272 @@
   }
 
   /* =========================================================================
-     Visite guidee : explique chaque onglet a la premiere ouverture. Elle
-     bascule sur l'onglet concerne et met en evidence la zone decrite.
-     Relancable avec le bouton « ? » de l'en-tete.
+     Guide interactif : on essaie chaque bouton soi-même, sur un carnet d'essai.
+     Chaque étape éclaire une zone. Une étape « à vous » attend le geste demandé
+     (seule la zone éclairée répond) puis passe seule à la suite ; une étape
+     d'explication avance avec « Suivant ». Le nom de l'écran est toujours affiché.
+     Lancé à la première ouverture, puis depuis Réglages > Guide.
      ========================================================================= */
-  const VKEY = "trak.visite.v1";
-  // Cinq étapes au plus, une par écran. Sur téléphone, la bulle est en bas de l'écran :
-  // la zone est remontée en haut et sa mise en évidence s'arrête au-dessus de la bulle.
+  // v3 (16 novembre 2026) : guide interactif ; il se relance une fois chez tout le monde.
+  const VKEY = "trak.visite.v3";
+  const auj = () => State.today;
+  const entreeSeance = () => State.log["n-seance|" + auj()] || {};
+  // Champs d'une étape :
+  //   ecran   nom affiché (« Aujourd'hui », « Bilan · Saison »…) ; tab : écran ouvert à l'arrivée
+  //   cible   sélecteur (ou liste essayée dans l'ordre) de la zone éclairée
+  //   faire   consigne du geste ; fait() dit quand il est accompli (étape « à vous »)
+  //   haut    sur téléphone, bulle en haut (zone expliquée en bas de l'écran)
+  //   vue     vue de Chronos à ouvrir ; jour : "hier" pour montrer la veille
   const VISITE = [
-    { tab: "today", titre: "Bienvenue sur Trak",
-      texte: "Votre carnet de nageur : les habitudes de chaque jour, les mètres nagés et vos chronos. La mascotte change de tenue au fil des kilomètres de la saison." },
-    { tab: "today", cible: "#view-today .today-grid > div:first-child", titre: "Le jour",
-      texte: "Cochez une habitude dès qu'elle est faite. Après une séance, notez la distance ; « + séance » en ajoute une deuxième. Les flèches près de la date ramènent aux jours passés." },
-    { tab: "chronos", cible: "#chronos-tete", titre: "Chronos",
-      texte: "« Ajouter un temps » note un chrono, avec ses passages si vous voulez. Trak garde votre record par épreuve et par bassin. Compétitions : les prochaines, leurs temps limites, et vos temps aux passées." },
-    { tab: "week", cible: "#view-week .week-table-wrap", titre: "Bilan",
-      texte: "Semaine : les sept jours en un tableau, une case oubliée se coche d'un clic. Saison : une case par jour depuis le 1er septembre, les kilomètres par semaine et vos séries." },
-    { tab: "today", cible: "#reglages-btn", titre: "Réglages et compte",
-      texte: "La roue dentée ouvre les Réglages : vos habitudes, leur objectif par semaine et la sauvegarde du carnet. À sa gauche, un compte facultatif synchronise téléphone et ordinateur. « ? » relance cette visite." }
+    { ecran: "Bienvenue", tab: "today", titre: "Essayez Trak, pas à pas",
+      texte: "Ce guide vous fait toucher chaque bouton pour de vrai, sur un carnet d'essai : vos vraies données ne bougent pas, et l'essai disparaît à la fin. À chaque étape, une zone est éclairée. Quand une consigne commence par « À vous », faites-la : le guide passe tout seul à la suite." },
+
+    { ecran: "Aujourd'hui", tab: "today", cible: '#view-today .habit-row[data-id="n-seance"] .check', titre: "Cocher une habitude",
+      texte: "Vous êtes sur l'écran Aujourd'hui : la liste de ce que vous voulez faire chaque jour. Quand une chose est faite, on la coche.",
+      faire: "Touchez le rond à gauche de « Séance de natation ».",
+      fait: () => !!entreeSeance().done },
+    { ecran: "Aujourd'hui", tab: "today", cible: '#view-today [data-action="metres"][data-id="n-seance"]', titre: "Noter les mètres nagés",
+      texte: "Le rond est devenu rouge : la séance est cochée. Juste dessous, la case Distance garde les mètres de la séance.",
+      faire: "Touchez la case Distance, tapez 3000, puis touchez « OK » sur le clavier (ou ailleurs sur l'écran).",
+      fait: () => (entreeSeance().m || 0) > 0 },
+    { ecran: "Aujourd'hui", tab: "today", cible: '#view-today [data-action="note-toggle"][data-id="n-seance"]', titre: "Ouvrir une note",
+      texte: "Les mètres sont enregistrés. Une note, c'est une phrase sur votre journée : « épaule fatiguée », « bonne séance »…",
+      faire: "Touchez « + note » sur la ligne de la séance.",
+      fait: () => !!document.querySelector('#view-today [data-action="note-input"][data-id="n-seance"]') },
+    { ecran: "Aujourd'hui", tab: "today", cible: '#view-today [data-action="note-input"][data-id="n-seance"]', titre: "Écrire la note",
+      texte: "Une ligne s'est ouverte sous la séance.",
+      faire: "Écrivez quelques mots, puis touchez « OK » sur le clavier (ou ailleurs sur l'écran).",
+      fait: () => !!(entreeSeance().note || "").trim() },
+    { ecran: "Aujourd'hui", tab: "today", cible: '#view-today [data-action="jour-prec"]', titre: "Remplir un jour oublié",
+      texte: "La note est rangée avec la séance. En haut, la date du jour ; les flèches à côté servent à remplir un jour oublié.",
+      faire: "Touchez la flèche ← pour aller à hier.",
+      fait: () => State.jour < auj() },
+    { ecran: "Aujourd'hui · hier", tab: "today", jour: "hier", cible: "#view-today .jour-titre, #view-today h1", titre: "Vous êtes sur hier",
+      texte: "La date en haut a changé : c'est maintenant la journée d'hier. Tout ce que vous cochez ici est rangé à hier, comme si vous l'aviez noté hier soir." },
+    { ecran: "Aujourd'hui · hier", tab: "today", jour: "hier", cible: ['#view-today [data-action="jour-auj"]', '#view-today [data-action="jour-suiv"]'], titre: "Revenir à aujourd'hui",
+      faire: "Touchez « Aujourd'hui » pour revenir au jour même.",
+      fait: () => State.jour === auj() },
+    { ecran: "Aujourd'hui", tab: "today", cible: "#view-today .volume-carte", titre: "Votre semaine en bref",
+      texte: "Plus bas, Trak additionne tout seul les mètres nagés de la semaine, puis montre vos objectifs de la semaine. Ces cartes se remplissent à chaque coche." },
+
+    { ecran: "Aujourd'hui", tab: "today", cible: '.tabs [data-tab="bilan"]', haut: true, titre: "Changer d'écran",
+      texte: "Trak a trois écrans : Aujourd'hui, Bilan et Chronos. Leurs noms sont dans la barre en bas (en haut sur ordinateur). Le nom en couleur est l'écran où vous êtes.",
+      faire: "Touchez « Bilan » pour aller voir vos semaines.",
+      fait: () => State.tab === "week" || State.tab === "year" },
+    { ecran: "Bilan · Semaine", tab: "week", cible: "#view-week .week-table-wrap", titre: "Votre semaine",
+      texte: "Vous êtes sur l'écran Bilan. Une ligne par habitude, une colonne par jour : un rond rouge veut dire « fait ». Un jour oublié se coche aussi ici, d'un toucher." },
+    { ecran: "Bilan · Semaine", tab: "week", cible: '#bilan-switch [data-vue="year"]', titre: "Voir toute la saison",
+      texte: "En haut du Bilan, deux boutons : Semaine et Saison.",
+      faire: "Touchez « Saison ».",
+      fait: () => State.tab === "year" },
+    { ecran: "Bilan · Saison", tab: "year", cible: "#view-year .year-card", titre: "Une case par jour",
+      texte: "Une petite case par jour depuis le 1er septembre. Plus elle est rouge, plus vous avez coché de choses ce jour-là. Les jours à venir restent gris." },
+    { ecran: "Bilan · Saison", tab: "year", cible: "#vol-saison", titre: "Les kilomètres par semaine",
+      texte: "Chaque barre, c'est une semaine. Plus elle est haute, plus vous avez nagé. Touchez une barre (ou glissez le doigt) pour lire le chiffre exact au-dessus." },
+
+    { ecran: "Bilan · Saison", tab: "year", cible: '.tabs [data-tab="chronos"]', haut: true, titre: "Aller aux chronos",
+      texte: "Retour à la barre des écrans.",
+      faire: "Touchez « Chronos ».",
+      fait: () => State.tab === "chronos" },
+    { ecran: "Chronos · Records", tab: "chronos", vue: "records", cible: '#view-chronos [data-action="chrono-form-ouvrir"]', titre: "Ajouter un temps",
+      texte: "Vous êtes sur l'écran Chronos : il garde vos temps de course, nage par nage.",
+      faire: "Touchez « Ajouter un temps ».",
+      fait: () => !!document.getElementById("ch-temps") },
+    { ecran: "Chronos · Records", tab: "chronos", vue: "records", cible: "#ch-temps", titre: "Taper le temps",
+      texte: "Le formulaire est ouvert, avec « 100 m nage libre » et « 25 m » déjà choisis. Sur iPhone, les virgules remplacent les deux-points.",
+      faire: "Touchez la case Temps et tapez 1,08,50 (1 minute 08 secondes 50).",
+      fait: () => { const c = document.getElementById("ch-temps"); return !!(c && parseTemps(c.value)); } },
+    { ecran: "Chronos · Records", tab: "chronos", vue: "records", cible: '#chrono-form button[type="submit"]', titre: "Enregistrer le temps",
+      texte: "Le temps est tapé. Il reste à l'enregistrer.",
+      faire: "Touchez « Ajouter le temps ».",
+      debut: () => tempsVivants().length,
+      fait: (n) => tempsVivants().length > n },
+    { ecran: "Chronos · Records", tab: "chronos", vue: "records", cible: "#view-chronos .rp-grid", titre: "Vos records",
+      texte: "Votre temps est rangé avec les autres. Le meilleur temps de chaque épreuve devient votre record : c'est le grand chiffre bleu. Touchez une carte pour voir sa courbe de progrès." },
+    { ecran: "Chronos · Records", tab: "chronos", vue: "records", cible: '[data-action="chronos-vue"][data-vue="compets"]', titre: "Les compétitions",
+      texte: "En haut de Chronos, deux boutons : Records et Compétitions.",
+      faire: "Touchez « Compétitions ».",
+      fait: () => State.chrono.vue === "compets" },
+    { ecran: "Chronos · Compétitions", tab: "chronos", vue: "compets", cible: ["#view-chronos .compet-liste", "#view-chronos .compet-ajout"], titre: "Vos prochaines courses",
+      texte: "Ici, vos compétitions à venir avec le nombre de jours qui restent (J-12 = dans 12 jours). « Ajouter une compétition », plus bas, en crée une. Après la course, Trak vous propose d'entrer vos temps." },
+
+    { ecran: "En haut de l'écran", tab: "today", cible: "#account-btn", titre: "Le même carnet partout",
+      texte: "Ce bouton sert à créer un compte, si vous le voulez (pas pendant l'essai). Avec un compte, votre carnet est le même sur votre téléphone et votre ordinateur. Le petit point devient vert quand tout est enregistré." },
+    { ecran: "En haut de l'écran", tab: "today", cible: "#reglages-btn", titre: "Les réglages",
+      texte: "À côté du compte, la roue dentée.",
+      faire: "Touchez la roue dentée pour ouvrir les Réglages.",
+      fait: () => State.tab === "reglages" },
+    { ecran: "Réglages", tab: "reglages", cible: '#view-reglages section[aria-labelledby="rg-habitudes"]', titre: "Vos habitudes",
+      texte: "Vous êtes dans les Réglages. Ici, vous changez vos habitudes : leur nom, combien de fois par semaine, et si elles comptent les mètres. Plus bas : la sauvegarde de votre carnet et votre compte." },
+    { ecran: "Réglages", tab: "reglages", cible: "#guide-btn", titre: "C'est fini !",
+      texte: "Ce bouton relance ce guide quand vous voulez. En touchant « Terminer », le carnet d'essai disparaît et vous retrouvez le vôtre, exactement comme avant." }
   ];
-  const Visite = { i: -1 };
+  const Visite = { i: -1, base: null, fini: false, minuterie: 0 };
+  const etapeAction = (e) => typeof e.fait === "function";
+
+  // cible : un sélecteur, ou une liste essayée dans l'ordre (le bouton n'existe pas toujours).
+  function cibleEtape(e) {
+    for (const s of [].concat(e.cible || [])) {
+      const el = document.querySelector(s);
+      if (el && el.getClientRects().length) return el;
+    }
+    return null;
+  }
 
   function visiteActive() { return Visite.i >= 0; }
+
+  // --- Carnet d'essai -----------------------------------------------------
+  function donneesEssai() {
+    const t = nowMs(), j = (n) => ymd(addDays(new Date(auj() + "T12:00:00"), -n));
+    const habits = defaultHabits().map((h) => Object.assign(h, { u: t }));
+    const log = {};
+    // Trois semaines d'exemple : natation 4 à 5 fois par semaine, prépa et étirements de temps en temps.
+    const mNage = [3200, 0, 2800, 3500, 0, 3000, 0, 2600, 3400, 0, 3100, 2900, 0, 0, 3300, 2700, 0, 3600, 3000, 0];
+    for (let n = 1; n <= 20; n++) {
+      if (mNage[n - 1]) log["n-seance|" + j(n)] = { done: true, note: n === 3 ? "Séries de 100 m, bonnes sensations" : "", m: mNage[n - 1], u: t };
+      if (n % 3 === 1) log["n-prepa|" + j(n)] = { done: true, note: "", m: 0, u: t };
+      if (n % 2 === 0) log["n-etirements|" + j(n)] = { done: true, note: "", m: 0, u: t };
+    }
+    const times = {};
+    [["100-nl", 7240, 45], ["100-nl", 7085, 24], ["100-nl", 6990, 8], ["50-nl", 3260, 30], ["50-nl", 3195, 8]].forEach(([ev, tps, n], k) => {
+      times["essai" + k] = { ev: ev, pool: 25, t: tps, d: j(n), comp: 1, lieu: "Piscine du club", sp: [], u: t };
+    });
+    const items = {
+      "essai-comp": { k: "comp", data: { nom: "Meeting du club", d: ymd(addDays(new Date(auj() + "T12:00:00"), 12)), lieu: "Piscine du club", pool: 25, evs: ["50-nl", "100-nl"] }, u: t },
+      "obj:100-nl:25": { k: "obj", data: { t: 6800 }, u: t }
+    };
+    return { habits: habits, log: log, times: times, items: items };
+  }
+
+  function entrerEssai() {
+    if (Essai.actif) return;
+    clearTimeout(Sync.timer);
+    Essai.copie = {
+      state: JSON.parse(JSON.stringify(Object.assign({}, State, { today: undefined }))),
+      mascotte: { dernierPalier: Mascotte.dernierPalier, couleur: Mascotte.couleur, accessoire: Mascotte.accessoire }
+    };
+    Essai.actif = true;
+    const d = donneesEssai();
+    Object.assign(State, {
+      habits: d.habits, log: d.log, gone: {}, times: d.times, items: d.items,
+      dirtyH: {}, dirtyE: {}, dirtyT: {}, dirtyI: {},
+      jour: auj(), weekOffset: 0, saisonOffset: 0, openNote: null, newName: "", bilan: "week", seancePlus: null
+    });
+    Object.assign(State.chrono, { sel: "", ev: "100-nl", pool: 25, comp: 1, msg: "", msgType: "", brouillon: null, objMsg: "", compMsg: "",
+      compOuvert: false, vuePool: 25, histoTout: false, vue: "records", formOuvert: false, edit: null, compEdit: null, annuler: null,
+      saisie: null, saisieMsg: "", saisieB: null });
+    // La mascotte de l'essai part des kilomètres de l'essai (pas de toast en rafale).
+    Mascotte.dernierPalier = palierAtteint(metresSaison() / 1000);
+    renderAll();
+  }
+
+  function sortirEssai() {
+    if (!Essai.actif) return;
+    const c = Essai.copie;
+    Object.keys(c.state).forEach((k) => { if (k !== "today") State[k] = c.state[k]; });
+    Object.assign(Mascotte, c.mascotte);
+    Mascotte.cleEntete = "";
+    Essai.actif = false; Essai.copie = null;
+    if (State.tab === "reglages") State.tab = "today";
+    renderAll();
+    Sync.schedule(400);
+  }
 
   function lancerVisite() {
     if (isModalOpen()) closeAccount();
     if (isMascotteOuverte()) fermerMascotte();
+    entrerEssai();
     document.getElementById("visite").hidden = false;
     allerEtape(0);
   }
 
   function finirVisite() {
+    clearTimeout(Visite.minuterie);
     Visite.i = -1;
     document.getElementById("visite").hidden = true;
     try { localStorage.setItem(VKEY, "1"); } catch (e) { /* stockage indisponible */ }
+    sortirEssai();
     State.tab = "today"; renderTabs();
     window.scrollTo(0, 0);
-    document.getElementById("aide-btn").focus();
+    document.getElementById("reglages-btn").focus();
+  }
+
+  // Met l'application dans l'état que l'étape suppose (écran, vue de Chronos, jour).
+  function preparerEtape(e) {
+    if (e.tab === "reglages") { if (State.tab !== "reglages") ouvrirReglages(); }
+    else {
+      if (State.tab === "reglages") fermerReglages();
+      if (State.tab !== e.tab) { State.tab = e.tab; renderTabs(); }
+    }
+    if (e.tab === "week" || e.tab === "year") State.bilan = e.tab;
+    if (e.vue && State.chrono.vue !== e.vue) { State.chrono.vue = e.vue; renderChronos(); }
+    if (e.tab === "today") {
+      const voulu = e.jour === "hier" ? ymd(addDays(new Date(auj() + "T12:00:00"), -1)) : null;
+      if (voulu && State.jour !== voulu) allerJour(voulu);
+      if (!e.jour && !etapeAction(e) && State.jour !== auj()) allerJour(auj());
+    }
   }
 
   function allerEtape(i) {
+    clearTimeout(Visite.minuterie);
     Visite.i = i;
     const e = VISITE[i];
-    if (State.tab !== e.tab) { State.tab = e.tab; renderTabs(); }
-    const der = i === VISITE.length - 1;
-    const points = VISITE.map((_, k) => `<span class="${k === i ? "actif" : ""}"></span>`).join("");
-    const t = tenueEffective(etatMascotte().niveau);
+    preparerEtape(e);
+    Visite.base = e.debut ? e.debut() : null;
+    // Geste déjà fait (retour en arrière) : l'étape se lit comme une explication.
+    Visite.fini = etapeAction(e) && e.fait(Visite.base);
+    dessinerBulle();
     const bulle = document.getElementById("visite-bulle");
-    bulle.innerHTML = `
-      ${e.cible ? "" : mascotteSVG({ humeur: "ravie", couleur: t.couleur.id, accessoire: t.accessoire.id, taille: 84, decoratif: true })}
-      <p class="visite-etape">${i === 0 ? "Visite guidée" : `Étape ${i} sur ${VISITE.length - 1}`}</p>
-      <h2 id="visite-titre">${esc(e.titre)}</h2>
-      <p class="visite-texte">${esc(e.texte)}</p>
-      <div class="visite-points" aria-hidden="true">${points}</div>
-      <div class="visite-actions">
-        ${der ? "" : `<button type="button" class="btn btn-ghost" data-v="passer">Passer</button>`}
-        <span class="spacer"></span>
-        ${i > 0 ? `<button type="button" class="btn" data-v="prec">Précédent</button>` : ""}
-        <button type="button" class="btn btn-primary" data-v="suiv">${i === 0 ? "C'est parti" : der ? "Terminer" : "Suivant"}</button>
-      </div>`;
-    const cible = e.cible && document.querySelector(e.cible);
-    // Sur telephone la bulle occupe le bas de l'ecran : on remonte la zone en haut.
-    if (cible) {
+    const cible = cibleEtape(e);
+    if (cible && !cible.closest(".tabs")) {
       cible.scrollIntoView({ block: window.innerWidth <= 560 ? "start" : "center", behavior: "instant" });
-      // Ordinateur : centrée, une zone haute ne laisse la place à la bulle ni dessus ni dessous ;
+      // Ordinateur : une zone haute ne laisse la place à la bulle ni dessus ni dessous ;
       // remontée en haut de l'écran, la bulle tient dessous sans la cacher.
       const r = cible.getBoundingClientRect(), bh = bulle.offsetHeight, vh = window.innerHeight;
       if (window.innerWidth > 560 && r.bottom + 22 + bh > vh - 8 && r.top - 22 - bh < 8 && r.height + bh + 60 <= vh) {
         window.scrollBy({ top: r.top - 24, behavior: "instant" });
       }
-    } else window.scrollTo(0, 0);
+    } else if (!cible || window.innerWidth > 560) window.scrollTo(0, 0);   // onglets : en haut de page sur ordinateur
     placerVisite();
-    bulle.querySelector('[data-v="suiv"]').focus();
+    const btn = bulle.querySelector('[data-v="suiv"]');
+    if (btn) btn.focus({ preventScroll: true });
+    else bulle.focus({ preventScroll: true });
+  }
+
+  function dessinerBulle() {
+    const e = VISITE[Visite.i], i = Visite.i, n = VISITE.length - 1;
+    const der = i === n, attend = etapeAction(e) && !Visite.fini;
+    const t = tenueEffective(etatMascotte().niveau);
+    const bulle = document.getElementById("visite-bulle");
+    bulle.classList.toggle("en-haut", !!e.haut);
+    document.getElementById("visite").classList.toggle("attend", attend);
+    bulle.innerHTML = `
+      ${i === 0 ? mascotteSVG({ humeur: "ravie", couleur: t.couleur.id, accessoire: t.accessoire.id, taille: 72, decoratif: true }) : ""}
+      <p class="visite-etape">${esc(e.ecran)}${i ? ` · étape ${i} sur ${n}` : ""}</p>
+      <h2 id="visite-titre">${esc(e.titre)}</h2>
+      ${e.texte ? `<p class="visite-texte">${esc(e.texte)}</p>` : ""}
+      ${etapeAction(e) ? `<p class="visite-faire${Visite.fini ? " fait" : ""}" role="status"><strong>${Visite.fini ? "C'est fait." : "À vous :"}</strong> ${esc(e.faire)}</p>` : ""}
+      <div class="visite-progres" aria-hidden="true"><span style="width:${Math.round(i / n * 100)}%"></span></div>
+      <div class="visite-actions">
+        ${der ? "" : `<button type="button" class="btn btn-ghost" data-v="passer">Quitter</button>`}
+        <span class="spacer"></span>
+        ${i > 0 ? `<button type="button" class="btn" data-v="prec">Précédent</button>` : ""}
+        ${attend ? `<button type="button" class="btn btn-ghost" data-v="sauter">Passer</button>`
+          : `<button type="button" class="btn btn-primary" data-v="suiv">${i === 0 ? "Commencer" : der ? "Terminer" : "Suivant"}</button>`}
+      </div>`;
+  }
+
+  // Après chaque geste : le geste demandé est-il fait ? Si oui, on le dit et on passe à la suite.
+  function verifierEtape() {
+    if (!visiteActive()) return;
+    const e = VISITE[Visite.i];
+    placerVisite();
+    if (!etapeAction(e) || Visite.fini || !e.fait(Visite.base)) return;
+    Visite.fini = true;
+    dessinerBulle();
+    placerVisite();
+    const i = Visite.i;
+    Visite.minuterie = setTimeout(() => { if (Visite.i === i) allerEtape(i + 1); }, 900);
   }
 
   // Place le trou sur la cible et la bulle dessous, sinon dessus, sinon en bas.
@@ -4732,7 +4966,7 @@
     const fond = document.getElementById("visite");
     const trou = document.getElementById("visite-trou");
     const bulle = document.getElementById("visite-bulle");
-    const cible = e.cible && document.querySelector(e.cible);
+    const cible = cibleEtape(e);
     const r = cible ? cible.getBoundingClientRect() : null;
     const vw = window.innerWidth, vh = window.innerHeight;
     const sansCible = !r || !r.width;
@@ -4743,12 +4977,14 @@
       return;
     }
     const m = 8;
-    const top = Math.max(r.top - m, 4);
+    let top = Math.max(r.top - m, 4);
     let bas = Math.min(r.bottom + m, vh - 4);
-    // Téléphone : la bulle est posée en bas (CSS). Une zone plus haute que la place
-    // restante n'est mise en évidence que jusqu'au-dessus de la bulle, jamais dessous.
+    // Téléphone : la bulle est posée en bas (ou en haut, CSS). La zone n'est mise en
+    // évidence que du côté libre de la bulle, jamais dessous.
     if (vw <= 560) {
-      bas = Math.min(bas, bulle.getBoundingClientRect().top - 10);
+      const bb = bulle.getBoundingClientRect();
+      if (e.haut) top = Math.max(top, bb.bottom + 10);
+      else bas = Math.min(bas, bb.top - 10);
       trou.style.left = (r.left - m) + "px";
       trou.style.top = top + "px";
       trou.style.width = (r.width + 2 * m) + "px";
@@ -4773,28 +5009,60 @@
     bulle.style.top = y + "px";
   }
 
+  // Ce qui a le droit de répondre pendant le guide : la bulle, et la zone éclairée
+  // d'une étape « à vous » tant que le geste n'est pas fait.
+  function autorise(el) {
+    const bulle = document.getElementById("visite-bulle");
+    if (bulle.contains(el)) return true;
+    const e = VISITE[Visite.i];
+    if (!etapeAction(e) || Visite.fini) return false;
+    const cible = cibleEtape(e);
+    return !!(cible && (cible === el || cible.contains(el)));
+  }
+
   function wireVisite() {
-    document.getElementById("aide-btn").addEventListener("click", lancerVisite);
+    // Bande du haut (iPhone) : plus haute dès que la page a défilé.
+    const majDefile = () => document.documentElement.classList.toggle("defile", window.scrollY > 2);
+    window.addEventListener("scroll", majDefile, { passive: true });
+    majDefile();
     const bulle = document.getElementById("visite-bulle");
     bulle.addEventListener("click", (ev) => {
       const b = ev.target.closest("[data-v]");
       if (!b) return;
-      if (b.dataset.v === "passer") finirVisite();
-      else if (b.dataset.v === "prec") allerEtape(Visite.i - 1);
+      const v = b.dataset.v;
+      if (v === "passer") finirVisite();
+      else if (v === "prec") allerEtape(Visite.i - 1);
       else if (Visite.i === VISITE.length - 1) finirVisite();
       else allerEtape(Visite.i + 1);
     });
+    // Le reste de la page ne répond pas pendant le guide (on peut toujours faire défiler).
+    ["pointerdown", "mousedown", "click"].forEach((type) => document.addEventListener(type, (ev) => {
+      if (!visiteActive() || autorise(ev.target)) return;
+      ev.preventDefault(); ev.stopPropagation();
+    }, true));
+    // Après le geste (et le redessin qu'il provoque), on regarde si l'étape est accomplie.
+    let verif = 0;
+    const plusTard = () => { if (!visiteActive()) return; clearTimeout(verif); verif = setTimeout(verifierEtape, 60); };
+    ["click", "change", "input", "keyup"].forEach((type) => document.addEventListener(type, plusTard));
     document.addEventListener("keydown", (ev) => {
       if (!visiteActive()) return;
+      const e = VISITE[Visite.i];
       if (ev.key === "Escape") { ev.preventDefault(); finirVisite(); return; }
-      if (ev.key === "ArrowRight" && Visite.i < VISITE.length - 1) { ev.preventDefault(); allerEtape(Visite.i + 1); return; }
-      if (ev.key === "ArrowLeft" && Visite.i > 0) { ev.preventDefault(); allerEtape(Visite.i - 1); return; }
+      const dansChamp = /^(INPUT|SELECT|TEXTAREA)$/.test((document.activeElement || {}).tagName || "");
+      if (!dansChamp && !etapeAction(e)) {
+        if (ev.key === "ArrowRight" && Visite.i < VISITE.length - 1) { ev.preventDefault(); allerEtape(Visite.i + 1); return; }
+        if (ev.key === "ArrowLeft" && Visite.i > 0) { ev.preventDefault(); allerEtape(Visite.i - 1); return; }
+      }
       if (ev.key !== "Tab") return;
-      // Le focus reste dans la bulle tant que la visite est ouverte.
-      const f = Array.from(bulle.querySelectorAll("button"));
-      const dedans = bulle.contains(document.activeElement);
-      if (ev.shiftKey && (!dedans || document.activeElement === f[0])) { ev.preventDefault(); f[f.length - 1].focus(); }
-      else if (!ev.shiftKey && (!dedans || document.activeElement === f[f.length - 1])) { ev.preventDefault(); f[0].focus(); }
+      // Le focus passe de la bulle à la zone à toucher, et nulle part ailleurs.
+      const cible = etapeAction(e) && !Visite.fini ? cibleEtape(e) : null;
+      const f = Array.from(bulle.querySelectorAll("button")).concat(cible
+        ? (cible.matches("button, input, select, textarea, [tabindex]") ? [cible] : Array.from(cible.querySelectorAll("button, input, select, textarea")))
+        : []);
+      if (!f.length) return;
+      const k = f.indexOf(document.activeElement);
+      ev.preventDefault();
+      f[(k + (ev.shiftKey ? -1 : 1) + f.length) % f.length].focus();
     });
     let attente = 0;
     const replacer = () => { cancelAnimationFrame(attente); attente = requestAnimationFrame(placerVisite); };
