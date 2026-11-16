@@ -788,8 +788,12 @@
 
   // --- Temps de course : centiemes <-> texte ------------------------------
   // Accepte « 1:05.32 », « 1'05"32 », « 65,32 », « 32.4 » (dixiemes) ou « 28 ».
+  // Le pave numerique de l'iPhone n'a que la virgule : « 1,05,32 » (trois nombres,
+  // secondes sur deux chiffres) se lit aussi 1:05.32.
   function parseTemps(s) {
-    const m = String(s || "").trim().match(/^(?:(\d{1,2})\s*[:'h]\s*)?(\d{1,2})(?:\s*[.,"]\s*(\d{1,2}))?$/);
+    const brut = String(s || "").trim();
+    const m = brut.match(/^(\d{1,2})\s*[:'h.,]\s*(\d{2})\s*[:.,"]\s*(\d{1,2})$/)
+      || brut.match(/^(?:(\d{1,2})\s*[:'h]\s*)?(\d{1,2})(?:\s*[.,"]\s*(\d{1,2}))?$/);
     if (!m) return null;
     const min = Number(m[1] || 0), sec = Number(m[2]);
     if (m[1] && sec > 59) return null;
@@ -1461,7 +1465,7 @@
       if (c) c.focus();
     };
     const t = parseTemps(C.brouillon.temps);
-    if (!t) return erreur("Temps illisible. Écrivez par exemple 1:05.32 ou 31.84.", "ch-temps");
+    if (!t) return erreur("Temps illisible. Écrivez par exemple 1:05.32, 1,05,32 ou 31,84.", "ch-temps");
     if (!/^\d{4}-\d{2}-\d{2}$/.test(d) || d > State.today) return erreur("Date invalide (pas dans le futur).", "ch-date");
     const sp = parsePassages(C.brouillon.pass, ev, t);
     if (!sp) return erreur("Passages illisibles : les temps cumulés tous les 50 m, du plus petit au plus grand, par exemple 31.20 1:06.51.", "ch-pass");
@@ -1691,7 +1695,7 @@
         <label class="field"><span>Contexte</span><select class="input" id="ch-comp">
           <option value="1"${C.comp ? " selected" : ""}>Compétition</option><option value="0"${C.comp ? "" : " selected"}>Entraînement</option></select></label>
         <label class="field field-large"><span>Lieu ou compétition (facultatif)</span><input class="input" id="ch-lieu" type="text" maxlength="120" placeholder="Interclubs, Annecy" value="${esc(B.lieu || "")}"></label>
-        <label class="field field-passages"><span>Temps de passage, cumulés tous les 50 m (facultatif)</span><input class="input temps" id="ch-pass" type="text" inputmode="decimal" autocomplete="off" placeholder="31.20 1:06.51 1:42.80" value="${esc(B.pass || "")}"></label>
+        <label class="field field-passages"><span>Temps de passage, cumulés tous les 50 m (facultatif)</span><input class="input temps" id="ch-pass" type="text" inputmode="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="31.20 1:06.51 1:42.80" value="${esc(B.pass || "")}"></label>
         <div class="chrono-actions">
           <button type="submit" class="btn btn-primary">Ajouter le temps</button>
           ${C.msg ? `<p class="form-msg ${C.msgType}" role="status">${esc(C.msg)}</p>` : ""}
