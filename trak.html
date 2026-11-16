@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Trak — natation : habitudes et chronos</title>
+<title>Trak, natation : habitudes et chronos</title>
 <meta name="description" content="Trak, carnet de natation : cochez vos séances, comptez les mètres nagés, notez vos chronos et suivez vos records personnels par épreuve, synchronisés entre vos appareils.">
 <!-- Icone : la mascotte (Image/favicon.svg), avec des PNG pour les navigateurs
      sans SVG et pour l'ecran d'accueil des iPhone. -->
@@ -13,10 +13,10 @@
 <!-- Installable (ecran d'accueil) et utilisable sans reseau : manifest.json + sw.js. -->
 <link rel="manifest" href="manifest.json">
 <meta name="apple-mobile-web-app-title" content="Trak">
-<meta name="theme-color" content="#e7e2d7">
+<meta name="theme-color" content="#f7f8f6">
 <link rel="canonical" href="https://dunandchatellet.fr/Trak/trak.html">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Trak — natation : habitudes et chronos">
+<meta property="og:title" content="Trak, natation : habitudes et chronos">
 <meta property="og:description" content="Trak, carnet de natation : cochez vos séances, comptez les mètres nagés, notez vos chronos et suivez vos records personnels par épreuve, synchronisés entre vos appareils.">
 <meta property="og:url" content="https://dunandchatellet.fr/Trak/trak.html">
 <meta property="og:image" content="https://dunandchatellet.fr/Trak/Image/apercu.jpg">
@@ -25,33 +25,33 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="fonts/fonts.css">
 <style>
-  /* Trak — même famille que le portfolio (papier / encre, Syne, Geist, JetBrains Mono) ; la mascotte et ses couleurs restent à Trak. */
+  /* Trak, tableau de séance du bord de bassin (2026-11-14) ; la mascotte et ses couleurs restent à Trak. */
   :root {
-    --color-bg: #e7e2d7;           /* papier */
-    --color-text: #16130f;         /* encre */
-    --color-neutral-100: #f3efe6;  /* surfaces : cartes, champs, boutons */
-    --color-neutral-200: #ddd7ca;
-    --color-neutral-300: #cdc6b5;
-    --color-neutral-400: #857e6e;  /* bordures des boutons et champs : 3,1:1 sur le papier */
-    --color-neutral-600: #5f5849;  /* texte discret : 5,5:1 sur le papier */
-    --color-neutral-700: #4a4438;
-    --color-accent-200: #ffe3b0;
-    --color-accent-500: #e79a3a;
-    --color-accent-700: #8a4f10;  /* orange foncé pour le texte : 5,1:1 sur le papier */
-    --color-accent2-200: #d9ecd3;
-    --color-accent2-300: #bfe0b4;
-    --color-accent2-400: #9ed08d;
-    --color-accent2-500: #6fb559;
-    --color-accent2-600: #58994a;
-    --color-accent2-800: #315e2c;
-    --color-accent2-900: #21401e;
-    --color-empty-grey: #cfc8b8;
-    --color-future-beige: #ddd7ca;
-    --radius-lg: 10px;
+    --color-bg: #f7f8f6;           /* papier */
+    --color-text: #1b1d21;         /* encre */
+    --color-neutral-100: #ffffff;  /* surfaces : cartes, champs, boutons */
+    --color-neutral-200: #eceef1;
+    --color-neutral-300: #d3d7dc;
+    --color-neutral-400: #868b94;  /* bordures des boutons et champs : 3,1:1 sur le papier */
+    --color-neutral-600: #555b63;  /* texte discret : 5,5:1 sur le papier */
+    --color-neutral-700: #3f444b;
+    --color-accent-200: #dbe6ff;
+    --color-accent-500: #1d4ed8;
+    --color-accent-700: #1e40af;  /* orange foncé pour le texte : 5,1:1 sur le papier */
+    --color-accent2-200: #fde3df;
+    --color-accent2-300: #f9c3bb;
+    --color-accent2-400: #f08f80;
+    --color-accent2-500: #d92d20;
+    --color-accent2-600: #b42318;
+    --color-accent2-800: #8f1d14;
+    --color-accent2-900: #5c120c;
+    --color-empty-grey: #d3d7dc;
+    --color-future-beige: #eceef1;
+    --radius-lg: 8px;
     --shadow-sm: 0 1px 2px rgba(22,19,15,.07), 0 1px 8px rgba(22,19,15,.05);
-    --font-heading: "Syne", "Helvetica Neue", Arial, sans-serif;
-    --font-body: "Geist", system-ui, sans-serif;
-    --font-mono: "JetBrains Mono", ui-monospace, monospace;
+    --font-heading: "Gochi Hand", "Comic Sans MS", cursive;
+    --font-body: "Schibsted Grotesk", system-ui, sans-serif;
+    --font-mono: "Schibsted Grotesk", system-ui, sans-serif;
   }
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; }
@@ -287,6 +287,14 @@
   }
 
   /* ---- Week ---- */
+  .bilan-switch { display: flex; gap: 8px; margin-bottom: 22px; }
+  .bilan-switch[hidden] { display: none; }
+  .bilan-switch .compte { margin-left: 4px; font-weight: 400; opacity: .7; }
+  .histo-plus { margin-top: 8px; }
+  /* Safari iPhone donne au champ date une largeur et une hauteur à lui : il débordait sur
+     « Contexte » et dépassait les autres champs. On le ramène à la taille des autres. */
+  input[type="date"].input { -webkit-appearance: none; appearance: none; min-width: 0; display: block; text-align: left; }
+  input[type="date"].input::-webkit-date-and-time-value { text-align: left; margin: 0; }
   .week-head-row { display: flex; flex-wrap: wrap; align-items: baseline; gap: 14px; margin-bottom: 22px; }
   .week-head-row h1 { margin: 0; margin-right: auto; }
   .week-table-wrap { overflow-x: auto; }
@@ -540,7 +548,7 @@
     .divider { margin-bottom: 20px; }
     nav.tabs {
       position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; margin: 0;
-      display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px;
+      display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px;
       padding: 6px 8px calc(6px + env(safe-area-inset-bottom));
       background: var(--color-bg); border-top: 1px solid var(--color-neutral-300);
       box-shadow: 0 -6px 18px rgba(22,19,15,.07);
@@ -614,6 +622,57 @@
     .year-cell { width: 9px; height: 9px; }
     .month-label { width: 9px; font-size: 11px; }
   }
+
+  /* ===== Identité « tableau blanc » (2026-11-14) =====
+     Trak se lit comme le tableau de séance du bord de bassin : titres et
+     grands nombres au feutre bleu, aimants rouges pour ce qui est fait,
+     rebord gris foncé en bas. Le texte courant est en Schibsted Grotesk,
+     la police du portfolio. Plus de petites majuscules espacées. */
+  h1, h2 { font-family: var(--font-heading); font-weight: 400; text-transform: none; letter-spacing: 0; color: var(--color-accent-500); line-height: 1.05; }
+  h1 { font-size: 40px; }
+  h2 { font-size: 28px; }
+  h1.big, h1.num, h2.num { font-family: var(--font-heading); font-weight: 400; letter-spacing: 0; }
+  h1.big { font-size: 46px; }
+  .brand span { font-family: var(--font-body); font-weight: 800; text-transform: none; letter-spacing: -0.01em; font-size: 20px; }
+  .eyebrow, .btn, .visite-etape, .tenue-groupe legend, .week-table .colhead .dow, .note-when,
+  .rp-card .bassin, .histo th, .histo .badge, .compet-ajout summary, .pied, .courbe .axe, .courbe .objectif-txt, .month-label {
+    text-transform: none; letter-spacing: 0;
+  }
+  .eyebrow, .visite-etape, .tenue-groupe legend, .note-when, .rp-card .bassin, .histo th, .compet-ajout summary { font-size: 13px; font-weight: 600; }
+  .btn { font-size: 14px; font-weight: 600; border-radius: 8px; }
+  .input { border-radius: 8px; }
+  .ev-choix { border-radius: 8px; }
+  /* Feuilles posées sur le tableau : pas d'ombre floue, un trait net. */
+  .card, .habit-row, .mascotte-card, .note-card, .streak-card, .manage-row, .rp-card { box-shadow: none; border: 1.5px solid var(--color-neutral-300); }
+  .stat-card { border: 1.5px solid var(--color-accent2-300); }
+  .stat-card + .stat-card { border-color: #b8c9f5; }
+  /* Les aimants : ronds, bord épais, rouges et en relief une fois posés. */
+  .check, .week-cell { border: 3px solid var(--color-text); }
+  .check.done, .week-cell.done { background: var(--color-accent2-500); border-color: var(--color-accent2-500); color: #fff; box-shadow: inset -4px -5px 0 rgba(0,0,0,.2); }
+  /* Grands nombres écrits au feutre. */
+  .stat-card .big-num, .streak-card .num, .compet-carte .compet-j { font-family: var(--font-heading); font-weight: 400; letter-spacing: 0; }
+  .stat-card .big-num { color: var(--color-accent2-600); font-size: 52px; }
+  .stat-card + .stat-card .big-num { color: var(--color-accent-500); }
+  .streak-card .num { color: var(--color-accent-500); font-size: 34px; }
+  .rp-card .num { color: var(--color-accent-700); }
+  .divider { height: 2px; background: var(--color-accent-500); }
+  .btn-primary, .btn-primary:hover { color: #fff; }
+  /* La mascotte garde sa feuille verte. */
+  .mascotte .m-tige { stroke: #315e2c; }
+  .mascotte .m-feuille { fill: #9ed08d; stroke: #315e2c; }
+  /* Rappel du portfolio dans le pied de page. */
+  .pied { font-size: 14px; align-items: center; }
+  .pied .auteur { display: inline-flex; align-items: center; gap: 8px; color: var(--color-text); font-weight: 600; }
+  .pied .auteur svg { width: 22px; height: 22px; }
+  @media (max-width: 560px) {
+    h1.big, h1 { font-size: 34px; }
+    /* Le rebord du tableau : la barre d'onglets, en gris foncé. */
+    nav.tabs { background: var(--color-text); border-top: 0; box-shadow: none; }
+    nav.tabs .btn { color: #c9ccd1; font-size: 13px; }
+    nav.tabs .btn:hover { background: #2b2e34; }
+    nav.tabs .btn.active { color: #ffe066; }
+    nav.tabs .btn.active::before { top: auto; bottom: 6px; background: #ffe066; border-radius: 3px; }
+  }
 </style>
 </head>
 <body>
@@ -624,8 +683,7 @@
     <div class="brand"><div class="mascotte-entete" id="mascotte-entete"></div><span>Trak</span></div>
     <nav class="tabs">
       <button type="button" class="btn" data-tab="today">Aujourd'hui</button>
-      <button type="button" class="btn" data-tab="week">Semaine</button>
-      <button type="button" class="btn" data-tab="year">Année</button>
+      <button type="button" class="btn" data-tab="bilan">Bilan</button>
       <button type="button" class="btn" data-tab="chronos">Chronos</button>
       <button type="button" class="btn" data-tab="manage">Habitudes</button>
     </nav>
@@ -637,13 +695,17 @@
   <div class="divider"></div>
 
   <section id="view-today"></section>
+  <div class="bilan-switch" id="bilan-switch" role="group" aria-label="Période du bilan" hidden>
+    <button type="button" class="btn" data-vue="week">Semaine</button>
+    <button type="button" class="btn" data-vue="year">Année</button>
+  </div>
   <section id="view-week" style="display:none"></section>
   <section id="view-year" style="display:none"></section>
   <section id="view-chronos" style="display:none"></section>
   <section id="view-manage" style="display:none"></section>
 
   <footer class="pied">
-    <a href="https://dunandchatellet.fr/">← dunandchatellet.fr</a>
+    <a class="auteur" href="https://dunandchatellet.fr/"><svg viewBox="0 0 64 64" aria-hidden="true"><path fill="currentColor" d="M16.383 41.28V31.13H45.325Q47.065 31.13 48.254 30.579Q49.443 30.028 49.443 28.23095081967213Q49.443 26.374 48.254 25.852Q47.065 25.330000000000002 45.325 25.330000000000002H17.311V50.85H2.8109999999999977V13.729999999999997H43.063Q47.43421951219512 13.729999999999997 51.22260975609756 14.338999999999999Q55.011 14.948 57.853 16.514Q60.695 18.08 62.319 20.921999999999997Q63.943000000000005 23.764 63.943000000000005 28.23Q63.943000000000005 32.696 62.319 35.306Q60.695 37.916 57.853 39.192Q55.011 40.468 51.22260975609756 40.874Q47.43421951219512 41.28 43.063 41.28Z"/></svg>Un projet de Pierre Dunand-Chatellet</a>
     <a href="https://dunandchatellet.fr/mentions-legales.html">Mentions légales</a>
   </footer>
 
@@ -756,6 +818,8 @@
 
   const State = {
     tab: "today",
+    // Dernier écran ouvert dans l'onglet « Bilan » (Semaine ou Année), rouvert au retour.
+    bilan: "week",
     today: ymd(new Date()),
     weekOffset: 0,
     openNote: null,
@@ -769,7 +833,7 @@
     times: {},
     // Objectifs (k: "obj", data: { t }) et competitions (k: "comp", data: { nom, d, lieu, pool, evs }).
     items: {},
-    chrono: { sel: "", ev: "100-nl", pool: 25, comp: 1, msg: "", msgType: "", brouillon: null, objMsg: "", objMsgType: "", compMsg: "", compOuvert: false },
+    chrono: { sel: "", ev: "100-nl", pool: 25, comp: 1, msg: "", msgType: "", brouillon: null, objMsg: "", objMsgType: "", compMsg: "", compOuvert: false, vuePool: 0, histoTout: false },
     // Ce qui reste a envoyer au serveur.
     dirtyH: {},
     dirtyE: {},
@@ -915,8 +979,18 @@
   }
 
   function renderTabs() {
+    // « Bilan » regroupe Semaine et Année : un seul onglet, un sélecteur en haut de l'écran.
+    const bilan = State.tab === "week" || State.tab === "year";
+    if (bilan) State.bilan = State.tab;
     document.querySelectorAll(".tabs .btn").forEach((b) => {
-      b.classList.toggle("active", b.dataset.tab === State.tab);
+      b.classList.toggle("active", b.dataset.tab === State.tab || (bilan && b.dataset.tab === "bilan"));
+    });
+    const choix = document.getElementById("bilan-switch");
+    choix.hidden = !bilan;
+    choix.querySelectorAll(".btn").forEach((b) => {
+      const actif = b.dataset.vue === State.tab;
+      b.classList.toggle("active", actif);
+      b.setAttribute("aria-pressed", String(actif));
     });
     ["today", "week", "year", "chronos", "manage"].forEach((t) => {
       document.getElementById("view-" + t).style.display = t === State.tab ? "" : "none";
@@ -1046,14 +1120,14 @@
         const future = day > State.today;
         const cls = done ? "done" : future ? "future" : "";
         const m = h.dist ? metersOf(h.id, day) : 0;
-        return `<button type="button" class="week-cell ${cls}" title="${esc(h.name)} — ${day}${m ? " — " + m + " m" : ""}" ${future ? "disabled" : `data-action="toggle" data-id="${esc(h.id)}" data-day="${day}"`}>${done ? "✓" : ""}</button>`;
+        return `<button type="button" class="week-cell ${cls}" title="${esc(h.name)}, ${day}${m ? ", " + m + " m" : ""}" ${future ? "disabled" : `data-action="toggle" data-id="${esc(h.id)}" data-day="${day}"`}>${done ? "✓" : ""}</button>`;
       }).join("");
       return `<div class="rowname">${esc(h.name)}</div>${cellsHtml}<div class="total">${c}/7</div>`;
     }).join("");
 
     const wEnd = addDays(wStart, 6);
     const weekLabel = State.weekOffset === 0 ? "Cette semaine"
-      : wStart.getDate() + " " + MONTHS[wStart.getMonth()] + " – " + wEnd.getDate() + " " + MONTHS[wEnd.getMonth()];
+      : wStart.getDate() + " " + MONTHS[wStart.getMonth()] + ", " + wEnd.getDate() + " " + MONTHS[wEnd.getMonth()];
 
     const weekNotes = [];
     weekDays.forEach((day, i) => {
@@ -1118,7 +1192,7 @@
         const ratio = State.habits.length ? n / State.habits.length : 0;
         const bg = future ? "var(--color-future-beige)" : heatColor(ratio);
         cellsHtml += inYear
-          ? `<div class="year-cell${day === State.today ? " auj" : ""}" title="${day} — ${n}/${State.habits.length}" style="background:${bg}"></div>`
+          ? `<div class="year-cell${day === State.today ? " auj" : ""}" title="${day}, ${n}/${State.habits.length}" style="background:${bg}"></div>`
           : `<div class="year-cell" style="background:transparent"></div>`;
       }
       colsHtml += `<div class="year-col">${cellsHtml}</div>`;
@@ -1155,7 +1229,7 @@
       </div>
       <div class="legend-row">
         <span>Aucune</span>${legendHtml}<span>Toutes</span>
-        <span class="legend-note">Une case par jour : plus le vert est foncé, plus vous avez coché d'habitudes ce jour-là.</span>
+        <span class="legend-note">Une case par jour : plus le rouge est foncé, plus vous avez coché d'habitudes ce jour-là.</span>
       </div>
       <div class="streak-grid">${streakHtml || "<p class=\"p-muted\">—</p>"}</div>`;
     caleAnnee();
@@ -1396,7 +1470,7 @@
     const id = "t" + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
     State.times[id] = { ev: ev, pool: pool, t: t, d: d, comp: comp, lieu: lieu, sp: sp, u: nowMs() };
     State.dirtyT[id] = 1;
-    C.sel = ev + "|" + pool;
+    C.sel = ev + "|" + pool; C.vuePool = pool; C.histoTout = false;
     C.brouillon = null;
     const nom = nomEpreuve(ev) + " (" + pool + " m)";
     if (ancienRp === null) { C.msg = "Premier temps sur " + nom + " : " + formatTemps(t) + "."; C.msgType = "ok"; }
@@ -1505,7 +1579,7 @@
         <td class="temps">${obj ? formatTemps(obj) + (r.best.t <= obj ? " (atteint)" : " (" + formatEcart(r.best.t - obj) + ")") : "—"}</td>
         <td>${r.n} temps${gain < 0 ? ", " + formatEcart(gain) : ""}</td></tr>`;
     }).join("");
-    const compets = competsAVenir().map((c) => `<li><strong>${esc(c.data.nom)}</strong> — ${esc(dateCourte(c.data.d))}${c.data.lieu ? ", " + esc(c.data.lieu) : ""}, bassin ${c.data.pool} m${(c.data.evs || []).length ? " : " + esc(c.data.evs.map(nomEpreuve).join(", ")) : ""}</li>`).join("");
+    const compets = competsAVenir().map((c) => `<li><strong>${esc(c.data.nom)}</strong>, ${esc(dateCourte(c.data.d))}${c.data.lieu ? ", " + esc(c.data.lieu) : ""}, bassin ${c.data.pool} m${(c.data.evs || []).length ? " : " + esc(c.data.evs.map(nomEpreuve).join(", ")) : ""}</li>`).join("");
     let vol = "";
     if (State.habits.some((h) => h.dist)) {
       const lundi = mondayOf(new Date(State.today + "T12:00:00"));
@@ -1516,7 +1590,7 @@
       vol = `<h2>Volume nagé, quatre dernières semaines</h2><table class="fiche-vol"><tbody>${sem}</tbody></table>`;
     }
     document.getElementById("fiche").innerHTML = `
-      <h1>Fiche nageur — records et objectifs</h1>
+      <h1>Fiche nageur, records et objectifs</h1>
       <p class="fiche-date">Éditée le ${esc(dateCourte(State.today))} avec Trak.</p>
       <h2>Records personnels</h2>
       ${lignes ? `<table><thead><tr><th>Épreuve</th><th>Bassin</th><th>Record</th><th>Date, lieu</th><th>Passages</th><th>Objectif</th><th>Progression</th></tr></thead><tbody>${lignes}</tbody></table>` : "<p>Aucun temps enregistré.</p>"}
@@ -1532,8 +1606,16 @@
     const el = document.getElementById("view-chronos");
     const C = State.chrono;
     const B = C.brouillon || {};
-    const recs = records();
+    const tous = records();
+    if (!tous.some((r) => r.cle === C.sel)) C.sel = tous.length ? tous[0].cle : "";
+    // Records séparés par bassin : un seul bassin à l'écran, choisi par le sélecteur 25 m / 50 m.
+    // Au départ, celui du record sélectionné.
+    if (C.vuePool !== 25 && C.vuePool !== 50) C.vuePool = C.sel ? Number(C.sel.split("|")[1]) : 25;
+    const recs = tous.filter((r) => r.pool === C.vuePool);
     if (!recs.some((r) => r.cle === C.sel)) C.sel = recs.length ? recs[0].cle : "";
+    const nbPool = (p) => tous.filter((r) => r.pool === p).length;
+    const choixPool = tous.length ? `<div class="bilan-switch" role="group" aria-label="Bassin des records">${[25, 50].map((p) =>
+      `<button type="button" class="btn${p === C.vuePool ? " active" : ""}" data-action="vue-pool" data-pool="${p}" aria-pressed="${p === C.vuePool}">Bassin ${p} m <span class="compte">${nbPool(p)}</span></button>`).join("")}</div>` : "";
 
     const options = NAGES.map((n) => `<optgroup label="${esc(n.nom[0].toUpperCase() + n.nom.slice(1))}">${
       EPREUVES.filter((e) => e.nage === n.id).map((e) => `<option value="${e.id}"${e.id === C.ev ? " selected" : ""}>${esc(e.nom)}</option>`).join("")
@@ -1544,7 +1626,6 @@
       const obj = objectif(r.ev, r.pool);
       return `<button type="button" class="rp-card${r.cle === C.sel ? " active" : ""}" data-action="chrono-sel" data-cle="${r.cle}" aria-pressed="${r.cle === C.sel}">
           <div class="name">${esc(nomEpreuve(r.ev))}</div>
-          <div class="bassin">Bassin ${r.pool} m</div>
           <div class="num temps">${formatTemps(r.best.t)}</div>
           <div class="detail">${esc(dateCourte(r.best.d))} · ${r.n} temps${gain < 0 ? ` · <span class="gain">${formatEcart(gain)}</span> depuis le premier` : ""}</div>
           ${obj ? `<div class="objectif${r.best.t <= obj ? " atteint" : ""}">${esc(texteObjectif(r.best.t, obj))}</div>` : ""}
@@ -1556,7 +1637,9 @@
     if (r) {
       const s = serie(r.ev, r.pool);
       const obj = objectif(r.ev, r.pool);
-      const lignes = s.slice().reverse().map((x) => `<tr>
+      const HISTO = 5;
+      const plusVieux = Math.max(0, s.length - HISTO);
+      const lignes = s.slice(C.histoTout ? 0 : plusVieux).reverse().map((x) => `<tr>
           <td>${esc(dateCourte(x.d))}<span class="ctx-mobile">${x.comp ? "Compétition" : "Entraînement"}</span></td>
           <td class="temps">${formatTemps(x.t)}${x.t === r.best.t ? '<span class="badge">RP</span>' : ""}${x.sp && x.sp.length ? `<span class="passages">${esc(textePassages(x))}</span>` : ""}</td>
           <td class="temps ${x.t > r.best.t ? "perte" : ""}">${x.t === r.best.t ? "—" : formatEcart(x.t - r.best.t)}</td>
@@ -1575,7 +1658,7 @@
               : obj ? `<p class="form-msg${r.best.t <= obj ? " ok" : ""}">${esc(texteObjectif(r.best.t, obj))}.</p>` : ""}
           </form>
           ${s.length > 1
-            ? `<p class="eyebrow" style="margin:18px 0 6px">Progression — plus haut = plus rapide</p><div class="courbe" id="courbe"></div>`
+            ? `<p class="eyebrow" style="margin:18px 0 6px">Progression, plus haut = plus rapide</p><div class="courbe" id="courbe"></div>`
             : `<p class="p-muted" style="margin:16px 0 0">Un seul temps pour l'instant : la courbe de progression apparaît dès le deuxième.</p>`}
         </div>
         <div class="card histo-wrap" style="margin-top:14px">
@@ -1583,6 +1666,7 @@
             <thead><tr><th>Date</th><th>Temps</th><th>Écart au RP</th><th class="col-ctx">Contexte</th><th class="col-lieu">Lieu</th><th><span class="sr-only">Action</span></th></tr></thead>
             <tbody>${lignes}</tbody>
           </table>
+          ${plusVieux ? `<button type="button" class="btn btn-ghost histo-plus" data-action="histo-tout" aria-expanded="${C.histoTout}">${C.histoTout ? "Ne garder que les " + HISTO + " derniers" : "Voir les " + s.length + " temps"}</button>` : ""}
         </div>`;
     }
 
@@ -1614,7 +1698,10 @@
         </div>
       </form>
       <h2>Records personnels</h2>
-      ${cartes ? `<div class="rp-grid">${cartes}</div>` : `<p class="p-muted">Aucun temps pour l'instant. Ajoutez votre dernier chrono ci-dessus.</p>`}
+      ${choixPool}
+      ${cartes ? `<div class="rp-grid">${cartes}</div>`
+        : tous.length ? `<p class="p-muted">Aucun temps en bassin de ${C.vuePool} m pour l'instant.</p>`
+        : `<p class="p-muted">Aucun temps pour l'instant. Ajoutez votre dernier chrono ci-dessus.</p>`}
       ${detail}
       <h2>Compétitions à venir</h2>
       ${compets ? `<div class="card compet-liste">${compets}</div>` : `<p class="p-muted">Aucune compétition prévue. Ajoutez la prochaine : un compte à rebours apparaîtra sur l'écran Aujourd'hui.</p>`}
@@ -1642,12 +1729,20 @@
 
     el.querySelector("#chrono-form").addEventListener("submit", (ev) => { ev.preventDefault(); ajouterTemps(); });
     el.querySelectorAll('[data-action="chrono-sel"]').forEach((b) => b.addEventListener("click", () => {
-      C.sel = b.dataset.cle; C.msg = ""; C.objMsg = "";
+      C.sel = b.dataset.cle; C.msg = ""; C.objMsg = ""; C.histoTout = false;
       renderChronos();
       const nb = document.querySelector(`[data-action="chrono-sel"][data-cle="${C.sel}"]`);
       if (nb) nb.focus();
     }));
     el.querySelectorAll('[data-action="chrono-del"]').forEach((b) => b.addEventListener("click", () => supprimerTemps(b.dataset.id)));
+    el.querySelectorAll('[data-action="vue-pool"]').forEach((b) => b.addEventListener("click", () => {
+      C.vuePool = Number(b.dataset.pool); C.sel = ""; C.histoTout = false; C.objMsg = "";
+      renderChronos(); retracerCourbe();
+      const nb = document.querySelector(`[data-action="vue-pool"][data-pool="${C.vuePool}"]`);
+      if (nb) nb.focus();
+    }));
+    const histoTout = el.querySelector('[data-action="histo-tout"]');
+    if (histoTout) histoTout.addEventListener("click", () => { C.histoTout = !C.histoTout; renderChronos(); retracerCourbe(); });
     if (r) {
       el.querySelector("#obj-form").addEventListener("submit", (ev) => { ev.preventDefault(); enregistrerObjectif(r.ev, r.pool); });
       const retirer = el.querySelector('[data-action="obj-del"]');
@@ -1743,7 +1838,7 @@
   // palier = record (en jours) necessaire ; « le » sert aux phrases du toast.
   const M_COULEURS = [
     { id: "vert", nom: "Vert", adj: "verte", palier: 0, le: "le vert",
-      corps: "var(--color-accent2-500)", ombre: "var(--color-accent2-600)", clair: "var(--color-accent2-400)" },
+      corps: "#6fb559", ombre: "#58994a", clair: "#9ed08d" },
     { id: "peche", nom: "Pêche", adj: "pêche", palier: 3, le: "la couleur pêche",
       corps: "#f0a860", ombre: "#d4843a", clair: "#f8cc97" },
     { id: "bleuet", nom: "Bleuet", adj: "bleuet", palier: 21, le: "la couleur bleuet",
@@ -2076,7 +2171,7 @@
   }
 
   // Apres un choix : on ne redessine que l'apercu, les vignettes d'accessoires
-  // (si la couleur a change) et la mascotte hors modale — le focus reste en place.
+  // (si la couleur a change) et la mascotte hors modale, le focus reste en place.
   function majApresChoix(couleurChangee) {
     const etat = etatMascotte();
     const t = tenueEffective(etat.record);
@@ -2179,7 +2274,7 @@
   const Account = { base: "", token: "", email: "", lastEmail: "", lastSync: 0 };
 
   // Adresse du serveur. Laissée vide, l'application prend le dossier api/ placé
-  // à côté de cette page — le cas normal une fois le site en ligne. À remplir
+  // à côté de cette page, le cas normal une fois le site en ligne. À remplir
   // seulement pour ouvrir ce fichier en local (file://) tout en synchronisant,
   // par exemple : "https://exemple.fr/trak/api/".
   const SERVER_URL = "";
@@ -2816,7 +2911,7 @@
     { tab: "week", cible: "#view-week .week-table-wrap", titre: "Semaine",
       texte: "Toute la semaine d'un coup d'œil. Une case oubliée ? Cliquez-la pour cocher un jour passé. Les flèches remontent aux semaines précédentes." },
     { tab: "year", cible: "#view-year .year-card", titre: "Année",
-      texte: "Une case par jour : plus le vert est foncé, plus la journée était remplie. En dessous, la série en cours et le record de chaque habitude." },
+      texte: "Une case par jour : plus le rouge est foncé, plus la journée était remplie. En dessous, la série en cours et le record de chaque habitude." },
     { tab: "chronos", cible: "#chrono-form", titre: "Chronos",
       texte: "Notez vos temps (et vos passages), en compétition ou à l'entraînement. Trak garde votre record par épreuve et par bassin, trace votre progression vers l'objectif que vous fixez, compte les jours jusqu'à la prochaine compétition et prépare une fiche pour votre entraîneur." },
     { tab: "manage", cible: "#view-manage .manage-wrap", titre: "Habitudes",
@@ -2952,10 +3047,14 @@
 
   document.querySelectorAll(".tabs .btn").forEach((b) => {
     b.addEventListener("click", () => {
-      State.tab = b.dataset.tab; renderTabs(); retracerCourbe(); caleAnnee();
+      State.tab = b.dataset.tab === "bilan" ? State.bilan : b.dataset.tab; renderTabs(); retracerCourbe(); caleAnnee();
       // Barre d'onglets en bas (telephone) : on repart du haut du nouvel ecran.
       window.scrollTo(0, 0);
     });
+  });
+
+  document.querySelectorAll("#bilan-switch .btn").forEach((b) => {
+    b.addEventListener("click", () => { State.tab = b.dataset.vue; renderTabs(); caleAnnee(); });
   });
 
   load();

@@ -1,4 +1,4 @@
-// Trak — service worker : l'application s'ouvre sans reseau (au bord du bassin).
+// Trak, service worker : l'application s'ouvre sans reseau (au bord du bassin).
 //
 // - La page trak.html : reseau d'abord (pour recevoir les mises a jour), copie en
 //   cache si le reseau ne repond pas en 4 s ou pas du tout.
@@ -6,17 +6,14 @@
 //   >>> Changer VERSION des qu'un de ces fichiers change, sinon l'ancien reste servi.
 // - L'API (api/) n'est jamais mise en cache : la synchro reste en direct, et les
 //   modifications faites hors ligne attendent dans le navigateur (file d'envoi de Trak).
-const VERSION = "trak-2026-11-07";
+const VERSION = "trak-2026-11-14";
 const FICHIERS = [
   "trak.html",
   "manifest.json",
   "fonts/fonts.css",
-  "fonts/Geist-normal-400-latin.woff2",
-  "fonts/Geist-normal-400-latin-ext.woff2",
-  "fonts/JetBrainsMono-normal-400-latin.woff2",
-  "fonts/JetBrainsMono-normal-400-latin-ext.woff2",
-  "fonts/Syne-normal-400-800-latin.woff2",
-  "fonts/Syne-normal-400-800-latin-ext.woff2",
+  "fonts/GochiHand-latin.woff2",
+  "fonts/SchibstedGrotesk-latin.woff2",
+  "fonts/SchibstedGrotesk-latin-ext.woff2",
   "Image/favicon.svg",
   "Image/favicon-32.png",
   "Image/apple-touch-icon.png",

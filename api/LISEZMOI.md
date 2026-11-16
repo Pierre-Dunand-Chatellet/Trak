@@ -1,7 +1,7 @@
-# API Trak — comptes et synchronisation
+# API Trak, comptes et synchronisation
 
 Backend minimal en PHP : un compte, plusieurs appareils, les mêmes données partout.
-**Aucune base de données** — les données vivent dans des fichiers JSON, sous `api/data/`.
+**Aucune base de données**, les données vivent dans des fichiers JSON, sous `api/data/`.
 
 ## Fichiers
 
@@ -23,7 +23,7 @@ Backend minimal en PHP : un compte, plusieurs appareils, les mêmes données par
 4. Ouvrir `trak.html`, cliquer **Se connecter** puis **En créer un**.
 
 Prérequis : PHP 64 bits (7.4 ou plus) et un dossier `api/` accessible en écriture.
-Rien d'autre — pas de base, pas d'identifiants à saisir.
+Rien d'autre, pas de base, pas d'identifiants à saisir.
 
 Le formulaire ne demande qu'une adresse e-mail et un mot de passe : l'application
 trouve `api/` toute seule dès lors qu'elle est servie en HTTP. Pour ouvrir
@@ -57,8 +57,8 @@ qui synchronisent à la même seconde attendent l'un l'autre au lieu de s'écras
 ### Pourquoi des fichiers plutôt qu'une base
 
 L'hébergement n'a pas SQLite, et MySQL demande un accès au panneau d'administration
-dont l'utilisateur ne dispose pas. À cette échelle — un compte, deux ou trois
-appareils, quelques milliers de petites lignes — un fichier JSON par compte relu en
+dont l'utilisateur ne dispose pas. À cette échelle, un compte, deux ou trois
+appareils, quelques milliers de petites lignes, un fichier JSON par compte relu en
 entier à chaque synchro reste largement en dessous du millième de seconde.
 
 Ce qui ferait changer d'avis : plusieurs dizaines de comptes actifs simultanément
@@ -68,7 +68,7 @@ bouger : seul `store.php` serait à réécrire.
 
 ## Comment la synchronisation fonctionne
 
-Chaque valeur — une habitude, une case cochée d'un jour — porte l'horodatage de
+Chaque valeur, une habitude, une case cochée d'un jour, porte l'horodatage de
 l'appareil qui l'a écrite (`u`, en millisecondes). Le serveur garde la valeur dont
 l'horodatage est le plus récent, habitude par habitude et jour par jour : deux
 appareils ne s'écrasent donc jamais entièrement, seule la case réellement en conflit
@@ -76,7 +76,7 @@ est arbitrée.
 
 Le serveur note aussi, avec sa propre horloge, la date de chaque écriture (`ua`).
 C'est ce repère (`now`, renvoyé à chaque synchro et à repasser en `since`) qui sert à
-savoir ce qui est nouveau pour un appareil donné — l'horloge du serveur étant la
+savoir ce qui est nouveau pour un appareil donné, l'horloge du serveur étant la
 seule identique pour tout le monde.
 
 Les suppressions laissent une trace (`del: 1`) au lieu de disparaître, sinon un

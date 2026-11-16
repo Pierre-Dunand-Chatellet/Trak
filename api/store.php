@@ -317,7 +317,7 @@ function passages($sp): array {
  * derniere synchro. Lecture, arbitrage et ecriture se font sous un seul verrou.
  *
  * Arbitrage : la valeur dont l'horodatage d'appareil (cu) est le plus recent
- * gagne. A egalite, la derniere arrivee gagne — c'est le meme comportement que
+ * gagne. A egalite, la derniere arrivee gagne, c'est le meme comportement que
  * la version SQL de ce projet.
  *
  * Les chronos (temps de course) suivent la meme regle, temps par temps, et les

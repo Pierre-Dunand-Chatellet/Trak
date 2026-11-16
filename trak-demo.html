@@ -3,41 +3,42 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Trak — suivi d'habitudes</title>
+<title>Trak, suivi d'habitudes</title>
 <meta name="description" content="Démonstration de Trak, application de suivi d'habitudes : cochez vos journées, suivez vos séries et vos records.">
+<meta name="robots" content="noindex, follow">
 <link rel="icon" type="image/svg+xml" href="Image/favicon.svg">
 <link rel="icon" type="image/png" sizes="32x32" href="Image/favicon-32.png">
 <link rel="apple-touch-icon" href="Image/apple-touch-icon.png">
-<meta name="theme-color" content="#e7e2d7">
+<meta name="theme-color" content="#f7f8f6">
 <link rel="stylesheet" href="fonts/fonts.css">
 <style>
-  /* Trak — même famille que le portfolio (papier / encre, Syne, Geist, JetBrains Mono) ; la mascotte et ses couleurs restent à Trak. */
+  /* Trak, tableau de séance du bord de bassin (2026-11-14) ; la mascotte et ses couleurs restent à Trak. */
   :root {
-    --color-bg: #e7e2d7;           /* papier */
-    --color-text: #16130f;         /* encre */
-    --color-neutral-100: #f3efe6;  /* surfaces : cartes, champs, boutons */
-    --color-neutral-200: #ddd7ca;
-    --color-neutral-300: #cdc6b5;
-    --color-neutral-400: #857e6e;  /* bordures des boutons et champs : 3,1:1 sur le papier */
-    --color-neutral-600: #5f5849;  /* texte discret : 5,5:1 sur le papier */
-    --color-neutral-700: #4a4438;
-    --color-accent-200: #ffe3b0;
-    --color-accent-500: #e79a3a;
-    --color-accent-700: #8a4f10;  /* orange foncé pour le texte : 5,1:1 sur le papier */
-    --color-accent2-200: #d9ecd3;
-    --color-accent2-300: #bfe0b4;
-    --color-accent2-400: #9ed08d;
-    --color-accent2-500: #6fb559;
-    --color-accent2-600: #58994a;
-    --color-accent2-800: #315e2c;
-    --color-accent2-900: #21401e;
-    --color-empty-grey: #cfc8b8;
-    --color-future-beige: #ddd7ca;
-    --radius-lg: 10px;
+    --color-bg: #f7f8f6;           /* papier */
+    --color-text: #1b1d21;         /* encre */
+    --color-neutral-100: #ffffff;  /* surfaces : cartes, champs, boutons */
+    --color-neutral-200: #eceef1;
+    --color-neutral-300: #d3d7dc;
+    --color-neutral-400: #868b94;  /* bordures des boutons et champs : 3,1:1 sur le papier */
+    --color-neutral-600: #555b63;  /* texte discret : 5,5:1 sur le papier */
+    --color-neutral-700: #3f444b;
+    --color-accent-200: #dbe6ff;
+    --color-accent-500: #1d4ed8;
+    --color-accent-700: #1e40af;  /* orange foncé pour le texte : 5,1:1 sur le papier */
+    --color-accent2-200: #fde3df;
+    --color-accent2-300: #f9c3bb;
+    --color-accent2-400: #f08f80;
+    --color-accent2-500: #d92d20;
+    --color-accent2-600: #b42318;
+    --color-accent2-800: #8f1d14;
+    --color-accent2-900: #5c120c;
+    --color-empty-grey: #d3d7dc;
+    --color-future-beige: #eceef1;
+    --radius-lg: 8px;
     --shadow-sm: 0 1px 2px rgba(22,19,15,.07), 0 1px 8px rgba(22,19,15,.05);
-    --font-heading: "Syne", "Helvetica Neue", Arial, sans-serif;
-    --font-body: "Geist", system-ui, sans-serif;
-    --font-mono: "JetBrains Mono", ui-monospace, monospace;
+    --font-heading: "Gochi Hand", "Comic Sans MS", cursive;
+    --font-body: "Schibsted Grotesk", system-ui, sans-serif;
+    --font-mono: "Schibsted Grotesk", system-ui, sans-serif;
   }
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; }
@@ -215,6 +216,57 @@
     .year-cell { width: 9px; height: 9px; }
     .month-label { width: 9px; font-size: 11px; }
   }
+
+  /* ===== Identité « tableau blanc » (2026-11-14) =====
+     Trak se lit comme le tableau de séance du bord de bassin : titres et
+     grands nombres au feutre bleu, aimants rouges pour ce qui est fait,
+     rebord gris foncé en bas. Le texte courant est en Schibsted Grotesk,
+     la police du portfolio. Plus de petites majuscules espacées. */
+  h1, h2 { font-family: var(--font-heading); font-weight: 400; text-transform: none; letter-spacing: 0; color: var(--color-accent-500); line-height: 1.05; }
+  h1 { font-size: 40px; }
+  h2 { font-size: 28px; }
+  h1.big, h1.num, h2.num { font-family: var(--font-heading); font-weight: 400; letter-spacing: 0; }
+  h1.big { font-size: 46px; }
+  .brand span { font-family: var(--font-body); font-weight: 800; text-transform: none; letter-spacing: -0.01em; font-size: 20px; }
+  .eyebrow, .btn, .visite-etape, .tenue-groupe legend, .week-table .colhead .dow, .note-when,
+  .rp-card .bassin, .histo th, .histo .badge, .compet-ajout summary, .pied, .courbe .axe, .courbe .objectif-txt, .month-label {
+    text-transform: none; letter-spacing: 0;
+  }
+  .eyebrow, .visite-etape, .tenue-groupe legend, .note-when, .rp-card .bassin, .histo th, .compet-ajout summary { font-size: 13px; font-weight: 600; }
+  .btn { font-size: 14px; font-weight: 600; border-radius: 8px; }
+  .input { border-radius: 8px; }
+  .ev-choix { border-radius: 8px; }
+  /* Feuilles posées sur le tableau : pas d'ombre floue, un trait net. */
+  .card, .habit-row, .mascotte-card, .note-card, .streak-card, .manage-row, .rp-card { box-shadow: none; border: 1.5px solid var(--color-neutral-300); }
+  .stat-card { border: 1.5px solid var(--color-accent2-300); }
+  .stat-card + .stat-card { border-color: #b8c9f5; }
+  /* Les aimants : ronds, bord épais, rouges et en relief une fois posés. */
+  .check, .week-cell { border: 3px solid var(--color-text); }
+  .check.done, .week-cell.done { background: var(--color-accent2-500); border-color: var(--color-accent2-500); color: #fff; box-shadow: inset -4px -5px 0 rgba(0,0,0,.2); }
+  /* Grands nombres écrits au feutre. */
+  .stat-card .big-num, .streak-card .num, .compet-carte .compet-j { font-family: var(--font-heading); font-weight: 400; letter-spacing: 0; }
+  .stat-card .big-num { color: var(--color-accent2-600); font-size: 52px; }
+  .stat-card + .stat-card .big-num { color: var(--color-accent-500); }
+  .streak-card .num { color: var(--color-accent-500); font-size: 34px; }
+  .rp-card .num { color: var(--color-accent-700); }
+  .divider { height: 2px; background: var(--color-accent-500); }
+  .btn-primary, .btn-primary:hover { color: #fff; }
+  /* La mascotte garde sa feuille verte. */
+  .mascotte .m-tige { stroke: #315e2c; }
+  .mascotte .m-feuille { fill: #9ed08d; stroke: #315e2c; }
+  /* Rappel du portfolio dans le pied de page. */
+  .pied { font-size: 14px; align-items: center; }
+  .pied .auteur { display: inline-flex; align-items: center; gap: 8px; color: var(--color-text); font-weight: 600; }
+  .pied .auteur svg { width: 22px; height: 22px; }
+  @media (max-width: 560px) {
+    h1.big, h1 { font-size: 34px; }
+    /* Le rebord du tableau : la barre d'onglets, en gris foncé. */
+    nav.tabs { background: var(--color-text); border-top: 0; box-shadow: none; }
+    nav.tabs .btn { color: #c9ccd1; font-size: 13px; }
+    nav.tabs .btn:hover { background: #2b2e34; }
+    nav.tabs .btn.active { color: #ffe066; }
+    nav.tabs .btn.active::before { top: auto; bottom: 6px; background: #ffe066; border-radius: 3px; }
+  }
 </style>
 </head>
 <body>
@@ -238,7 +290,7 @@
   <section id="view-manage" style="display:none"></section>
 
   <footer class="pied">
-    <a href="https://dunandchatellet.fr/">← dunandchatellet.fr</a>
+    <a class="auteur" href="https://dunandchatellet.fr/"><svg viewBox="0 0 64 64" aria-hidden="true"><path fill="currentColor" d="M16.383 41.28V31.13H45.325Q47.065 31.13 48.254 30.579Q49.443 30.028 49.443 28.23095081967213Q49.443 26.374 48.254 25.852Q47.065 25.330000000000002 45.325 25.330000000000002H17.311V50.85H2.8109999999999977V13.729999999999997H43.063Q47.43421951219512 13.729999999999997 51.22260975609756 14.338999999999999Q55.011 14.948 57.853 16.514Q60.695 18.08 62.319 20.921999999999997Q63.943000000000005 23.764 63.943000000000005 28.23Q63.943000000000005 32.696 62.319 35.306Q60.695 37.916 57.853 39.192Q55.011 40.468 51.22260975609756 40.874Q47.43421951219512 41.28 43.063 41.28Z"/></svg>Un projet de Pierre Dunand-Chatellet</a>
     <a href="https://dunandchatellet.fr/mentions-legales.html">Mentions légales</a>
   </footer>
 
@@ -459,14 +511,14 @@
         if (done) c++;
         const future = day > State.today;
         const cls = done ? "done" : future ? "future" : "";
-        return `<button type="button" class="week-cell ${cls}" title="${esc(h.name)} — ${day}" ${future ? "disabled" : `data-action="toggle" data-id="${esc(h.id)}" data-day="${day}"`}>${done ? "✓" : ""}</button>`;
+        return `<button type="button" class="week-cell ${cls}" title="${esc(h.name)}, ${day}" ${future ? "disabled" : `data-action="toggle" data-id="${esc(h.id)}" data-day="${day}"`}>${done ? "✓" : ""}</button>`;
       }).join("");
       return `<div class="rowname">${esc(h.name)}</div>${cellsHtml}<div class="total">${c}/7</div>`;
     }).join("");
 
     const wEnd = addDays(wStart, 6);
     const weekLabel = State.weekOffset === 0 ? "Cette semaine"
-      : wStart.getDate() + " " + MONTHS[wStart.getMonth()] + " – " + wEnd.getDate() + " " + MONTHS[wEnd.getMonth()];
+      : wStart.getDate() + " " + MONTHS[wStart.getMonth()] + ", " + wEnd.getDate() + " " + MONTHS[wEnd.getMonth()];
 
     const weekNotes = [];
     weekDays.forEach((day, i) => {
@@ -531,7 +583,7 @@
         const ratio = State.habits.length ? n / State.habits.length : 0;
         const bg = future ? "var(--color-future-beige)" : heatColor(ratio);
         cellsHtml += inYear
-          ? `<div class="year-cell" title="${day} — ${n}/${State.habits.length}" style="background:${bg}"></div>`
+          ? `<div class="year-cell" title="${day}, ${n}/${State.habits.length}" style="background:${bg}"></div>`
           : `<div class="year-cell" style="background:transparent"></div>`;
       }
       colsHtml += `<div class="year-col">${cellsHtml}</div>`;
@@ -567,7 +619,7 @@
       </div>
       <div class="legend-row">
         <span>Aucune</span>${legendHtml}<span>Toutes</span>
-        <span class="legend-note">Une case par jour : plus le vert est foncé, plus vous avez coché d'habitudes ce jour-là.</span>
+        <span class="legend-note">Une case par jour : plus le rouge est foncé, plus vous avez coché d'habitudes ce jour-là.</span>
       </div>
       <div class="streak-grid">${streakHtml || "<p class=\"p-muted\">—</p>"}</div>`;
   }

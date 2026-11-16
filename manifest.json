@@ -6,8 +6,8 @@
   "start_url": "trak.html",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#e7e2d7",
-  "theme_color": "#e7e2d7",
+  "background_color": "#f7f8f6",
+  "theme_color": "#f7f8f6",
   "icons": [
     { "src": "Image/icone-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
     { "src": "Image/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
