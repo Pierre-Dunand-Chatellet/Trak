@@ -6,10 +6,13 @@
 //   { "since": 0,
 //     "habits":  [ {"id":"sport","name":"Sport","goal":4,"pos":3,"del":0,"u":1757000000000} ],
 //     "entries": [ {"h":"sport","d":"2026-09-06","done":1,"note":"","m":2400,"del":0,"u":1757000000000} ],
-//     "times":   [ {"id":"t...","ev":"100-pap","pool":25,"t":6532,"d":"2026-11-07","comp":1,"lieu":"","sp":[3120],"del":0,"u":...} ],
+//     "times":   [ {"id":"t...","ev":"100-pap","pool":25,"t":6532,"d":"2026-11-07","comp":1,"lieu":"","sp":[3120],"cid":"c...","del":0,"u":...} ],
 //     "items":   [ {"id":"obj:100-pap:25","k":"obj","data":"{\"t\":6500}","del":0,"u":...} ] }
-//   m = metres nages ; t = temps en centiemes (6532 = 1:05.32) ; pool = bassin de 25 ou 50 m ;
-//   sp = temps de passage cumules (centiemes) ; items = objectifs (k obj) et competitions (k comp).
+//   m = metres nages (total du jour) ; s = metres de chaque seance quand il y en a deux ou
+//   trois (ex. "m":3500,"s":[2000,1500]), [] sinon ; t = temps en centiemes (6532 = 1:05.32) ; pool = bassin de 25 ou 50 m ;
+//   sp = temps de passage cumules (centiemes) ; comp = 0 entrainement, 1 competition, 2 relais
+//   (depart lance, hors record) ; cid = identifiant de la competition (item k comp) ou "" ;
+//   items = objectifs (k obj) et competitions (k comp, data.lim = temps limites par epreuve).
 //
 // Reponse : { "ok":true, "now":<horloge serveur ms>, "habits":[...], "entries":[...], "times":[...], "items":[...] }
 //   - "now" doit etre renvoye tel quel en "since" a la synchro suivante.
@@ -21,7 +24,7 @@ require __DIR__ . '/_core.php';
 const TRAK_MAX_PUSH = 10000;
 
 if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
-    fail('Methode non autorisee.', 405, 'method');
+    fail('Méthode non autorisée.', 405, 'method');
 }
 
 $user = requireUser();
@@ -46,6 +49,10 @@ jsonOut([
     'ok'      => true,
     'now'     => $now,
     'first'   => $since === 0,
+    // Version de l'API : 2 = elle garde les seances (entries[].s) ; 3 = aussi le relais
+    // (times[].comp = 2) et la competition d'un temps (times[].cid). Un client a jour qui voit
+    // une version plus basse sait que ces champs n'ont pas ete gardes.
+    'api'     => 3,
     'habits'  => $out['habits'],
     'entries' => $out['entries'],
     'times'   => $out['times'],

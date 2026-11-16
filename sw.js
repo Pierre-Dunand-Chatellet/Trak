@@ -6,7 +6,7 @@
 //   >>> Changer VERSION des qu'un de ces fichiers change, sinon l'ancien reste servi.
 // - L'API (api/) n'est jamais mise en cache : la synchro reste en direct, et les
 //   modifications faites hors ligne attendent dans le navigateur (file d'envoi de Trak).
-const VERSION = "trak-2026-11-14";
+const VERSION = "trak-2026-11-16";
 const FICHIERS = [
   "trak.html",
   "manifest.json",

@@ -9,7 +9,7 @@ Backend minimal en PHP : un compte, plusieurs appareils, les mêmes données par
 | --- | --- |
 | `store.php` | Le stockage : fichiers, verrou, arbitrage des conflits. |
 | `_core.php` | Réponses JSON, vérification du jeton. Pas appelé directement. |
-| `auth.php` | Inscription, connexion, déconnexion, mot de passe, liste des appareils. |
+| `auth.php` | Inscription, connexion, déconnexion, mot de passe, liste des appareils, suppression du compte. |
 | `sync.php` | Envoi et réception des habitudes et des jours cochés, en un aller-retour. |
 | `.htaccess` | Rétablit l'en-tête `Authorization` que certains Apache suppriment. |
 | `test.php` | Vérifie que l'hébergement est compatible. **À supprimer après vérification.** |
@@ -98,6 +98,7 @@ POST auth.php   {"action":"register","email":"…","password":"…"}   -> {"ok":
 POST auth.php   {"action":"login","email":"…","password":"…"}      -> {"ok":true,"token":"…"}
 POST auth.php   {"action":"logout"|"me"|"devices"|"revoke_others"}
 POST auth.php   {"action":"password","current":"…","password":"…"}
+POST auth.php   {"action":"delete","password":"…"}                 -> {"ok":true}
 POST sync.php   {"since":0,"habits":[…],"entries":[…]}             -> {"ok":true,"now":…,"habits":[…],"entries":[…]}
 ```
 
@@ -135,6 +136,47 @@ chronos en file d'envoi au lieu de les croire envoyés.
   épreuve dans un bassin, id `obj:<épreuve>:<bassin>`, data `{"t":6500}`) ou `comp`
   (compétition : nom, date, lieu, bassin, épreuves engagées). Le serveur ne lit pas
   `data` : il exige du JSON de 4 000 octets au plus et arbitre par `u`, comme le reste.
+
+## Plusieurs séances le même jour (2026-11-16)
+
+- `entries[].s` : mètres de chaque séance quand il y en a deux ou trois ce jour-là
+  (`"m":3500,"s":[2000,1500]`), `[]` sinon. `m` reste le total, le seul champ que lisent
+  les anciens clients. Le serveur garde 3 séances au plus (0 à 100 000 m chacune) et
+  recalcule `m` à partir de `s`.
+- Un ancien client n'envoie pas `s` : si son `m` est égal au total des séances connues,
+  elles sont gardées ; sinon (il a changé le total) elles sont oubliées.
+- La réponse de `sync.php` porte `"api":2`. Un client à jour qui ne la voit pas (ancienne
+  API) garde ses séances en local et les renvoie dès que l'API les accepte.
+
+## Relais, compétition d'un chrono, temps limites (2026-11-16)
+
+- `times[].comp` vaut 0 (entraînement), 1 (compétition) ou **2 (relais, départ lancé)**.
+  Un relais reste dans l'historique mais ne compte ni pour le record ni pour l'objectif.
+- `times[].cid` : identifiant de la compétition (item `comp`) où le temps a été nagé, ou `""`.
+  Le serveur le nettoie (64 caractères `A-Z a-z 0-9 : _ -` au plus, sinon vide). Un ancien
+  client ne l'envoie pas : le `cid` déjà connu pour ce temps est gardé.
+- Compétitions (`items`, `k` = `comp`) : `data.lim` = temps limites facultatifs par épreuve
+  (`{"100-pap":6600}`), `data.fermee` = 1 quand le rappel « Entrez vos temps » a été masqué.
+  Rien à changer côté serveur : `data` reste opaque.
+- La réponse de `sync.php` porte `"api":3`. Un client à jour face à une API plus ancienne
+  (qui renvoie un relais comme une compétition et perd `cid`) garde ces deux champs en local
+  (marque `tx`, jamais envoyée) et renvoie ces temps dès que l'API les accepte.
+- Un ancien client lit un relais (`comp` 2) comme une compétition : chez lui, ce temps
+  compte encore pour le record.
+
+## Suppression du compte (2026-11-16)
+
+- `auth.php` action `delete` : exige le jeton **et** le mot de passe actuel (un jeton volé
+  ne suffit pas ; un mauvais mot de passe compte comme un échec de connexion, même limite
+  de 20 par quart d'heure et par IP). Réponse `{"ok":true}`.
+- Sous le verrou, `userDelete()` (store.php) efface d'abord `data/user-<id>.php`, puis
+  l'utilisateur dans `users.php`, toutes ses sessions et les tentatives ratées notées à son
+  adresse. Si le fichier de données ne peut pas être effacé, rien d'autre ne bouge.
+- `syncMerge()` revérifie sous le verrou qu'une session existe encore pour ce compte : une
+  synchro partie juste avant la suppression ne recrée pas le fichier (réponse `unauthorized`).
+- Les autres appareils reçoivent `unauthorized` à leur synchro suivante et se déconnectent.
+  Les données gardées dans les navigateurs ne sont pas touchées.
+- Un ancien client ne connaît pas cette action : rien ne change pour lui.
 
 ## Hors ligne
 

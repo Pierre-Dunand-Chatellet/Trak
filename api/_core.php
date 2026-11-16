@@ -61,7 +61,7 @@ function nowMs(): int {
 // Les horodatages sont en millisecondes : ils depassent la capacite d'un entier
 // 32 bits et seraient tronques, faussant l'arbitrage des conflits.
 if (PHP_INT_SIZE < 8) {
-    fail('PHP 32 bits non supporte : la synchronisation exige des entiers 64 bits.', 500, 'php32');
+    fail('PHP 32 bits non supporté : la synchronisation exige des entiers 64 bits.', 500, 'php32');
 }
 
 // Refuse l'API en http : un mot de passe y circulerait en clair. La redirection
@@ -72,7 +72,7 @@ $https = (!empty($_SERVER['HTTPS']) && strtolower((string) $_SERVER['HTTPS']) !=
     || ($_SERVER['REQUEST_SCHEME'] ?? '') === 'https'
     || (string) ($_SERVER['SERVER_PORT'] ?? '') === '443';
 if (!$https && !in_array($_SERVER['REMOTE_ADDR'] ?? '', ['127.0.0.1', '::1'], true)) {
-    fail('Connexion non chiffree refusee : utilisez https.', 403, 'https_required');
+    fail('Connexion non chiffrée refusée : utilisez https.', 403, 'https_required');
 }
 
 require __DIR__ . '/store.php';
@@ -101,15 +101,15 @@ function newToken(): string {
 function requireUser(): array {
     $token = bearerToken();
     if ($token === '' || !preg_match('/^[a-f0-9]{64}$/', $token)) {
-        fail('Non connecte.', 401, 'unauthorized');
+        fail('Non connecté.', 401, 'unauthorized');
     }
 
     $session = sessionGet($token);
-    if (!$session) fail('Session expiree, reconnectez-vous.', 401, 'unauthorized');
+    if (!$session) fail('Session expirée, reconnectez-vous.', 401, 'unauthorized');
 
     if (time() - (int) ($session['created_at'] ?? 0) > TRAK_TOKEN_TTL) {
         sessionDelete($token);
-        fail('Session expiree, reconnectez-vous.', 401, 'unauthorized');
+        fail('Session expirée, reconnectez-vous.', 401, 'unauthorized');
     }
 
     sessionTouch($token);

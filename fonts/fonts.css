@@ -1,7 +1,10 @@
 /* Polices hébergées sur ce serveur (licence SIL Open Font License, textes dans
    *-OFL.txt), pour ne pas transmettre l'adresse IP des visiteurs à Google.
    Gochi Hand : l'écriture au feutre du tableau blanc (titres, grands nombres).
-   Schibsted Grotesk : le texte courant, la police du portfolio (le rappel). */
+   Schibsted Grotesk : le texte courant, la police du portfolio (le rappel).
+   Trak Chiffres : les chiffres de Schibsted Grotesk, placée avant Gochi Hand dans
+   --font-heading. En Gochi Hand « 0 j » se lisait « oj » et le « 1 » un « I » :
+   les lettres restent au feutre, les chiffres et leurs signes passent en Schibsted. */
 
 @font-face {
   font-family: "Gochi Hand";
@@ -25,4 +28,13 @@
   font-display: swap;
   src: url(SchibstedGrotesk-latin-ext.woff2) format("woff2");
   unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: "Trak Chiffres";
+  font-style: normal;
+  font-weight: 400 900;
+  font-display: swap;
+  src: url(SchibstedGrotesk-latin.woff2) format("woff2");
+  /* Chiffres, % , . : - et le signe moins. */
+  unicode-range: U+0030-0039, U+0025, U+002C, U+002E, U+003A, U+002D, U+2212;
 }

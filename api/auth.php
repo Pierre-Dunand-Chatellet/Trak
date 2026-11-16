@@ -1,11 +1,11 @@
 <?php
 // Trak - comptes : inscription, connexion, session, appareils.
-// Appel : POST auth.php  { "action": "register|login|logout|me|password|devices|revoke_others" }
+// Appel : POST auth.php  { "action": "register|login|logout|me|password|devices|revoke_others|delete" }
 declare(strict_types=1);
 require __DIR__ . '/_core.php';
 
 if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
-    fail('Methode non autorisee.', 405, 'method');
+    fail('Méthode non autorisée.', 405, 'method');
 }
 
 $in     = body();
@@ -19,7 +19,8 @@ switch ($action) {
     case 'password':      changePassword($in); break;
     case 'devices':       devices(); break;
     case 'revoke_others': revokeOthers(); break;
-    default:              fail('Action inconnue.', 400, 'bad_action');
+    case 'delete':        deleteAccount($in); break;
+    default:             fail('Action inconnue.', 400, 'bad_action');
 }
 
 // --- Actions ----------------------------------------------------------------
@@ -28,23 +29,23 @@ function register(array $in): void {
     // Sans ces deux limites, n'importe qui trouvant l'URL pourrait creer des
     // comptes en boucle et remplir le disque du serveur.
     if (userCount() >= TRAK_MAX_ACCOUNTS) {
-        fail('Les inscriptions sont fermees sur ce serveur.', 403, 'closed');
+        fail('Les inscriptions sont fermées sur ce serveur.', 403, 'closed');
     }
     if (registerCount(clientIp(), time() - 3600) >= 3) {
-        fail('Trop de comptes crees depuis cette connexion. Reessayez plus tard.', 429, 'throttled');
+        fail('Trop de comptes créés depuis cette connexion. Réessayez plus tard.', 429, 'throttled');
     }
 
     [$email, $password] = credentials($in);
 
     if (mb_strlen($password) < TRAK_MIN_PASSWORD) {
-        fail('Le mot de passe doit faire au moins ' . TRAK_MIN_PASSWORD . ' caracteres.', 400, 'weak_password');
+        fail('Le mot de passe doit faire au moins ' . TRAK_MIN_PASSWORD . ' caractères.', 400, 'weak_password');
     }
     if (userByEmail($email)) {
-        fail('Un compte existe deja avec cette adresse.', 409, 'email_taken');
+        fail('Un compte existe déjà avec cette adresse.', 409, 'email_taken');
     }
 
     $user = userCreate($email, password_hash($password, PASSWORD_DEFAULT));
-    if (!$user) fail('Un compte existe deja avec cette adresse.', 409, 'email_taken');
+    if (!$user) fail('Un compte existe déjà avec cette adresse.', 409, 'email_taken');
 
     registerRecord(clientIp(), time() - 3600);
     issueSession($user, true);
@@ -95,7 +96,7 @@ function changePassword(array $in): void {
     $next    = isset($in['password']) && is_string($in['password']) ? $in['password'] : '';
 
     if (mb_strlen($next) < TRAK_MIN_PASSWORD) {
-        fail('Le nouveau mot de passe doit faire au moins ' . TRAK_MIN_PASSWORD . ' caracteres.', 400, 'weak_password');
+        fail('Le nouveau mot de passe doit faire au moins ' . TRAK_MIN_PASSWORD . ' caractères.', 400, 'weak_password');
     }
 
     $record = userByEmail($user['email']);
@@ -133,6 +134,27 @@ function revokeOthers(): void {
     jsonOut(['ok' => true, 'revoked' => sessionsDeleteOthers($user['id'], $user['token'])]);
 }
 
+// Suppression du compte par son titulaire : le mot de passe actuel est exige (un jeton
+// vole ne suffit pas), puis l'utilisateur, ses sessions et son fichier de donnees sont
+// effaces. Les donnees gardees dans le navigateur ne sont pas touchees.
+function deleteAccount(array $in): void {
+    $user     = requireUser();
+    $password = isset($in['password']) && is_string($in['password']) ? $in['password'] : '';
+    throttle($user['email']);
+
+    $record = userByEmail($user['email']);
+    if (!$record || ($record['id'] ?? '') !== $user['id'] || $password === ''
+        || !password_verify($password, (string) $record['pass_hash'])) {
+        recordFailure($user['email']);
+        fail('Mot de passe incorrect.', 401, 'bad_credentials');
+    }
+
+    if (!userDelete($user['email'], $user['id'])) {
+        fail('Ce compte n\'existe plus.', 404, 'not_found');
+    }
+    jsonOut(['ok' => true]);
+}
+
 // --- Utilitaires ------------------------------------------------------------
 
 /** @return array{0:string,1:string} */
@@ -165,7 +187,7 @@ function issueSession(array $user, bool $created): void {
 function throttle(string $email): void {
     // Par IP : freine le devinage de mot de passe sans permettre de bloquer un compte a distance.
     if (attemptsCount(clientIp(), time() - 900) >= 20) {
-        fail('Trop de tentatives. Reessayez dans quelques minutes.', 429, 'throttled');
+        fail('Trop de tentatives. Réessayez dans quelques minutes.', 429, 'throttled');
     }
 }
 
