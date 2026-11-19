@@ -494,6 +494,13 @@
   .pied { display: flex; flex-wrap: wrap; gap: 4px 24px; margin-top: 56px; padding-top: 14px; border-top: 1px solid var(--color-neutral-300);
     font-family: var(--font-mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; }
   .pied a { color: var(--color-neutral-700); text-underline-offset: 3px; padding: 7px 0; }
+  /* Présentation visible sans compte (aussi ce que lisent les moteurs de recherche). */
+  .presentation { margin-top: 56px; max-width: 62ch; }
+  .presentation h2 { margin: 0 0 10px; }
+  .presentation p { margin: 0 0 10px; color: var(--color-neutral-700); line-height: 1.55; }
+  .presentation a { color: var(--color-text); text-underline-offset: 3px; }
+  .presentation a:hover { color: var(--color-accent-700); }
+  .presentation[hidden] { display: none; }
   .pied a:hover { color: var(--color-accent-700); }
 
   /* ---- Compte & synchronisation ---- */
@@ -1021,6 +1028,13 @@
   <section id="view-year" style="display:none"></section>
   <section id="view-chronos" style="display:none"></section>
   <section id="view-reglages" style="display:none" aria-labelledby="reglages-titre"></section>
+
+  <section class="presentation" id="presentation" aria-labelledby="presentation-titre">
+    <h2 id="presentation-titre">Trak, le carnet de natation</h2>
+    <p>Trak sert à tenir son entraînement de natation au jour le jour : on coche ses séances, on compte les mètres nagés et on note ses chronos, épreuve par épreuve et selon le bassin, 25 ou 50&nbsp;m.</p>
+    <p>Les records personnels et le bilan de la semaine ou de la saison se calculent tout seuls. Pas besoin de compte pour commencer : le carnet reste sur l'appareil, et un compte sert seulement à le retrouver sur le téléphone et l'ordinateur.</p>
+    <p><a href="https://dunandchatellet.fr/fiches/trak.html">Comment Trak a été fait</a></p>
+  </section>
 
   <footer class="pied">
     <a class="auteur" href="https://dunandchatellet.fr/"><svg viewBox="0 0 64 64" aria-hidden="true"><path fill="currentColor" d="M16.383 41.28V31.13H45.325Q47.065 31.13 48.254 30.579Q49.443 30.028 49.443 28.23095081967213Q49.443 26.374 48.254 25.852Q47.065 25.330000000000002 45.325 25.330000000000002H17.311V50.85H2.8109999999999977V13.729999999999997H43.063Q47.43421951219512 13.729999999999997 51.22260975609756 14.338999999999999Q55.011 14.948 57.853 16.514Q60.695 18.08 62.319 20.921999999999997Q63.943000000000005 23.764 63.943000000000005 28.23Q63.943000000000005 32.696 62.319 35.306Q60.695 37.916 57.853 39.192Q55.011 40.468 51.22260975609756 40.874Q47.43421951219512 41.28 43.063 41.28Z"/></svg>Un projet de Pierre Dunand-Chatellet</a>
@@ -3842,7 +3856,7 @@
         <div class="goal-bar-bg" role="progressbar" aria-label="Kilomètres de la saison vers le prochain cadeau" aria-valuemin="0" aria-valuemax="${suivant.palier}" aria-valuenow="${Math.floor(etat.km * 10) / 10}"><div class="goal-bar" style="width:${pct}%"></div></div>
         <p class="mascotte-note">${etat.nage ? "Encore " + formatDistance(manque) + " à nager cette saison pour le débloquer." : "Aucune habitude ne compte les mètres : cochez « Compter les mètres » dans les Réglages."}</p>`;
     } else {
-      progression = `<p class="mascotte-note">Tout est débloqué : 1 000 km dans une saison, chapeau bas.</p>`;
+      progression = `<p class="mascotte-note">${etat.km >= 1000 ? "Tout est débloqué : 1 000 km dans une saison, chapeau bas." : "Toutes les tenues sont débloquées sur cet appareil."}</p>`;
     }
 
     const couleursHtml = M_COULEURS.map((c) =>
@@ -3924,6 +3938,35 @@
     toast.addEventListener("mouseleave", reprise);
     toast.addEventListener("focusout", reprise);
 
+    requestAnimationFrame(() => requestAnimationFrame(() => toast.classList.add("visible")));
+    clearTimeout(Mascotte.toastTimer);
+    Mascotte.toastTimer = setTimeout(masquerToast, 8000);
+  }
+
+  // Lien secret « trak.html#toutes-les-tenues » : débloque toutes les tenues sur cet appareil,
+  // pour toujours (le palier atteint ne redescend jamais). Rien ne part sur le serveur.
+  const LIEN_TENUES = "#toutes-les-tenues";
+  function offrirToutesLesTenues() {
+    if (location.hash !== LIEN_TENUES) return false;
+    try { history.replaceState(null, "", location.pathname + location.search); } catch (e) { /* adresse laissée telle quelle */ }
+    const max = M_PALIERS[M_PALIERS.length - 1].palier;
+    const nouveau = (Mascotte.dernierPalier || 0) < max;
+    Mascotte.dernierPalier = Math.max(Mascotte.dernierPalier || 0, max);
+    sauverMascotte();
+    return nouveau;
+  }
+  function toastToutesLesTenues() {
+    const zone = document.getElementById("mascotte-toast");
+    zone.innerHTML = `
+      <div class="toast">
+        ${mascotteSVG({ humeur: "ravie", couleur: "dore", accessoire: "couronne", taille: 48, decoratif: true })}
+        <div class="toast-texte"><strong>Toutes les tenues sont débloquées</strong><span>Sur cet appareil, pour toujours.</span></div>
+        <button type="button" class="btn" data-act="choisir">Choisir</button>
+        <button type="button" class="btn btn-ghost" data-act="fermer" aria-label="Fermer">×</button>
+      </div>`;
+    const toast = zone.firstElementChild;
+    toast.querySelector('[data-act="choisir"]').addEventListener("click", ouvrirMascotte);
+    toast.querySelector('[data-act="fermer"]').addEventListener("click", masquerToast);
     requestAnimationFrame(() => requestAnimationFrame(() => toast.classList.add("visible")));
     clearTimeout(Mascotte.toastTimer);
     Mascotte.toastTimer = setTimeout(masquerToast, 8000);
@@ -4367,6 +4410,9 @@
     const dot = document.getElementById("sync-dot");
     const label = document.getElementById("account-label");
     majCompteReglages();
+    // la présentation ne sert qu'aux visiteurs sans compte
+    const presentation = document.getElementById("presentation");
+    if (presentation) presentation.hidden = !!Account.token;
     if (!Account.token) {
       dot.className = "sync-dot";
       label.textContent = "Se connecter";
@@ -5099,6 +5145,8 @@
 
   load();
   chargerMascotte();
+  // Avant le guide : pendant son carnet d'essai, rien ne s'enregistre.
+  const tenuesOffertes = offrirToutesLesTenues();
   loadAccount();
   renderAll();
   wireAccount();
@@ -5111,6 +5159,15 @@
   let visiteVue = true;
   try { visiteVue = localStorage.getItem(VKEY) === "1"; } catch (e) { /* stockage indisponible */ }
   if (!visiteVue) lancerVisite();
+  else if (tenuesOffertes) toastToutesLesTenues();
+  // Lien secret ouvert alors que la page l'était déjà (seule l'ancre change) :
+  // on débloque, puis on redessine la mascotte.
+  window.addEventListener("hashchange", () => {
+    if (Essai.actif || !offrirToutesLesTenues()) return;
+    const etat = etatMascotte();
+    renderMascotteCarte(etat); majMascotteEntete(etat);
+    if (!visiteActive()) toastToutesLesTenues();
+  });
 
   // Hors ligne : sw.js garde une copie de la page, des polices et des icones.
   // Seulement en https (ou en local) : ailleurs le navigateur le refuse de toute facon.
